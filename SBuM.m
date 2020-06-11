@@ -1,4 +1,4 @@
-function FrontEnd_SBSBuM()
+function SBuM()
 
 % Data is shared between all child functions by declaring the variables
 % here (they become global to the function). We keep things tidy by putting
@@ -5872,7 +5872,7 @@ end  % mouseMovedCallback
                uiwait(msgbox(strcat(num2str(numel(Housenumber)),' houses were saved successfully with the extensions ''_XXXXXX'''),'Information','modal')); 
                 data.savedname = CurrentSavingName ;
            case 'New'
-               FrontEnd_SBSBuM
+               SBuM
            case 'Import...'
                % Load the XML file that you want to import
                filter = {'*.xml'};
