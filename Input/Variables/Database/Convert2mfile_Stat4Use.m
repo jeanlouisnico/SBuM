@@ -1,0 +1,69 @@
+InhabitantList = {'Inhabitant1', 'Inhabitant2', 'Inhabitant3','Inhabitant4', 'Inhabitant5', 'Inhabitant6', 'Inhabitant7'} ;
+Category = {'MaxUse', 'Temp', 'TimeUsage','Weekdistr', 'Weekdayweight', 'Weekdayacc', 'Delay','Power'} ;
+AppliancesList = {'WashMach';...
+                  'DishWash';...
+                  'Elec';...
+                  'Kettle';...
+                  'Oven';...
+                  'MW';...
+                  'Coffee';...
+                  'Toas';...
+                  'Waff';...
+                  'Fridge';...
+                  'Radio';...
+                  'Laptop';...
+                  'Elecheat';...
+                  'Shaver';...
+                  'Hair';...
+                  'Tele';...
+                  'Stereo';...
+                  'Iron';...
+                  'Vacuum';...
+                  'Charger';...
+                  'Sauna';...
+                  'clLight'                            }';
+
+% Stat4Use 1. time of the day, 2. Appliance, 3. day of the week, 4. month
+
+% weekdayvar = {'1','2','3'} ;
+% timemonth  = {'1','2','3','4','5','6','7','8','9','10','11','12'} ;
+% HourDay    = 
+
+try
+    Stat4Use_New2 ;
+catch
+    load('C:\Users\jlouis\MATLAB Drive\MatLab model Beta\Input\Variables\Database\Smart_House_Data_MatLab.mat')
+end
+
+B = permute(Stat4Use_New2,[2 4 3 1]) ;
+CDetail_Appliance_B = num2cell(B);
+CreateAppDetailList = cell2struct(CDetail_Appliance_B,AppliancesList) ;
+
+% Testing to create subindex
+% for ij = 1:numel(AppliancesList)
+%     for i = 1:numel(Category)
+%         for ik = 1:numel(InhabitantList)
+%             TestNewStr.(AppliancesList{ij})(ik).(Category{i}) = CreateAppDetailList(i,ik).(AppliancesList{ij}) ;
+%         end
+%     end
+% end
+
+
+[str, sts] = gencode_rvalue(CreateAppDetailList);
+display(sts) ;
+char(str)    ;
+
+stry = gencode(CreateAppDetailList,'ApplianceLD');
+copystry = char(stry) ;
+
+% Divide variable to display and copy
+TotalSize = size(copystry,1) * size(copystry,2) ;
+Looprow = floor(524288 / size(copystry,2)) ;
+for i = 1:ceil(TotalSize / 524288)
+    LoopName = ['Loop',num2str(i)] ;
+    if i == ceil(TotalSize / 524288)
+        copystrytodesktop.(LoopName) = copystry((Looprow * (i - 1) + 1):size(copystry,1),:) ;
+    else
+        copystrytodesktop.(LoopName) = copystry((Looprow * (i - 1) + 1):Looprow*i,:) ;
+    end
+end

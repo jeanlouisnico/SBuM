@@ -1,0 +1,341 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>checkdateentry</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-08-02"><meta name="DC.source" content="checkdateentry.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>checkdateentry</h1><pre class="codeinput"><span class="keyword">function</span> [Outputdatstr,Outputdate] = checkdateentry(hObject)
+
+<span class="keyword">if</span> isobject(hObject)
+    user_entry = get(hObject,<span class="string">'string'</span>);
+<span class="keyword">elseif</span> ischar(hObject)
+    user_entry = hObject ;
+<span class="keyword">elseif</span> isnumeric(hObject)
+    user_entry = datestr(hObject,<span class="string">'dd/mm/yyyy'</span>) ;
+<span class="keyword">end</span>
+monthsFullName = {<span class="string">'January'</span>, <span class="string">'February'</span>, <span class="string">'March'</span>, <span class="string">'April'</span>, <span class="string">'May'</span>, <span class="string">'June'</span>, <span class="keyword">...</span>
+  <span class="string">'July'</span>, <span class="string">'August'</span>, <span class="string">'September'</span>, <span class="string">'October'</span>, <span class="string">'November'</span>, <span class="string">'December'</span>};
+
+<span class="keyword">if</span> isempty(user_entry)
+    Outputdate = datenum(now) ;
+    Formatout = <span class="string">'dd/mm/yyyy'</span> ;
+    Outputdatstr = datestr(Outputdate,Formatout) ;
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+usecase = dateseparator(user_entry) ;
+
+<span class="keyword">if</span> usecase == -1
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+
+user_entrysplit = strsplit(user_entry,usecase) ;
+
+<span class="keyword">if</span> numel(user_entrysplit) == 3
+    tokenNames.year  = user_entrysplit{3} ;
+    tokenNames.month = user_entrysplit{2} ;
+    tokenNames.day   = user_entrysplit{1} ;
+<span class="keyword">else</span>
+    errordlg(<span class="string">'Invalid Input Format. Date must include day, month, and year'</span>,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+    <span class="keyword">if</span> isobject(hObject)
+        uicontrol(hObject) ;
+    <span class="keyword">end</span>
+    Outputdate = datenum(2012,1,1) ;
+    Formatout = [<span class="string">'dd'</span>,usecase,<span class="string">'mm'</span>,usecase,<span class="string">'yyyy'</span>] ;
+    Outputdatstr = datestr(Outputdate,Formatout) ;
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+
+[~,FormatoutDS] = getformatDate(tokenNames,usecase) ;
+
+<span class="comment">% Check the year entry</span>
+<span class="keyword">if</span> length(tokenNames.year) == 2
+    <span class="comment">% Year entry is a 2 number digit. As of now, if nothing is specified</span>
+    <span class="comment">% anydate below 60 is considered as 2060 and any number higher than 60</span>
+    <span class="comment">% are considered to be from 1961</span>
+    <span class="keyword">if</span> str2double(tokenNames.year) &gt; 60
+        Yearin = [<span class="string">'19'</span>,tokenNames.year] ;
+    <span class="keyword">else</span>
+        Yearin = [<span class="string">'20'</span>,tokenNames.year] ;
+    <span class="keyword">end</span>
+    Yearin = str2double(Yearin) ;
+<span class="keyword">elseif</span> length(tokenNames.year) == 4
+    Yearin = str2double(tokenNames.year) ;
+<span class="keyword">else</span>
+    errordlg(<span class="string">'Invalid Input Format for years (YY or YYYY)'</span>,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+    <span class="keyword">if</span> isobject(hObject)
+        uicontrol(hObject) ;
+    <span class="keyword">end</span>
+    Outputdate = datenum(2012,1,1) ;
+    Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+
+<span class="comment">% Check the Month entry</span>
+<span class="keyword">if</span> isnan(str2double(tokenNames.month))
+    <span class="comment">% This means that the input is a string</span>
+    <span class="keyword">try</span>
+        date2check = [<span class="string">'2012-'</span>,tokenNames.month,<span class="string">'-01'</span>] ;
+        dateentry = datetime(date2check,<span class="string">'InputFormat'</span>,<span class="string">'yyyy-MMM-dd'</span>) ;
+    <span class="keyword">catch</span>
+        errordlg(<span class="string">'Invalid Input Format for month (either use abbreviated month in English e.g. Jan Feb... or express month as numbers)'</span>,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+        <span class="keyword">if</span> isobject(hObject)
+            uicontrol(hObject) ;
+        <span class="keyword">end</span>
+        Outputdate = datenum(Yearin,1,1) ;
+        Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+        <span class="keyword">return</span>
+    <span class="keyword">end</span>
+    Monthin = month(dateentry) ;
+<span class="keyword">else</span>
+    <span class="comment">% Entry is a number</span>
+    <span class="keyword">if</span> str2double(tokenNames.month) &lt; 1 || str2double(tokenNames.month) &gt; 12
+        errordlg(<span class="string">'Invalid Input Format for month. Month must be greater than 0 and smaller than 12.'</span>,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+        <span class="keyword">if</span> isobject(hObject)
+            uicontrol(hObject) ;
+        <span class="keyword">end</span>
+        Outputdate = datenum(Yearin,1,1) ;
+        Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+        <span class="keyword">return</span>
+    <span class="keyword">end</span>
+    Monthin = str2double(tokenNames.month) ;
+
+<span class="keyword">end</span>
+
+<span class="comment">% Check the Day Entry</span>
+<span class="keyword">if</span> isnan(str2double(tokenNames.day))
+    <span class="comment">% This means that the input is a string</span>
+    errordlg(<span class="string">'Invalid Input Format for day (express days as numbers e.g. 01 or 1)'</span>,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+    <span class="keyword">if</span> isobject(hObject)
+        uicontrol(hObject) ;
+    <span class="keyword">end</span>
+    <span class="keyword">return</span>
+<span class="keyword">else</span>
+    <span class="comment">% Entry is a number</span>
+    MaxDayMonth = eomday(Yearin,Monthin) ;
+    <span class="keyword">if</span> str2double(tokenNames.day) &lt; 1 || str2double(tokenNames.day) &gt; MaxDayMonth
+        <span class="keyword">if</span> str2double(tokenNames.day) &lt; 1
+            Outputdate = datenum(Yearin,Monthin,1) ;
+            Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+            errordlg(<span class="string">'Invalid Input Format for day. Day must be greater than 0'</span>,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+        <span class="keyword">elseif</span> str2double(tokenNames.day) &gt; MaxDayMonth
+            Outputdate = datenum(Yearin,Monthin,MaxDayMonth) ;
+            Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+            Message = [<span class="string">'There was a maximum of '</span>,num2str(MaxDayMonth),<span class="string">' days in '</span>,monthsFullName{Monthin},<span class="string">' '</span>,num2str(Yearin)];
+            errordlg(Message,<span class="string">'Error Message'</span>,<span class="string">'modal'</span>)
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> isobject(hObject)
+            uicontrol(hObject) ;
+        <span class="keyword">end</span>
+        <span class="keyword">return</span>
+    <span class="keyword">end</span>
+    Dayin = str2double(tokenNames.day) ;
+<span class="keyword">end</span>
+
+<span class="comment">% Return the proper date as date format</span>
+Outputdate = datenum(Yearin,Monthin,Dayin) ;
+Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+<span class="keyword">end</span>
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in checkdateentry (line 4)
+if isobject(hObject)
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% checkdateentry
+function [Outputdatstr,Outputdate] = checkdateentry(hObject)
+
+if isobject(hObject)
+    user_entry = get(hObject,'string');
+elseif ischar(hObject)
+    user_entry = hObject ;
+elseif isnumeric(hObject)
+    user_entry = datestr(hObject,'dd/mm/yyyy') ;
+end
+monthsFullName = {'January', 'February', 'March', 'April', 'May', 'June', ...
+  'July', 'August', 'September', 'October', 'November', 'December'};
+
+if isempty(user_entry)
+    Outputdate = datenum(now) ;
+    Formatout = 'dd/mm/yyyy' ;
+    Outputdatstr = datestr(Outputdate,Formatout) ;
+    return
+end
+usecase = dateseparator(user_entry) ;
+
+if usecase == -1
+    return
+end
+
+user_entrysplit = strsplit(user_entry,usecase) ;
+
+if numel(user_entrysplit) == 3
+    tokenNames.year  = user_entrysplit{3} ;
+    tokenNames.month = user_entrysplit{2} ;
+    tokenNames.day   = user_entrysplit{1} ;
+else 
+    errordlg('Invalid Input Format. Date must include day, month, and year','Error Message','modal')
+    if isobject(hObject)
+        uicontrol(hObject) ;
+    end
+    Outputdate = datenum(2012,1,1) ;
+    Formatout = ['dd',usecase,'mm',usecase,'yyyy'] ;
+    Outputdatstr = datestr(Outputdate,Formatout) ;
+    return
+end
+
+[~,FormatoutDS] = getformatDate(tokenNames,usecase) ;
+
+% Check the year entry
+if length(tokenNames.year) == 2
+    % Year entry is a 2 number digit. As of now, if nothing is specified
+    % anydate below 60 is considered as 2060 and any number higher than 60
+    % are considered to be from 1961
+    if str2double(tokenNames.year) > 60
+        Yearin = ['19',tokenNames.year] ;
+    else
+        Yearin = ['20',tokenNames.year] ;
+    end
+    Yearin = str2double(Yearin) ;
+elseif length(tokenNames.year) == 4
+    Yearin = str2double(tokenNames.year) ;
+else
+    errordlg('Invalid Input Format for years (YY or YYYY)','Error Message','modal')
+    if isobject(hObject)
+        uicontrol(hObject) ;
+    end
+    Outputdate = datenum(2012,1,1) ;
+    Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+    return
+end
+
+% Check the Month entry
+if isnan(str2double(tokenNames.month))
+    % This means that the input is a string
+    try
+        date2check = ['2012-',tokenNames.month,'-01'] ;
+        dateentry = datetime(date2check,'InputFormat','yyyy-MMM-dd') ;
+    catch
+        errordlg('Invalid Input Format for month (either use abbreviated month in English e.g. Jan Feb... or express month as numbers)','Error Message','modal')
+        if isobject(hObject)
+            uicontrol(hObject) ;
+        end
+        Outputdate = datenum(Yearin,1,1) ;
+        Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+        return
+    end
+    Monthin = month(dateentry) ;
+else
+    % Entry is a number
+    if str2double(tokenNames.month) < 1 || str2double(tokenNames.month) > 12
+        errordlg('Invalid Input Format for month. Month must be greater than 0 and smaller than 12.','Error Message','modal')
+        if isobject(hObject)
+            uicontrol(hObject) ;
+        end
+        Outputdate = datenum(Yearin,1,1) ;
+        Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+        return
+    end
+    Monthin = str2double(tokenNames.month) ;
+    
+end
+
+% Check the Day Entry
+if isnan(str2double(tokenNames.day))
+    % This means that the input is a string
+    errordlg('Invalid Input Format for day (express days as numbers e.g. 01 or 1)','Error Message','modal')
+    if isobject(hObject)
+        uicontrol(hObject) ;
+    end
+    return
+else
+    % Entry is a number
+    MaxDayMonth = eomday(Yearin,Monthin) ;
+    if str2double(tokenNames.day) < 1 || str2double(tokenNames.day) > MaxDayMonth
+        if str2double(tokenNames.day) < 1
+            Outputdate = datenum(Yearin,Monthin,1) ;
+            Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+            errordlg('Invalid Input Format for day. Day must be greater than 0','Error Message','modal')
+        elseif str2double(tokenNames.day) > MaxDayMonth
+            Outputdate = datenum(Yearin,Monthin,MaxDayMonth) ;
+            Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+            Message = ['There was a maximum of ',num2str(MaxDayMonth),' days in ',monthsFullName{Monthin},' ',num2str(Yearin)];
+            errordlg(Message,'Error Message','modal')
+        end
+        if isobject(hObject)
+            uicontrol(hObject) ;
+        end
+        return
+    end
+    Dayin = str2double(tokenNames.day) ;
+end
+
+% Return the proper date as date format
+Outputdate = datenum(Yearin,Monthin,Dayin) ;
+Outputdatstr = datestr(Outputdate,FormatoutDS) ;
+end
+
+
+##### SOURCE END #####
+--></body></html>
