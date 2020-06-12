@@ -80,7 +80,7 @@ displayEndOfDemoMessage('')
         GetPath = mfilename('fullpath');
         ParentFolder = GetPath(1:max(strfind(GetPath,filesep)));
         
-        var=strcat(ParentFolder,'Images',filesep,filename);
+        var=strcat(ParentFolder,'Input',filesep,'GUI',filesep,'Images',filesep,filename);
         ORI_IMG=imread(var);
         
         if ishandle( AxesFigure )
@@ -143,8 +143,14 @@ displayEndOfDemoMessage('')
             'Small-scale production'     'ssprod'           'Select small-scale production'
             'Thermal characteristics'    'thermchar'        'Set thermal characteristics'
             };
-        [filepath,~,~] = fileparts(which('FrontEnd_SB.m')) ;
-        filepathini = [erase(filepath,'GUI') 'ini' filesep] ;
+        
+        
+        GetPath = mfilename('fullpath');
+        ParentFolder = GetPath(1:max(strfind(GetPath,filesep)));
+        
+        ImageFolder = strcat(ParentFolder,'Input',filesep,'GUI',filesep,'Images',filesep);
+        
+        filepathini = [ParentFolder 'Input' filesep 'ini' filesep] ;
 
         if exist(filepathini, 'dir')
             listing = dir ([filepathini '*xml']) ;
@@ -184,7 +190,7 @@ displayEndOfDemoMessage('')
                                  else
                                      path           = Chckfiles.folder ;
                                      file           = Chckfiles.name   ;
-                                     userdata       = importXMLini([path file])             ;
+                                     userdata       = importXMLini([path filesep file])             ;
                                      fileaccept          = 1;
                                      [varname]           = variable_names;
                                      Detail_Appliance    = userdata.Detail_Appliance             ;
@@ -552,7 +558,8 @@ displayEndOfDemoMessage('')
             'DatabaseApp',{DatabaseApp},...
             'AppProfile',AppProfile,...
             'ApplianceRates',ApplianceRates,...
-            'Detail_Appliance',Detail_Appliance); % JARI'S ADDITION
+            'Detail_Appliance',Detail_Appliance,...
+            'ImageFolder',ImageFolder); % JARI'S ADDITION
      end % createData
 
 function gui = createInterface()
@@ -673,7 +680,7 @@ function gui = createInterface()
         filename_noext = erase(filename,'.m') ;
         filePath = erase(Path,filename_noext) ;
         
-        s = strcat(filePath,'Images',filesep,'LogosSaveAll.png');
+        s = [data.ImageFolder 'LogosSaveAll.png'] ;
         if exist(s, 'file') == 2
             % The file exist at that location
             setIconMenu(jMenuBar, 'Save all' ,s);
@@ -682,7 +689,7 @@ function gui = createInterface()
             warning('Logo Save All not located under ...\Images\') ;
         end
         
-        s = strcat(filePath,'Images',filesep,'LogosPreferences.png');
+        s = [data.ImageFolder 'LogosPreferences.png'];
         if exist(s, 'file') == 2
             % The file exist at that location
             setIconMenu(jMenuBar, 'Preferences' ,s);
@@ -4600,7 +4607,7 @@ end  % mouseMovedCallback
                 Prof2Save = 1;
         end
 
-        var=strcat(ParentFolder,'Images',filesep,filename);
+        var = [data.ImageFolder filename];
         ORI_IMG=imread(var);
         
         if ishandle( gui.AxesFigure )
