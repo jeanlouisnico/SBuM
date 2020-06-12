@@ -5,7 +5,7 @@ import mlreportgen.dom.*
 
 FullPath  = mfilename('fullpath')       ;
 
-PathSmartHome = getfolder(FullPath,'MatLab model Beta') ;
+PathSmartHome = getfolder(FullPath,'SBuM') ;
 
 PathExtrFunc = [PathSmartHome,filesep,'Input',filesep,'Extra Functions'] ;
 
