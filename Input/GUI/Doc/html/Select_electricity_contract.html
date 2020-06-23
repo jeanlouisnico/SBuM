@@ -1,0 +1,140 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Select electricity contract</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-08-05"><meta name="DC.source" content="Select_electricity_contract.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Select electricity contract</h1><!--introduction--><p><h2>What's inside</h2></p><p>It includes:</p><div><ul><li>Different electricity contract that are available for individual people;</li></ul></div><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Electricity contract</a></li><li><a href="#2">Real-time pricing</a></li><li><a href="#3">Varmavirta</a></li><li><a href="#4">Vihreavirta</a></li><li><a href="#5">Tuulivirta</a></li></ul></div><h2 id="1">Electricity contract</h2><p>The electric contracts have been taken from the commercial offers from Oulun Energia. Oulun energia has 3 main contracts:</p><div><ol><li>Varmavirta (energy mix, cheap contract),</li><li>Vihre&auml;virta (Energy based on biomass production, Middle price),</li><li>Tuulirvirta (Energy based on wind, High price).</li></ol></div><p>There is also an option to use the real-time pricing as an optional input. Real-time pricing is based on the NordPool price.</p><p>Four (4) types of electricity contracts are available:</p><div><ol><li>Real-time pricing</li><li>Varmavirta (Energy mix contract)</li><li>Vihreavirta (Biomass based contract)</li><li>Tuulivirta (Wind contract)</li></ol></div><h2 id="2">Real-time pricing</h2><p>Real time pricing are using hourly data from NordPool for historical data or hourly electricity price in general (if the price profile is provided in the "time setting" tab.</p><p>Two options for limiting the electricty price to peak down or up will limit the electricity price. In case an upper and lower limit are set, an associated monthly fee is added to the bill for compensating the energy producers. In case the real-time (RTT) pricing is chosen, then it is possible to set a low limiting value. In case no limiting value needs to be set, the default value is "-99999" or "99999" for the higher limit, but you can leave the cell blank, it will get filled automatically. One of the condition to be respected is that the low price must be greater than the higher limit value and vice versa.</p><h2 id="3">Varmavirta</h2><p>Varmavirta is the cheapest electricity contract available</p><p><i>Option</i> :  Fix price or time of use (ToU) tariffs. Fix price considers a fixed price for electricty tariffs throughout the year while ToU considers the time between 7 to 22 and from 22 to 7 as different prices. Winter and summer periods are also differentiated.</p><h2 id="4">Vihreavirta</h2><p><i>Option</i> :  Fix price or time of use (ToU) tariffs. Fix price considers a fixed price for electricty tariffs throughout the year while ToU considers the time between 7 to 22 and from 22 to 7 as different prices. Winter and summer periods are also differentiated.</p><h2 id="5">Tuulivirta</h2><p><i>Option</i> :  Fix price or time of use (ToU) tariffs. Fix price considers a fixed price for electricty tariffs throughout the year while ToU considers the time between 7 to 22 and from 22 to 7 as different prices. Winter and summer periods are also differentiated.</p><p><img vspace="5" hspace="5" src="LogoOulu1.PNG" alt=""> </p><p>Copyright 2016-2019 University of Oulu</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Select electricity contract
+%
+% <html><h2>What's inside</h2></html>
+%
+% It includes: 
+% 
+% * Different electricity contract that are available for individual people;
+% 
+% 
+%% Electricity contract
+%
+% The electric contracts have been taken from the commercial offers from Oulun Energia. 
+% Oulun energia has 3 main contracts: 
+%
+% # Varmavirta (energy mix, cheap contract), 
+% # Vihreävirta (Energy based on biomass production, Middle price), 
+% # Tuulirvirta (Energy based on wind, High price). 
+%
+% There is also an option to use the real-time pricing as an optional input. 
+% Real-time pricing is based on the NordPool price.
+% 
+% Four (4) types of electricity contracts are available: 
+% 
+% # Real-time pricing
+% # Varmavirta (Energy mix contract)
+% # Vihreavirta (Biomass based contract)
+% # Tuulivirta (Wind contract)
+% 
+%% Real-time pricing
+%
+% Real time pricing are using hourly data from NordPool for historical data
+% or hourly electricity price in general (if the price profile is provided
+% in the "time setting" tab.
+%
+% Two options for limiting the electricty price to peak down or up will
+% limit the electricity price. In case an upper and lower limit are set, an
+% associated monthly fee is added to the bill for compensating the energy
+% producers. In case the real-time (RTT) pricing is chosen, then it is possible 
+% to set a low limiting value. In case no limiting value needs to be set, 
+% the default value is "-99999" or "99999" for the higher limit, but you can 
+% leave the cell blank, it will get filled automatically. One of the condition 
+% to be respected is that the low price must be greater than the higher limit value and vice versa. 
+%% Varmavirta
+%
+% Varmavirta is the cheapest electricity contract available
+%
+% _Option_ :  Fix price or time of use (ToU) tariffs. Fix price considers a
+% fixed price for electricty tariffs throughout the year while ToU
+% considers the time between 7 to 22 and from 22 to 7 as different prices. 
+% Winter and summer periods are also differentiated.
+%% Vihreavirta
+%
+% _Option_ :  Fix price or time of use (ToU) tariffs. Fix price considers a
+% fixed price for electricty tariffs throughout the year while ToU
+% considers the time between 7 to 22 and from 22 to 7 as different prices. 
+% Winter and summer periods are also differentiated.
+%% Tuulivirta
+%
+% _Option_ :  Fix price or time of use (ToU) tariffs. Fix price considers a
+% fixed price for electricty tariffs throughout the year while ToU
+% considers the time between 7 to 22 and from 22 to 7 as different prices. 
+% Winter and summer periods are also differentiated.
+%%
+% 
+% <<LogoOulu1.PNG>> 
+% 
+% Copyright 2016-2019 University of Oulu
+% 
+##### SOURCE END #####
+--></body></html>
