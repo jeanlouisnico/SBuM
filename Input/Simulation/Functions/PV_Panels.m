@@ -26,7 +26,11 @@
 function [Power] = PV_Panels(Global_Irr, Sunrise, Sunset, Time_Sim, Input_Data, Temperature,Housenbr)
 
 myiter = Time_Sim.myiter;
-timehour = Time_Sim.timehour;
+if length(Global_Irr) > 1
+    timehour = Time_Sim.HourArray ;
+else
+    timehour = Time_Sim.timehour ; 
+end
 Tilt = str2double(Input_Data.Tilt) ;
 MaxPowerPV = str2double(Input_Data.MaxPowerPV) ;
 LengthPV = str2double(Input_Data.LengthPV) ;
@@ -34,7 +38,6 @@ WidthPV = str2double(Input_Data.WidthPV) ;
 Nbrmodser = str2double(Input_Data.Nbrmodser) ;
 Nbrmodpar = str2double(Input_Data.Nbrmodpar) ;
 Aspect = str2double(Input_Data.Aspect) ;
-Timeoffset = Time_Sim.Timeoffset;
 Voc = str2double(Input_Data.Voc) ;
 Isc = str2double(Input_Data.Isc) ;
 NOCT = str2double(Input_Data.NOCT) ;
@@ -64,7 +67,7 @@ VTempCoff = str2double(Input_Data.VTempCoff) ;
 % Where _Vt_ is the thermal voltage [V], K is the Boltzmann constant equal
 % to 1,3806505E-23 [J/K], q is the charge of an electron 1.602176565e-19
 % [C], and T is the temperature [K].
-Vt = 1.3806505e-23 * (273.15 + Temperature(Timeoffset + myiter+1) ) / 1.602176565e-19;
+Vt = 1.3806505e-23 * (273.15 + Temperature(myiter+1) ) / 1.602176565e-19;
 %%% Open Ciruit voltage and short circuit current per cells
 % The open circuit voltage is defined by the manufacturer and is available
 % online for the entire module. Nevertheless, the method require to defin
@@ -135,7 +138,7 @@ Rs         = (1- FFpercell / FF0percell) * Vocpercell/ Isc;
 % constant of nominal solar radiation [W/m2] at which the cell has been
 % tested.
 Ct = (NOCT - 20) / 800;
-Tc = Temperature(Timeoffset + myiter+1) + Ct * Global_Irr;
+Tc = Temperature(myiter+1) + Ct * Global_Irr;
 %%% Voltage and current at cell temperature
 % In case the default value has been chosen from the form (_*Vtempcoff =
 % -1*_), then the standard value for the voltage temperature coefficient
@@ -182,7 +185,7 @@ voc        = Vocpercell / Vt;
 if or(Vocpercell < 0,Isc < 0)
     rsg = 0;
 else
-    rsg = Rs / (Vocpercell / Isc);
+    rsg = Rs ./ (Vocpercell ./ Isc);
 end
 %%%
 % The maximum voltage and current point operation, can thus be evaluated
@@ -201,10 +204,10 @@ end
 % And,
 %%%
 % $$b=\frac{a}{1+a}$$
-a_atGeff = voc + 1 - 2 * voc * rsg;
-b_atGeff = a_atGeff / (1 + a_atGeff);
-Vm_Voc_atGeff = 1- b_atGeff / voc * log(a_atGeff) - rsg * (1 - a_atGeff^(-b_atGeff));
-Im_Isc_atGeff = 1 - a_atGeff^(-b_atGeff);
+a_atGeff = voc + 1 - 2 * voc .* rsg;
+b_atGeff = a_atGeff ./ (1 + a_atGeff);
+Vm_Voc_atGeff = 1- b_atGeff ./ voc .* log(a_atGeff) - rsg .* (1 - a_atGeff.^(-b_atGeff));
+Im_Isc_atGeff = 1 - a_atGeff.^(-b_atGeff);
 %%%
 % The overall voltage is calculated from the voltage of a single solar
 % cell. It requires to know the number of cells in the panel and as
@@ -219,14 +222,14 @@ Im_Isc_atGeff = 1 - a_atGeff^(-b_atGeff);
 % $$V_{M}=\frac{V_{M}}{V_{oc}(T_{c})}\cdot V_{oc-system}$$
 %%%
 % The maximum voltage point operation is thus deduced from Eq... 
-Vocg_System = (fix(LengthPV/156) * fix(WidthPV/156)) * Nbrmodser * Vocpercell;
-VM_atGeff   = Vm_Voc_atGeff * Vocg_System;
+Vocg_System = (fix(LengthPV/156) * fix(WidthPV/156)) * Nbrmodser .* Vocpercell;
+VM_atGeff   = Vm_Voc_atGeff .* Vocg_System;
 %%%
 % The maximum current point operation is
 %%%
 % $$I_{M}=\frac{I_{M}}{I_{SC}(G)}\cdot I_{SC}(G)\cdot
 % max(1,n_{mod-par})$$
-IM_atGeff   = Im_Isc_atGeff * Isc * max(1,Nbrmodpar);
+IM_atGeff   = Im_Isc_atGeff .* Isc .* max(1,Nbrmodpar);
 %%%
 % The maximum power point operation _*Ppm*_ is thus simply calculated by
 % multiplying the optimal voltage/current comnination
@@ -240,16 +243,24 @@ IM_atGeff   = Im_Isc_atGeff * Isc * max(1,Nbrmodpar);
 % a standard power.
 %%%
 % $$P_{M}=\frac{V_{M}I_{M}}{1000}-P_{motor}$$
-PM_atGeff   = (VM_atGeff * IM_atGeff) / 1000;
-if and(Sunrise < timehour,timehour < Sunset)
-    if or(Tilt == -1, Aspect == -1)
-        motorpower = 35 / 1000;
+PM_atGeff   = (VM_atGeff .* IM_atGeff) / 1000;
+
+if length(Global_Irr) > 1
+    motorpower = zeros(length(Global_Irr),1);
+    motorpower(timehour > Sunrise & timehour < Sunset) = 35 / 1000 ;
+else
+    if and(Sunrise < timehour,timehour < Sunset)
+        if or(Tilt == -1, Aspect == -1)
+            motorpower = 35 / 1000;
+        else
+            motorpower = 0;
+        end
     else
         motorpower = 0;
     end
-else
-    motorpower = 0;
 end
+
+
 
 Power = PM_atGeff - motorpower;
     

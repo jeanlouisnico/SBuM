@@ -274,7 +274,7 @@ Illuminancev = max(0,Illuminance .* cos(ai));
 % Illuminance = (8.86 * Solar_zenith * Cdeg) * G0^0.9 + (-10.98 * ...
 % (Solar_zenith * Cdeg)^4 + 54.16 * (Solar_zenith * Cdeg)^3 - 102.31 * (Solar_zenith * Cdeg)^2 + 90.21 * Solar_zenith * Cdeg - 29.24)* G0^1.1;            
 %% Output
-Power = PowerPV';
+Power = PowerPV;
 Luminance = Illuminance';
 Luminancev = Illuminancev;
 % PV_Spec.alpha(myiter + 1, 1) = Global_Irr;     
