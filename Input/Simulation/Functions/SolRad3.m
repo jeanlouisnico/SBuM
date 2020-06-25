@@ -230,16 +230,37 @@ yC2     = [-0.069,-0.054,-0.049,-0.023]';
 yTdirt  = [1,0.98,0.97,0.92]'; 
 yar     = [0.17,0.20,0.21,0.27]';
 
-[C2Coeff, ~, mu] = polyfit(x,yC2,2) ;
-C2 = polyval(C2Coeff,timedaynbrNArray,[],mu) ;
+% [C2Coeff, ~, mu] = polyfit(x,yC2,2) ;
+% C2 = polyval(C2Coeff,timedaynbrNArray,[],mu) ;
+
+outputarray = lin_inter(x,yC2,'linear');
+
+Replicate = ceil(size(Beta,1) / size(outputarray,1)) ;
+C2 = repmat(outputarray(:,2),Replicate,1) ;
+
+C2 = C2(1:size(Beta,1),1) ;
 
 % C2Coeff     = polyfit(x,yC2,2)';
-[TdirtCoeff, ~, mu] = polyfit(x,yTdirt,2) ;
-ar = polyval(TdirtCoeff,timedaynbrNArray,[],mu) ;
+% [TdirtCoeff, ~, mu] = polyfit(x,yTdirt,2) ;
+% ar = polyval(TdirtCoeff,timedaynbrNArray,[],mu) ;
+
+outputarray = lin_inter(x,yTdirt,'linear');
+
+Replicate = ceil(size(Beta,1) / size(outputarray,1)) ;
+Tdirt = repmat(outputarray(:,2),Replicate,1) ;
+
+Tdirt = Tdirt(1:size(Beta,1),1) ;
 
 % TdirtCoeff  = polyfit(x,yTdirt,2)';
-[arCoeff, ~, mu] = polyfit(x,yar,2) ;
-Tdirt = polyval(arCoeff,timedaynbrNArray,[],mu) ;
+% [arCoeff, ~, mu] = polyfit(x,yar,2) ;
+% Tdirt = polyval(arCoeff,timedaynbrNArray,[],mu) ;
+
+outputarray = lin_inter(x,yar,'linear');
+
+Replicate = ceil(size(Beta,1) / size(outputarray,1)) ;
+ar = repmat(outputarray(:,2),Replicate,1) ;
+
+ar = ar(1:size(Beta,1),1) ;
 
 % arCoeff     = polyfit(x,yar,2)';
 
@@ -247,11 +268,11 @@ Tdirt = polyval(arCoeff,timedaynbrNArray,[],mu) ;
 % ar      = arCoeff(3) + arCoeff(2) * Time_Sim.timedaynbrN + arCoeff(1) * Time_Sim.timedaynbrN ^2;
 % Tdirt   = TdirtCoeff(3) + TdirtCoeff(2) * Time_Sim.timedaynbrN + TdirtCoeff(1) * Time_Sim.timedaynbrN ^2;
 
-OtherArray = (1-(exp(-CosTeta ./ ar) - exp(-1 / ar)) ./ (1-exp(-1 /ar)));
+OtherArray = 1 - (exp(-CosTeta ./ ar) - exp(-1 ./ ar)) ./ (1-exp(-1 ./ar));
 
 Betacorr = Beta .* Tdirt .* OtherArray(:,1) ;
  
-Deltacorr = Delta .* Tdirt .* (1-exp( -1/ar * ...
+Deltacorr = Delta .* Tdirt .* (1-exp( -1./ar .* ...
                      ( 4 / (3*pi()) * sin(tilt * Cdeg) + (pi() - tilt * Cdeg - sin(tilt * Cdeg)) ./ (1+cos(tilt * Cdeg))) + ...
                      C2 .* ...
                      (sin(tilt * Cdeg) + (pi()-tilt * Cdeg - sin(tilt * Cdeg))./(1+cos(tilt * Cdeg))).^2));
