@@ -42,20 +42,6 @@ Voc = str2double(Input_Data.Voc) ;
 Isc = str2double(Input_Data.Isc) ;
 NOCT = str2double(Input_Data.NOCT) ;
 VTempCoff = str2double(Input_Data.VTempCoff) ;
-% Voc
-% if Input_Data{32}<= 0; Input_Data{32}= 36.3   ;Voc = Input_Data{32}; end
-% Isc
-% if Input_Data{33}<= 0; Input_Data{33}= 8.2   ; Isc = Input_Data{33}; end
-% MaxPowerPV
-% if Input_Data{34}<= 0; Input_Data{34}= 200   ; MaxPowerPV = Input_Data{34}; end
-% LengthPV
-% if Input_Data{35}<= 0; Input_Data{35}= 1657   ;LengthPV=Input_Data{35};  end
-% WidthPV
-% if Input_Data{36}<= 0; Input_Data{36}= 987   ; WidthPV=Input_Data{36}; end
-% NOCT
-% if Input_Data{37}<= 0; Input_Data{37}= 45   ; NOCT = Input_Data{37}; end
-% VTempCoff
-% if Input_Data{113}<= 0; Input_Data{113}= -0.0023   ; Vtempcoff = Input_Data{113}; end
 
 %%% Calculation of the cell performances in general
 %%% Thermal Voltage calculation
@@ -67,7 +53,13 @@ VTempCoff = str2double(Input_Data.VTempCoff) ;
 % Where _Vt_ is the thermal voltage [V], K is the Boltzmann constant equal
 % to 1,3806505E-23 [J/K], q is the charge of an electron 1.602176565e-19
 % [C], and T is the temperature [K].
-Vt = 1.3806505e-23 * (273.15 + Temperature(myiter+1) ) / 1.602176565e-19;
+if length(Global_Irr) > 1
+    Vt = 1.3806505e-23 * (273.15 + Temperature' ) / 1.602176565e-19;
+else
+    Vt = 1.3806505e-23 * (273.15 + Temperature(myiter+1) ) / 1.602176565e-19;
+end
+
+
 %%% Open Ciruit voltage and short circuit current per cells
 % The open circuit voltage is defined by the manufacturer and is available
 % online for the entire module. Nevertheless, the method require to defin
@@ -94,7 +86,7 @@ Vt = 1.3806505e-23 * (273.15 + Temperature(myiter+1) ) / 1.602176565e-19;
 % $$\mathit{v}_{oc}=\frac{V_{oc-cell}}{V_{t}}$$
 Vocpercell = Voc / (fix(LengthPV/156) * fix(WidthPV/156));
 Pmpercell  = MaxPowerPV / (fix(LengthPV/156) * fix(WidthPV/156));
-voc        = Vocpercell / Vt;
+voc        = Vocpercell ./ Vt;
 %%% Fill Factor
 % The fill factor _FF_ is one of the most important characteristic of a
 % solar cell for representing its efficiency. I can be calculated from
@@ -115,8 +107,8 @@ FFpercell  = Pmpercell/(Vocpercell * Isc);
 % Where _FF0-cell_ is defined as,
 %%%
 % $${FF}_{0-cell}=\frac{v_{oc}-ln(v_{oc}+0.72)}{v_{oc}+1}$$
-FF0percell = (voc - log(voc + 0.72)) / (voc+1);
-Rs         = (1- FFpercell / FF0percell) * Vocpercell/ Isc;
+FF0percell = (voc - log(voc + 0.72)) ./ (voc+1);
+Rs         = (1- FFpercell ./ FF0percell) * Vocpercell/ Isc;
 % rs         = 1 - FFpercell / FF0percell;
 
 % a          = voc + 1 - 2 * voc * rs;
@@ -138,7 +130,14 @@ Rs         = (1- FFpercell / FF0percell) * Vocpercell/ Isc;
 % constant of nominal solar radiation [W/m2] at which the cell has been
 % tested.
 Ct = (NOCT - 20) / 800;
-Tc = Temperature(myiter+1) + Ct * Global_Irr;
+
+if length(Global_Irr) > 1
+    Tc = Temperature' + Ct .* Global_Irr;
+else
+    Tc = Temperature(myiter+1) + Ct * Global_Irr;
+end
+
+
 %%% Voltage and current at cell temperature
 % In case the default value has been chosen from the form (_*Vtempcoff =
 % -1*_), then the standard value for the voltage temperature coefficient
@@ -172,8 +171,8 @@ if ~(VTempCoff == -0.0023)
     VTempCoff = Vocpercell * VTempCoff / 100         ;
 end
 Vocpercell  = Vocpercell + (Tc - 25) * VTempCoff;
-Isc        = Isc * Global_Irr / 1000;
-voc        = Vocpercell / Vt;
+Isc        = Isc .* Global_Irr / 1000;
+voc        = Vocpercell ./ Vt;
 %%% Power output
 % It is thus possible to calculate the power output from the solar cell.
 % Before being able to calculate the maximum power point operation _Pmp_,
@@ -182,11 +181,14 @@ voc        = Vocpercell / Vt;
 % voltage or the short circuit current is null.
 %%%
 % $$r_{s}=R_{s} \frac{I_{sc}(G)}{V_{oc}(T_{c})}$$
-if or(Vocpercell < 0,Isc < 0)
-    rsg = 0;
-else
+% if or(Vocpercell < 0,Isc < 0)
+%     rsg = 0;
+% else
+    rsg = zeros(length(Global_Irr),1);
     rsg = Rs ./ (Vocpercell ./ Isc);
-end
+    rsg(Vocpercell < 0 | Isc < 0) = 0 ;
+    
+% end
 %%%
 % The maximum voltage and current point operation, can thus be evaluated
 % using the following equation:
