@@ -1,6 +1,6 @@
 function AllApp = extractHouseAppliances(opendata)
 
-SimulationName = 'Simulation_NewPower_15min' ;
+SimulationName = 'Simulation_NewPower_1h' ;
 HouseExtract = 'House1' ;
 AllApps = fieldnames(opendata.(SimulationName).ApplianceOneCode.Appliances_ConsStr) ;
 TVariableNames = {} ;
@@ -9,7 +9,7 @@ for iApp = 1:length(AllApps)
     
     T(:,iApp) = opendata.(SimulationName).ApplianceOneCode.Appliances_ConsStr.(AppName).(HouseExtract) ;
     
-    TVariableNames{end} = AppName ;
+    TVariableNames{end + 1} = AppName ;
 end
 
 AllApp = array2table(T,...
