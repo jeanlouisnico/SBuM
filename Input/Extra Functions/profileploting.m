@@ -230,7 +230,8 @@ end
                 
                 grid on
                 grid minor
-                title([ProjectName '-' HouseTag])
+                ProjectNameTitle = strrep(ProjectName,'_','-') ;
+                title([ProjectNameTitle ' - ' HouseTag])
                 
             end
             hFigures(startingnumber).Visible = 'on' ;

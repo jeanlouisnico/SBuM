@@ -1,6 +1,6 @@
-function AllApp = extractHouseAppliances(opendata)
+function AllApp = extractHouseAppliances(opendata, SimulationName)
 
-SimulationName = 'Simulation_NewPower_1h' ;
+% SimulationName = 'Simulation_House_1h' ;
 HouseExtract = 'House1' ;
 AllApps = fieldnames(opendata.(SimulationName).ApplianceOneCode.Appliances_ConsStr) ;
 TVariableNames = {} ;
