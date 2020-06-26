@@ -638,7 +638,7 @@ Thermal_time_constant = (Total_Heat_capacity) / (Total_Loss + Loss_floor + ((1.2
 %         [Global_Irradiance_North, Global_Irradiance_East, Global_Irradiance_South, Global_Irradiance_West] = verticalrad1(Time_Sim, Input_Data, All_Var, BuildSim, SimDetails);
         [PV_production_estimation, Thermal_Model.GINARRAY, Thermal_Model.GIEARRAY, Thermal_Model.GISARRAY, Thermal_Model.GIWARRAY] = PV_production_estimation_function(Time_Sim, Input_Data, All_Var, BuildSim, SimDetails);
         
-        Thermal_Model.Forecast.PV_production_estimation = timetable(Time_Sim.TimeArray, PV_production_estimation');
+        Thermal_Model.Forecast.PV_production_estimation = timetable(Time_Sim.TimeArray, PV_production_estimation);
         Thermal_Model.Forecast.PV_production_estimation = [Thermal_Model.Forecast.PV_production_estimation; timetable(Thermal_Model.Forecast.PV_production_estimation.Time(end)+1,0,'VariableNames',{'Var1'})];
         PV_daily_production_estimation                  = retime(Thermal_Model.Forecast.PV_production_estimation,'daily',@sum) ;
         Daily_estimated_production_by_month             = retime(Thermal_Model.Forecast.PV_production_estimation,'monthly',@mean) ;

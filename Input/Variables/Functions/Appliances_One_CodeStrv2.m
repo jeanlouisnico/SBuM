@@ -148,12 +148,19 @@ if nbr_appliances > 0
                 catch
                     App.Info.(AppName)(subapp).(HouseName).ActionQty = 0;
                 end
-                
+                try
+                    App.Info.(AppName)(subapp).(HouseName).LeftCycle ;
+                catch
+                    App.Info.(AppName)(subapp).(HouseName).LeftCycle = 1 ;
+                end
 %                 if ~App.timeactionStr.(AppName)(subapp).(HouseName)(1) == 0
 %                     AppInUse = true  ;
 %                 else
 %                     AppInUse = false ;
 %                 end
+                if myiter == 1000
+                    x = 1;
+                end
                 if strcmp(AppName,'Sauna')
                     % Make a stop to debug
                     ystop = 1;
@@ -219,11 +226,11 @@ if nbr_appliances > 0
                         % CycleTime is the time of 1 cycle in the app
                         % signature (expressed in number of steps that is
                         % dependent on the time resolution of the
-                        % simulation)
+                        % simulation). Expressed in steps.
                         % Time_Cycle is the time the applicance is going to
                         % be running. This will be used for creating the
                         % appliance signature and the amount of electricity
-                        % used for this cycle
+                        % used for this cycle. Expressed in steps
                         
                         [AppSign, CycleTime, Time_Cycle, MinperIter, App] = CreateTime(AppName, All_Var, App, subapp, HouseName, myiter, Time_Usage_Prob, Time_Usage, Time_Step, Reduce_time, reduce_time, MinperIter) ;
                         
@@ -261,7 +268,17 @@ if nbr_appliances > 0
                         App.Info.(AppName)(subapp).(HouseName).ActionQtyStep(myiter + 1)      = multiply_time ;
                         App.Info.(AppName)(subapp).(HouseName).Time_Cycle(myiter + 1)         = Time_Cycle    ;
                         % Resample depending on the size of the cycle
-                        [App.PowerConsProfile.(AppName)(subapp).(HouseName), App.OutputSignal10s.(AppName)(subapp).(HouseName)] = ReSampling(AppSign.(AppName).Sign, Time_Cycle, AppName, CycleTime, MinperIter) ; % This has the entire profile to be used for calculating the active power of the appliance. This is expressed in [%] of the maximum power capacity of the applicance and therefore should be multiplied by the power rating of the appliance
+                        if strcmp(AppName,'Fridge')
+                           [App.PowerConsProfile.(AppName)(subapp).(HouseName), App.OutputSignal10s.(AppName)(subapp).(HouseName), App.Info.(AppName)(subapp).(HouseName).LeftCycle] = ...
+                                                    ReSampling(AppSign.(AppName).Sign, Time_Cycle, AppName, CycleTime, MinperIter, App.Info.(AppName)(subapp).(HouseName).LeftCycle) ; 
+                        else
+                            [App.PowerConsProfile.(AppName)(subapp).(HouseName), App.OutputSignal10s.(AppName)(subapp).(HouseName)] = ...
+                                                    ReSampling(AppSign.(AppName).Sign, Time_Cycle, AppName, CycleTime, MinperIter) ; 
+                        end
+                        
+                        % This has the entire profile to be used for calculating the active power of the appliance. 
+                        % This is expressed in [%] of the maximum power capacity of the applicance and therefore should be 
+                        % multiplied by the power rating of the appliance
                         
                     % 5. Look if the appliance can or should be delayed
                     %    If yes, delay to the indicated time
