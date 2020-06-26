@@ -9314,6 +9314,9 @@ end
                    'Callback',@AddApplianceCall);
         if nargin > 0
             originalarray = {'1' '2' '3' '4' '5' 'more...' '0'} ;
+            if isa(selectedQuantity{1},'double')
+                selectedQuantity = num2str(selectedQuantity{1}) ;
+            end
             if ismember(originalarray,selectedQuantity)
                 Value = find(ismember(originalarray,selectedQuantity)==1) ;
                 set(gui.popupQty,'Value',Value) ;
