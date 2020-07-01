@@ -161,7 +161,7 @@ if nbr_appliances > 0
                 if myiter == 1000
                     x = 1;
                 end
-                if strcmp(AppName,'Sauna')
+                if strcmp(AppName,'Elec')
                     % Make a stop to debug
                     ystop = 1;
                 end
@@ -212,7 +212,10 @@ if nbr_appliances > 0
                     % 3. if the appliance can generate, then proceed with
                     % the generation steps
                     if App.actionStr.(AppName)(subapp).(HouseName)(1)
-                        
+                        if strcmp(AppName,'Elec')
+                            % Make a stop to debug
+                            ystop = 1;
+                        end
                         App.activeApp.(AppName)(subapp).(HouseName)     = true ;
                         App.Info.(AppName)(subapp).(HouseName).InUse    = true ;
                         App.Info.(AppName)(subapp).(HouseName).InUse10s = true ;
