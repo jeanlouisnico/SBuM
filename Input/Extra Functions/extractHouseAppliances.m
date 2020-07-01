@@ -1,4 +1,4 @@
-function AllApp = extractHouseAppliances(opendata, SimulationName)
+function [AllApp, TVariableNames] = extractHouseAppliances(opendata, SimulationName)
 
 % SimulationName = 'Simulation_House_1h' ;
 HouseExtract = 'House1' ;

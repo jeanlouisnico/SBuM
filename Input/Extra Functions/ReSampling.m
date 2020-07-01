@@ -9,16 +9,18 @@ function [OutputSignal, OutputSignal10s, vargout] = ReSampling(InVar, Time_Cycle
         if isa(cycleLeft,'cell')
             cycleLeft = cycleLeft{1} ;
         end
-        if cycleLeft < 1
+        InVarOriginal = InVar ;
+        if cycleLeft < 1 && cycleLeft > 0
             % Resample with the next batch of signature to re-create the
             % InVar
-            Startextract    = floor((1 - cycleLeft) * length(InVar))  ; 
-            Finishextract   = length(InVar) ;
             
-            InVArtest   = InVar(Startextract:Finishextract) ;
-            InVartest2       = [InVArtest; InVar] ;
+            Startextract    = floor((1 - cycleLeft) * length(InVarOriginal)) + 1  ; 
+            Finishextract   = length(InVarOriginal) ;
+            
+            InVArtest   = InVarOriginal((Startextract):Finishextract) ;
+            InVartest2       = [InVArtest;  repmat(InVarOriginal,ceil(Time_Cycle/CycleTime),1)] ;
             InVar = InVartest2 ;
-            CycleTime   = length(InVar) / (MinperIter * 60 / 10) ;
+            CycleTime   = (length(InVar)) / (MinperIter*60/10) ;
         end
     end
     if Time_Cycle > CycleTime
@@ -26,14 +28,18 @@ function [OutputSignal, OutputSignal10s, vargout] = ReSampling(InVar, Time_Cycle
         if sum(strcmp(AppName, {'WashMach','DishWash'}))
             OutputSignal = repelem(InVar ,2) ;
         else
-            OutputSignal = repmat(InVar,ceil(Time_Cycle/CycleTime),1);
-            OutputSignal = OutputSignal(1:(ceil(Time_Cycle*6*MinperIter))) ;
+            OutputSignalFull = repmat(InVar,ceil(Time_Cycle/CycleTime),1);
+            OutputSignal = OutputSignalFull(1:(ceil(Time_Cycle*6*MinperIter))) ;
+            if any(strcmp(AppName, {'Fridge'}))
+                cycleleftv2 = OutputSignalFull((length(OutputSignal) + 1):end) ;
+                vargout{1}      = length(cycleleftv2) / length(InVar) ;
+            end
         end
         OutputSignal10s = OutputSignal                         ;
         OutputSignal    = shrink2fit(OutputSignal, Time_Cycle) ;
-        if any(strcmp(AppName, {'Fridge'}))
-            vargout{1}      = 0 ;
-        end
+%         if any(strcmp(AppName, {'Fridge'}))
+%             vargout{1}      = 0 ;
+%         end
     else
         % Shrink signal to match the simulation resolution
         if any(strcmp(AppName, {'WashMach','DishWash'}))
@@ -46,9 +52,17 @@ function [OutputSignal, OutputSignal10s, vargout] = ReSampling(InVar, Time_Cycle
             OutputSignal    = shrink2fit(OutputSignal, Time_Cycle) ;
         elseif any(strcmp(AppName, {'Fridge'}))
             % Resample for the next 2 cycles 
-            OutputSignal    = mean(InVar(1:(round(length(InVar) * (Time_Cycle/CycleTime) )))) ;
-            OutputSignal10s = InVar(1:(round(length(InVar) * (Time_Cycle/CycleTime) )))       ;
-            vargout{1}      = CycleTime - Time_Cycle ;
+            OutputSignal    = mean(InVar(1:(MinperIter*60/10))) ;
+            OutputSignal10s = InVar(1:(MinperIter*60/10))       ;
+            LeftArray = length(InVar) - MinperIter*60/10 ;
+            if LeftArray > length(InVarOriginal)
+                 multiplier = floor(LeftArray / length(InVarOriginal)) ;
+                 LeftArray2 = LeftArray - (length(InVarOriginal) * multiplier ) ;
+                 vargout{1}      = LeftArray2 / length(InVarOriginal) ;
+            else
+                vargout{1}      = LeftArray / length(InVarOriginal) ;
+            end
+            
         else
 
             OutputSignal    = mean(InVar(1:(round(length(InVar) * (Time_Cycle/CycleTime) )))) ;
