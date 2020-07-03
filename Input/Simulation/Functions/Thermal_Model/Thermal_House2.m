@@ -1241,7 +1241,7 @@ end
                                                                                pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope,...
                                                                                Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain,...
                                                                                Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet,...
-                                                                               Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                                                               Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                 HeatingNeed = T_inside0 < Temp_Set ;      % In case free floating temperature is under temperature set, then there is heat demand in the building
                 CoolingNeed = T_inside0 > Temp_cooling ;  % If free floating temperature is higher than cooling temperature, then there is need for cooling
@@ -1250,7 +1250,7 @@ end
                                                                                     pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope,...
                                                                                     Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate,...
                                                                                     Internal_Heat_Gain, Solar_Heat_Gain, Max_Input, Temperature, T_ground_hourly,...
-                                                                                    T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                                                                    T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
                 
                 if HeatingNeed || CoolingNeed   % If there is heating or cooling need, calculate the heat demand to achieve the heating or cooling set point
                     if HeatingNeed
@@ -1272,7 +1272,7 @@ end
                 [T_inside0, ~, T_operative0, ~] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws,...
                                                                     awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant,...
                                                                     Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power,...
-                                                                    Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                                                    Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                 HeatingNeed = T_inside0 < Temp_Set ;      % In case free floating temperature is under temperature set, then there is heat demand in the building
                 CoolingNeed = T_inside0 > Temp_cooling ;  % If free floating temperature is higher than cooling temperature, then there is need for cooling
@@ -1281,7 +1281,7 @@ end
                                                                          pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope,...
                                                                          Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain,...
                                                                          Solar_Heat_Gain, Dwelling_env_heat, Temperature, T_ground_hourly, T_inlet,...
-                                                                         Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                                                         Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                 if HeatingNeed || CoolingNeed   % If there is heating or cooling need, calculate the heat demand to achieve the heating or cooling set point
                     if HeatingNeed
@@ -1325,7 +1325,7 @@ end
                                                                                         Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate,...
                                                                                         Internal_Heat_Gain, Solar_Heat_Gain, Cooling_Power,...
                                                                                         Temperature, T_ground_hourly, T_inlet, Temperatures_nodal,...
-                                                                                        Solar_Radiation_vertical, Solar_radiation);
+                                                                                        Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                 Temp_inside         = T_inside;
                 Temp_radiative      = T_radiative;
@@ -1364,7 +1364,7 @@ end
 
                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)    = Thermal_comfort_achieved;
                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1) = Thermal_comfort_wasnt_achieved;
-            
+                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
             
                 if isfield(Thermal_Model.Heating, 'CurrentCapacity')
                     if size(Thermal_Model.Heating.CurrentCapacity,2) == myiter
@@ -1395,7 +1395,7 @@ end
                                                                                                     House_Volume, Building_Envelope, Building_Storage_constant,...
                                                                                                     Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain,...
                                                                                                     Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly,...
-                                                                                                    T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                                                                                    T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
     
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -1430,7 +1430,8 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)    = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1) = Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                            
                             Thermal_Model.Heating.HeaterPower(myiter+1)                         = Heater_Power;
                     case 'Time Set Temp'
                         % The heating is done based on time set temperatures. Thus the
@@ -1467,7 +1468,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                     case 'Manual'
 
                         % The heating is defined through having manual heater, that the
@@ -1483,7 +1484,7 @@ end
                             Thermal_Model.Heating.Set_Up       = Set_Up;
 
                             % Temperature indoor
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -1492,7 +1493,7 @@ end
 
                             % Check of thermal comfort
                             [PMV, PPD] = TestofThermalComfort(Met_rate, All_Var.Hourly_Temperature(1:Time_Sim.nbrstep.(Input_Data.Headers)), Temp_inside, Temp_radiative, myiter+1);            
-
+                            
                             if PMV < ComfortLimit && PMV > -ComfortLimit && tenancy == 1
                                 % Thermal comfort has been achieved. These values can be
                                 % changed
@@ -1509,7 +1510,8 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)        = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)     = Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                            
                     case 'PV with heating load shifting'
 
                         % The heating of the building is done partially by using
@@ -1534,7 +1536,7 @@ end
                             Thermal_Model.Economics.SavedMoneyModel(myiter+1)       = Saved_money1;
 
                             % Calculate the indoor temperature.
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             % Check of thermal comfort
                             [PMV, PPD] = TestofThermalComfort(Met_rate, All_Var.Hourly_Temperature(1:Time_Sim.nbrstep.(Input_Data.Headers)), T_inside, T_radiative, myiter+1);            
@@ -1555,9 +1557,10 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)= Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                            
                             if T_inside < LowerTempLimit && PMV < -ComfortLimit       % If minimum temperature is not achieved with storage heater, there need to be extra heater to provide heat to the system
-                                [T_insideMaxNew, ~, ~, ~]  = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Dwelling_env_heat-Heater_Power), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_insideMaxNew, ~, ~, ~]  = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Dwelling_env_heat-Heater_Power), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
                                 Extra_heater    = (Dwelling_env_heat - Heater_Power) * ((Temp_Set - T_inside)/(T_insideMaxNew - T_inside));
 
                                 if Extra_heater + Heater_Power > Dwelling_env_heat          % Cannot be more than the maximum capacity
@@ -1569,7 +1572,7 @@ end
                                 % Inside temperature calculation with the extra heater.
                                 Total_Heating       = Total_Heating + Extra_heater/Space_Heating_Efficiency; 
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -1590,6 +1593,7 @@ end
                                 end
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             else
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -1624,7 +1628,7 @@ end
                             Saved_money1(m)     = Saved_money;
 
                             % Inside temperature calculation.
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside(m)      = T_inside;
                             Temp_radiative(m)   = T_radiative;
@@ -1657,7 +1661,7 @@ end
                             Gain1(m)            = Gain;
                             Saved_money1(m)     = Saved_money;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Loss_Ventil(m), Flow_rate(m), Internal_Heat_Gain(m), Solar_Heat_Gain(m), Heater_Power(m), Temperature(m), T_ground_hourly(m), T_inlet(m), Temperatures_nodal(:,m-1), Solar_Radiation_vertical(m), Solar_radiation(m));
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Loss_Ventil(m), Flow_rate(m), Internal_Heat_Gain(m), Solar_Heat_Gain(m), Heater_Power(m), Temperature(m), T_ground_hourly(m), T_inlet(m), Temperatures_nodal(:,m-1), Solar_Radiation_vertical(m), Solar_radiation(m), Time_Sim.MinperIter);
 
                             Temp_inside(m)      = T_inside;
                             Temp_radiative(m)   = T_radiative;
@@ -1707,7 +1711,7 @@ end
                                 % from the extra heater.
                                 Total_Heating(m)            = Total_Heating(m) + Extra_heater(m);
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Loss_Ventil(m), Flow_rate(m), Internal_Heat_Gain(m), Solar_Heat_Gain(m), Heater_Power(m), Temperature(m), T_ground_hourly(m), T_inlet(m), Temperatures_nodal(:,m-1), Solar_Radiation_vertical(m), Solar_radiation(m));
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Loss_Ventil(m), Flow_rate(m), Internal_Heat_Gain(m), Solar_Heat_Gain(m), Heater_Power(m), Temperature(m), T_ground_hourly(m), T_inlet(m), Temperatures_nodal(:,m-1), Solar_Radiation_vertical(m), Solar_radiation(m), Time_Sim.MinperIter);
 
                                 Temp_inside(m)      = T_inside;
                                 Temp_radiative(m)   = T_radiative;
@@ -1861,7 +1865,7 @@ end
                             Thermal_Model.Heating.Cumulative_input_PV         = Cumulative_input_PV;
 
                             % Inside temperature and cost calculations for extra heater.
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature_underfloor(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Input, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature_underfloor(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Input, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             % Check of thermal comfort
 
@@ -1882,7 +1886,8 @@ end
                             end
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)    = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1) = Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                            
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
                             Temp_operative      = T_operative;
@@ -1930,7 +1935,7 @@ end
                             end
 
                 %             Temp_inside(m)                          = (((Heater_Power(m) + Extra_heater(m) - Heat_Demand(m)) * 3.600) / (1.2 * House_Volume * 1.007)) + (Temp_inside(m));
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside(m)      = T_inside;
                             Temp_radiative(m)   = T_radiative;
@@ -1952,7 +1957,8 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                            
                             Total_Heating(m)                        = Total_Heating(m) + Extra_heater(m);
                             Price1(m)                               = Price1(m) + Extra_heater(m)/1000 * RTP(m)/100;
                         else
@@ -1986,7 +1992,7 @@ end
                             Temperature_core(m)                     = Temperature_core(m);
                             Input(m)                                = Input(m);
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside(m)      = T_inside;
                             Temp_radiative(m)   = T_radiative;
@@ -2009,13 +2015,14 @@ end
                             end
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
-
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                            
                             if Temp_inside(m) < LowerTempLimit && PMV < -ComfortLimit       % If minimum temperature is not achieved with storage heater, there need to be extra heater to provide heat to the system
                                 Extra_heater(m)                     = ((1.2 * House_Volume * 1.007 + Building_Storage) * (LowerTempLimit - (Temp_inside(m))))/3.6;
 
                                 Heater_Power(m) = Heater_Power(m) + Extra_heater(m);
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Loss_Ventil(m), Flow_rate(m), Internal_Heat_Gain(m), Solar_Heat_Gain(m), Heater_Power(m), Temperature(m), T_ground_hourly(m), T_inlet(m), Temperatures_nodal(:,m-1), Solar_Radiation_vertical(m), Solar_radiation(m));
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Loss_Ventil(m), Flow_rate(m), Internal_Heat_Gain(m), Solar_Heat_Gain(m), Heater_Power(m), Temperature(m), T_ground_hourly(m), T_inlet(m), Temperatures_nodal(:,m-1), Solar_Radiation_vertical(m), Solar_radiation(m), Time_Sim.MinperIter);
 
                                 Temp_inside(m)      = T_inside;
                                 Temp_radiative(m)   = T_radiative;
@@ -2038,7 +2045,8 @@ end
 
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
-
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
+                                
                                 if Extra_heater > 0
                                     Total_Heating(m) = Total_Heating(m) + Extra_heater(m);
                                 end
@@ -2087,7 +2095,7 @@ end
                             Thermal_Model.Economics.Gain(myiter+1)            = Gain1;
                             Thermal_Model.Economics.SavedMoney(myiter+1)      = Saved_money1;
                             
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             % Check of thermal comfort
                             [PMV, PPD] = TestofThermalComfort(Met_rate, All_Var.Hourly_Temperature(1:Time_Sim.nbrstep.(Input_Data.Headers)), T_inside, T_radiative, myiter+1);            
@@ -2108,6 +2116,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             if T_inside < Temp_Set && PMV < -ComfortLimit %LowerTempLimit && PMV < -ComfortLimit       % If minimum temperature is not achieved with storage heater, there need to be extra heater to provide heat to the system
                                 Extra_heater        = ((1.2 * House_Volume * 1.007 + Building_Storage) * (LowerTempLimit - (T_inside)))/3.6;    % Extra Heater may have some difficulties on having too big values in the beginning
@@ -2120,7 +2129,7 @@ end
                                 % Inside temperature calculation with the extra heater.
 
                                 Total_Heating       = Total_Heating + Extra_heater/Space_Heating_Efficiency; 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2143,6 +2152,7 @@ end
                                 end
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             else
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2213,7 +2223,7 @@ end
 
                             % Check that the temperature is within the limits and calculate
                             % it 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             % Check of thermal comfort
 
@@ -2235,6 +2245,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)    = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1) = Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             % Apply extra heater if inside temperature drops too low
 
@@ -2251,7 +2262,7 @@ end
                                 Total_Heating            = Total_Heating + Extra_heater/Space_Heating_Efficiency;
                                 Heater_Power             = Heater_Power + Extra_heater/Space_Heating_Efficiency;
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2274,6 +2285,7 @@ end
                                 end
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             else
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2304,7 +2316,7 @@ end
 
                             Thermal_Model.Heating.Heating_Scheme = Heating_scheme1;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             [PMV, PPD] = TestofThermalComfort(Met_rate, All_Var.Hourly_Temperature(1:Time_Sim.nbrstep.(Input_Data.Headers)), T_inside, T_radiative, myiter+1);            
 
@@ -2324,6 +2336,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)          = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)       = Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             if T_inside < LowerTempLimit && Heater_Power < Dwelling_env_heat && PMV < -ComfortLimit
                                 Extra_heater             = ((1.2 * House_Volume * 1.007 + Building_Storage) + (LowerTempLimit - (T_inside)))/3.6;
@@ -2334,7 +2347,7 @@ end
 
                                 Total_Heating               = Total_Heating + Extra_heater/Space_Heating_Efficiency;
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside             = T_inside;
                                 Temp_radiative          = T_radiative;
@@ -2360,6 +2373,7 @@ end
                                 end
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             else
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2378,7 +2392,7 @@ end
                             Total_Heating                   = Space_Heating + Heating_Ventil;
                             PhotoVoltaic_Elec_Heat          = 0;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             % Check of thermal comfort
 
@@ -2400,6 +2414,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             % If the optimized scheme cannot provide enough heat to keep
                             % the temperature over lower temperature limit, an extra heat
@@ -2416,7 +2431,7 @@ end
                                 end
                                 Total_Heating               = Total_Heating + Extra_heater/Space_Heating_Efficiency;
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside             = T_inside;
                                 Temp_radiative          = T_radiative;
@@ -2442,6 +2457,7 @@ end
 
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)    = Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1) = Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             else
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2468,7 +2484,7 @@ end
                             Thermal_Model.Heating.Heating_Scheme  = Heating_scheme1;
 
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2493,6 +2509,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             if T_inside < LowerTempLimit && Heater_Power < Dwelling_env_heat && PMV < -ComfortLimit
                                 Extra_heater             = ((1.2 * House_Volume * 1.007 + Building_Storage) + (LowerTempLimit - (T_inside)))/3.6;
@@ -2502,7 +2519,7 @@ end
                                 end
                                 Total_Heating               = Total_Heating + Extra_heater/Space_Heating_Efficiency;
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, (Heater_Power + Extra_heater), Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside             = T_inside;
                                 Temp_radiative          = T_radiative;
@@ -2527,6 +2544,7 @@ end
                                 end
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)      = Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1)   = Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             else
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2541,7 +2559,7 @@ end
                             Total_Heating                   = Space_Heating + Heating_Ventil;
                             PhotoVoltaic_Elec_Heat          = 0;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2568,6 +2586,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(myiter+1)    = Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(myiter+1) = Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                         end
 
                     case 'Cost Optimized Heating_lower_limit'
@@ -2591,7 +2610,7 @@ end
 
                             Thermal_Model.Heating.Heating_Scheme(BuildSim,:) = Heating_scheme1;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2614,6 +2633,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                         elseif ~mod(myiter+1,nPeriods) == 0 
 
@@ -2623,7 +2643,7 @@ end
                             Space_Heating                   = Heater_Power/Space_Heating_Efficiency;
                             Total_Heating                   = Space_Heating + Heating_Ventil;
                             
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2639,7 +2659,7 @@ end
                                 Total_Heating               = Total_Heating + Extra_heater;
                                 Heater_Power                = Heater_Power + Extra_heater;
                                 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2663,6 +2683,7 @@ end
 
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             end
                         elseif myiter ~= Time_Sim.nbrstep
                             Heating_scheme1             = Thermal_Model.Heating.Heating_Scheme(BuildSim,:);
@@ -2690,7 +2711,7 @@ end
 
                             Thermal_Model.Heating.Heating_Scheme(BuildSim,:) = Heating_scheme1;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2712,12 +2733,13 @@ end
                             end
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                         else        % Describes the last step!
                             Heater_Power                    = Heating_scheme1(end);
                             Space_Heating                   = Heater_Power/Space_Heating_Efficiency;
                             Total_Heating                   = Space_Heating + Heating_Ventil;
                             
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2739,6 +2761,7 @@ end
                             end
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                         end
                     case 'Adaptive optimum heating scheme'
                         % This scheme considers adaptive heating scheme, where linear
@@ -2757,7 +2780,7 @@ end
                             
                             Thermal_Model.Heating.Heating_Scheme(BuildSim,:) = Heating_scheme1;
 
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2778,6 +2801,7 @@ end
                             end
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             % Defining the nonzero time slots and amount of them
                             Heating_on_hours                = nnz(Heating_scheme(1:nPeriods));
@@ -2798,7 +2822,7 @@ end
                             Space_Heating                = Heater_Power/Space_Heating_Efficiency;
                             Total_Heating                = Space_Heating + Heating_Ventil(m);
                             
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2821,6 +2845,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             Heating_on_hours                    = Thermal_Model.Heating.Heating_hours(BuildSim);
                             Heating_on_times                    = Thermal_Model.Heating.Heating_times(BuildSim,:);
@@ -2846,7 +2871,7 @@ end
                                 Heater_Power            = Heater_Power + Extra_heater;
                 %                 Temp_inside(m)              = (Extra_heater(m) * 3.600) / (1.2 * House_Volume * 1.007 + Building_Storage) + Temp_inside(m);
 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2870,6 +2895,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             end
                         elseif myiter +1 < nPeriods             % Recalculation cannot be done in the first 24 hours
@@ -2880,7 +2906,7 @@ end
                             Space_Heating                = Heater_Power/Space_Heating_Efficiency;
                             Total_Heating                = Space_Heating + Heating_Ventil;
                             
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -2904,6 +2930,7 @@ end
 
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
 
                             Heating_on_hours                    = Thermal_Model.Heating.Heating_hours(BuildSim);
                             Heating_on_times                    = Thermal_Model.Heating.Heating_times(BuildSim,:);
@@ -2927,7 +2954,7 @@ end
                                 Total_Heating            = Total_Heating + Extra_heater;
                                 Heater_Power             = Heater_Power + Extra_heater;
                                 
-                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                                [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                                 Temp_inside         = T_inside;
                                 Temp_radiative      = T_radiative;
@@ -2950,6 +2977,7 @@ end
                                 end
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                                 Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                                Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                             end
                         else                % If the current RTP price is lower than estimated or the optimization time has run over 24 hours, then the optimization needs to be done again
                             Heating_scheme1                 = Thermal_Model.Heating.Heating_Scheme(BuildSim,:);
@@ -2986,7 +3014,7 @@ end
                             Space_Heating                   = Heater_Power/Space_Heating_Efficiency;
                             Total_Heating                   = Space_Heating + Heating_Ventil;
      
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
 
                             Temp_inside      = T_inside;
                             Temp_radiative   = T_radiative;
@@ -3008,6 +3036,7 @@ end
                             end
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_Achieved(BuildSim,myiter+1)= Thermal_comfort_achieved;
                             Thermal_Model.Thermal_Comfort.Thermal_Comfort_notAchieved(BuildSim,myiter+1)= Thermal_comfort_wasnt_achieved;
+                            Thermal_Model.Thermal_Comfort.PMV(myiter+1)                           = PMV;
                         end
                 end
                 Cooling_Power = 0;  % When heating is on, no cooling power is used!

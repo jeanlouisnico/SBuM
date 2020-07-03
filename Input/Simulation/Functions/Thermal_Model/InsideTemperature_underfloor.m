@@ -68,6 +68,8 @@ Temperatures_nodal          = varargin{35};
 Solar_Radiation             = varargin{36};
 Global_Radiation            = varargin{37};
 
+Timestep                    = varargin{38} * 60;    % The timestep in seconds
+
 %% Variables from the standards
 % Variables used in the calculations that are defined in the standards.
 
@@ -105,6 +107,11 @@ fh = 0.5;
 % Thermal mass of air and fRrnitRres
 Air_capacitance = 10000;
 
+%% Include a change of thermal mass variable
+% This is done so that it will be in balance when calculating the
+% temperatures in lower time resolution
+
+Building_Thermal_mass = Building_Thermal_mass * 3600;   % This is used to change the Wh/m2 to J/m2
 
 %% Calculations for the variables used in the matrices
 % Here the variables required in the matrices are calculated from the input
@@ -131,7 +138,7 @@ Hve = (Flow_rate * House_Volume * 1.2 * 1.007)/3.6;     % Hve needs to be in W/K
 uw = (uvs * A_swall + uve * A_ewall + uvn * A_nwall + uvw * A_wwall)/(A_swall + A_ewall + A_nwall + A_wwall); % Thermal transimittance value with weighted areal average.
 Rw = ((1/uw) - 0.13 - 0.04);            % Calculation accoring to ISO 6946:2017. Rsi & Rse values (0.13 & 0.04) from the same standard
 % Rw = (1/((1/Rw) - (1/hci_h) - (1/hce) - (1/hri) - (1/hre)));                            % The corrected U-value for the wall without sRrface transfer coefficients
-Wall_capacitance = (Building_Thermal_mass * A_floor)/Building_envelope;    % The building thermall mass is in Wh/m2K for the building area, it needs to be transferred into Wh/m2K per construction element. All the elements are considered to have equal amount of thermal mass.
+Wall_capacitance = ((Building_Thermal_mass * A_floor)/Building_envelope)/Timestep;    % The building thermall mass is in Wh/m2K for the building area, it needs to be transferred into Wh/m2K per construction element. All the elements are considered to have equal amount of thermal mass.
 
 % Roof
 

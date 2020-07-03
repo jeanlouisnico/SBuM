@@ -4050,7 +4050,9 @@ end  % mouseMovedCallback
                 ApplianceCode       = data.AppliancesList{ij,3} ;
                 AppliancerateCode   = data.AppliancesList{ij,4} ;
                 
+                % MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
                 MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
+
                 MinQty = 0;
                 AppQty = round(RandBetween(MinQty,MaxQty)) ; %fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
                 
@@ -4110,7 +4112,7 @@ end  % mouseMovedCallback
                     end
                 end
                 if ~isempty(LastApp)
-                    SaveData('Appliances', HouseList{i}, ApplianceSel) ;
+                    SaveData('Appliances', HouseList{i}, ApplianceCode) ;
                 end
 %                 if ~isempty(AppliancerateCode)
 %                     data.SummaryStructure.(HouseList{i}).(AppliancerateCode) = AppRate ;
@@ -6246,7 +6248,9 @@ end  % mouseMovedCallback
                           uiwait();
                           return;
                     end
-                    
+                    if ~isfield(data,'ProfileUserdistri')
+                        profileupdate('Update Sim') ;
+                    end
                     Launch_Sim(gui.OutputFolEdit.String,gui.NameSimEdit.String,data,gui.SimLogWindow)
                 end
             case 'Run Selected'
@@ -8767,7 +8771,7 @@ end
         AppList = data.AppliancesList(:,3) ;
         
         switch trigger
-            case {'Update', 'Load'}
+            case {'Update', 'Load', 'Update Sim'}
                 HouseSelected = gui.ListBox.String ;
             case 'Change List'
                 HouseSelected = gui.ListBox.String(gui.ListBox.Value) ;

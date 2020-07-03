@@ -414,7 +414,7 @@ App.Power_Living.(HouseName)           = Power_Living.(HouseName);
 App.Power_Bath.(HouseName)             = Power_Bath.(HouseName);
 App.Power_Bedrooms.(HouseName)         = Power_Bedrooms.(HouseName);
 App.Power_Calc_Light.(HouseName)    = Power_Calc_Light.(HouseName) ;
-[Power_Light.(HouseName)(myiter + 1)]  = Lighting(myiter,sum(Power_Calc_Light.(HouseName)),Appliance_Light,Input_Data,App, HouseName, All_Var,stepreal,Building_Area,SolarLuminancev,clLight);
+[App.Power_Light.(HouseName)(myiter + 1)]  = Lighting(myiter,sum(Power_Calc_Light.(HouseName)),Appliance_Light,Input_Data,App, HouseName, All_Var,stepreal,Building_Area,SolarLuminancev,clLight);
 %%%
 % In this section, we are adding the electrical consumption of the smart
 % meter if it exists (Meter + Display = ~20W) + the consumption from the smart
@@ -468,8 +468,9 @@ if nbr_appliances > 0
             end
 %         end
     end
+    App.Total_Cons(myiter + 1) = Total_Cons ;
 end
-Total_Cons = Total_Cons + Power_Light.(HouseName)(myiter + 1) + App.Metering_ConsStr.(HouseName)(myiter + 1)    ;
+Total_Cons = Total_Cons + App.Power_Light.(HouseName)(myiter + 1) + App.Metering_ConsStr.(HouseName)(myiter + 1)    ;
            
 Power_Calc_Light = sum(Power_Calc_Light.(HouseName)) ;
 
@@ -587,11 +588,11 @@ varargout{1} = App;
         end
         switch (clLight)
             case 'Low consumption bulbs'
-                Power_Light = ValOccup * Building_Area * 0.0037 * stepreal;
+                Power_Light = ValOccup * Building_Area * 0.0037;
             case 'Incandescent bulbs'
-                Power_Light = ValOccup * Building_Area * 0.012 * stepreal;
+                Power_Light = ValOccup * Building_Area * 0.012;
             case 'Self-defined'         % JARI'S ADDITION
-                Power_Light = ValOccup * Building_Area * All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){LightPlace,1} * stepreal;   % JARI'S ADDITION
+                Power_Light = ValOccup * Building_Area * All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){LightPlace,1} ;   % JARI'S ADDITION
         end
     end % Lighting
 %--------------------------------------------------------------------------%
@@ -599,11 +600,11 @@ varargout{1} = App;
     function [Action] = Fri(timehour,AppClass, HouseName, All_Var,stepreal)
         switch (AppClass)
             case 'A or B class'
-                fri_Power = 0.039 * stepreal;
+                fri_Power = 0.039 ;
             case 'C or D class'
-                fri_Power = 0.100 * stepreal;
+                fri_Power = 0.100 ;
             case 'E or F class'
-                fri_Power = 0.200 * stepreal;
+                fri_Power = 0.200 ;
             case 'Self-Defined'                         % JARI
                 [Place1,~] = find(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName),'Fridge');
                 fri_Power = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){Place1,2} * stepreal;

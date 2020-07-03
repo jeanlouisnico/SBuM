@@ -5,6 +5,7 @@ HouseList = fieldnames(AppOut) ;
 for i = 1:length(HouseList)
     Housetag = HouseList{i} ;
     App.Metering_ConsStr.(Housetag) = AppOut.(Housetag).Metering_ConsStr.(Housetag) ;
+    App.Power_Light.(Housetag) = AppOut.(Housetag).Power_Light.(Housetag) ;
     
     AllAppliances = fieldnames(AppOut.(Housetag).Info) ;
     

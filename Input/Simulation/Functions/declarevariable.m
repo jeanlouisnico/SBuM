@@ -36,7 +36,7 @@ for HouseVar = 1:numel(Housenames)
             continue
         end
         Input_DataStr = Houses2Create.(Housenames{HouseVar})         ;
-        if isfield(Input_DataStr, AppName)
+%         if isfield(Input_DataStr, AppName)
 %             AppSN = Input_DataStr.(AppName) ;
             Housenbr2 = Input_DataStr.HouseNbr;
 
@@ -147,7 +147,7 @@ for HouseVar = 1:numel(Housenames)
                     App.Info.(AppName)(subapp).(Input_DataStr.Headers).InUse10s         = false                  ;
                 end
 %             end
-        end
+%         end
     end
 end
 

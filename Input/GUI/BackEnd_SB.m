@@ -1194,7 +1194,7 @@ end % Minimize
                     
                     writetable(table(x_data.(Data1), y_data.(Data2)),'Results.xlsx','sheet',sheet,'Range','A1','WriteVariableNames', true)
                 end
-                writetable(dataBE.(Project_ID).SavedVar,'tabledata.csv','Delimiter',',');
+%                 writetable(dataBE.(Project_ID).SavedVar,'tabledata.csv','Delimiter',',');
                 msgbox('File exported as tabledata.csv in the root file successfully!!')
                 
             case 'Open'
@@ -1419,7 +1419,7 @@ end % Minimize
         switch dataBE.(Project_ID).StatApp
             case 'Appliance Distribution'
                 Appliancestudied = guiBackEnd.Appstudied.String{guiBackEnd.Appstudied.Value} ;
-                [Stat4Use_Profileextract,Distri_Cumsum, Info] = Check_distribution_appliances(App,Appliancestudied,SelectedHouse, Time_Sim, All_Var) ;
+                [dataBE.(Project_ID).Distribution.Stat4Use_Profileextract,dataBE.(Project_ID).Distribution.Distri_Cumsum, dataBE.(Project_ID).Distribution.Info] = Check_distribution_appliances(App,Appliancestudied,SelectedHouse, Time_Sim, All_Var) ;
                 % Plot all the data, differentiate if multiple sources
             case 'Appliance signatures'
                 Appliancestudied = guiBackEnd.Appstudied.String{guiBackEnd.Appstudied.Value} ;

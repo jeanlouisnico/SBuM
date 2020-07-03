@@ -907,11 +907,11 @@ if Time_Sim.Series_Sim == 1
         [AppOut.(HouseInfo.Headers), ~, ~, ~]           = ReAssignHousev2(AppLoop,AppLoop,HouseInfo.Headers, xq, data.AppliancesList(:,3))          ;
         
         % Disaggregate appliances into 10 seconds array
-        tic
         if All_Var.GuiInfo.App10s
+            tic
             AppOut.(HouseInfo.Headers) = App10sec(AppOut.(HouseInfo.Headers), Time_Sim) ;
+            toc
         end
-        toc
         
 %         [Cont, ~, ~, ~]     = ReAssignHousev2(ContLoop,ContLoop,HouseInfo.Headers, xq, data.AppliancesList(:,3))         ;
 %         [Time_Sim, ~, ~, ~] = ReAssignHousev2(Time_SimLoop,Time_SimLoop,HouseInfo.Headers, xq, data.AppliancesList(:,3))         ;

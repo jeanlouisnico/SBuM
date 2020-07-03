@@ -64,9 +64,27 @@ function [OutputSignal, OutputSignal10s, vargout] = ReSampling(InVar, Time_Cycle
             end
             
         else
-
-            OutputSignal    = mean(InVar(1:(round(length(InVar) * (Time_Cycle/CycleTime) )))) ;
             OutputSignal10s = InVar(1:(round(length(InVar) * (Time_Cycle/CycleTime) )))       ;
+            if Time_Cycle > 1
+                % Reshape the signal to fit the length of the cycles
+                OutputSignal10sTemp = OutputSignal10s ;
+                ArrayLength  = (MinperIter*60/10) * ceil(Time_Cycle) ;
+                Missingarray = ArrayLength - length(OutputSignal10sTemp) ;
+                MissingarrayZeros = zeros(Missingarray, 1) ;
+                OutputSignal10s = [OutputSignal10sTemp ; MissingarrayZeros];
+                
+                OutputSignalLong  = reshape(OutputSignal10s, MinperIter*60/10, ceil(Time_Cycle)) ;
+                OutputSignal    = mean(OutputSignalLong) ;
+            else
+                % reshape the array to fill in the gaps of the timestep
+                OutputSignal10sTemp = OutputSignal10s   ;
+                ArrayLength         = MinperIter*60/10         ;
+                Missingarray        = ArrayLength - length(OutputSignal10sTemp) ;
+                MissingarrayZeros   = zeros(Missingarray, 1) ;
+                OutputSignal10s = [OutputSignal10sTemp ; MissingarrayZeros];
+                
+                OutputSignal    = mean(OutputSignal10s) ;
+            end
         end
     end
 end    
