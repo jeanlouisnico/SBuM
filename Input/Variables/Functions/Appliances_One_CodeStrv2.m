@@ -890,7 +890,7 @@ varargout{1} = App;
         AppSign.(AppName).Profile = dbAppName                        ;
         % Get the time of the appliance running time
         Program = find(App.rand_actStr.(AppName)(subapp).(HouseName)(myiter + 1) < Time_Usage_Prob);
-        Time_Cycle = Time_Usage(Program(1) - 1); % To adapt for the other time step. Now it is in hours
+        Time_Cycle = Time_Usage(max(1,Program(1) - 1)); % To adapt for the other time step. Now it is in hours
         
         CycleTime  = NonNaNValue / (6 * MinperIter); % Expressed in number of steps as the Time_Cycle is also a defined in hour
         Time_Cycle = Time_Cycle * (60 / MinperIter)  ; % Express Time cycle in terms of steps       
