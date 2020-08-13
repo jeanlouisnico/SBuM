@@ -3812,7 +3812,11 @@ end  % mouseMovedCallback
                             %Message = strcat({'Adding:'},spacecell,{varSel}) ;
                             %waitbar(i/(length(AllVar)),waitwindow) ;
                             if ~isempty(varSel)
-                                value2copy = data.SummaryStructure.(houseSel).(varSel) ;
+                                try
+                                    value2copy = data.SummaryStructure.(houseSel).(varSel) ;
+                                catch
+                                    continue;
+                                end
                                 NewvarDetail = data.varname.(varSel) ;
                                 addVar(varSel,NewvarDetail,value2copy, gui.Variablelist) ;
                             end

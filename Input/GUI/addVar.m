@@ -14,6 +14,8 @@ function addVar(varSel,varDetail,value2copy, List)
         end
         if isa(value2copy,'cell')
             value2copy = 'Too many inputs' ;
+        elseif isa(value2copy,'struct')
+            value2copy = 'Too many inputs' ;
         end
         rowItems = { varDetail.ShortName , varDetail.LongName, varDetail.Unit, value2copy, varDetail.Tooltip} ;
         uimulticollist( List, 'addRow', rowItems)

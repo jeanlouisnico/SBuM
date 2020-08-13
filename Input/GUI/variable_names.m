@@ -2113,7 +2113,17 @@ varnamecell.DemandVentilation.ShortName             = 'DemandVentilation';
         varnamecell.DemandVentilation.LowLimit      = 0;
         varnamecell.DemandVentilation.HighLimit     = 1;
         varnamecell.DemandVentilation.Exception     = -1;
-        
+varnamecell.Appliances.ShortName             = 'Appliances';
+        varnamecell.Appliances.LongName  = 'Appliance listing';
+        varnamecell.Appliances.Unit      = '[]';
+        varnamecell.Appliances.Defaultvalue = '0';
+        varnamecell.Appliances.Tooltip      = 'Choose whether to utilize demand-based ventilation';
+        varnamecell.Appliances.Comparefield = 'Compare';
+        varnamecell.Appliances.Defaultcreate = '0';
+        varnamecell.Appliances.Type          = 'struct';
+        varnamecell.Appliances.LowLimit      = -1;
+        varnamecell.Appliances.HighLimit     = -1;
+        varnamecell.Appliances.Exception     = -1;        
         
 % varnamecell.TemperatureFile.ShortName       = 'Temperature File';
 %         varnamecell.TemperatureFile.LongName    = 'Select Temperature File';
