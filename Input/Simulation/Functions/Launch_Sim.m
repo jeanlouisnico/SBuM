@@ -3,7 +3,14 @@ function Launch_Sim(varargin)
 
 
 dbstop if error
-% profile on
+
+profilerboo = true ;
+
+if profilerboo
+    profile on;
+else
+    profile off;
+end
 %% What would you like to do
 NewStart = 0 ;
 if NewStart == 1
@@ -1018,8 +1025,13 @@ addLineSim(hObject,data,AddText)
 AddText = 'Simulation Completed' ;
 addLineSim(hObject,data,AddText)
 delete(SimulationTimeWindow)
-profile viewer
-profile off
+
+if profilerboo
+    profile viewer
+    profile off
+end
+
+
 
 function addLineSim(hObject,handles,AddText,varargin)
 GetText = get(hObject,'string') ;
