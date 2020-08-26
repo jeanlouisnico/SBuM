@@ -960,6 +960,7 @@ save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Cons
 save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Power_prod_Global.mat'),'Power_prod')       ;
 save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Bill_Global.mat'),'Price')                  ;
 save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Time_Sim.mat'),'Time_Sim')                  ;
+save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Date_Sim.mat'),'Date_Sim')                  ;
 save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Input_Data.mat'),'Input_Data')              ;
 save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Cont.mat'),'Cont')              ;
 save(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Emissions_Houses.mat'),'Emissions_Houses')           ;

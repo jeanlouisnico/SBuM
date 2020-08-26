@@ -1385,7 +1385,7 @@ end
                             % After heat demand call the electric heating function in order
                             % to decide the amount of heating.
 
-                            [Heater_Power, Total_Heating]    = Constant_Temperature_Setting(Temp_inside, Temp_Set, Heat_Demand, House_Volume, Building_Storage, Dwelling_env_heat, Space_Heating_Efficiency, Heating_Ventil, Temperature);
+                            [Heater_Power, Total_Heating]    = Constant_Temperature_Setting(Temp_inside, Temp_Set, Heat_Demand, House_Volume, Building_Storage, Dwelling_env_heat, Space_Heating_Efficiency, Heating_Ventil, Temperature, Time_Sim.MinperIter);
                             PhotoVoltaic_Elec_Heat           = 0;    % Assumed that no PV generation is used in heating
 
                             % Calculate inside temperature using indoor temperature function.

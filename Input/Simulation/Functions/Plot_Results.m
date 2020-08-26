@@ -377,29 +377,29 @@ function [nbr_applinces, Action_Resume, Avg_Week, time_per_cycle, Daily_Profile_
                 otherwise
                     Multiple = 1000 ;
             end
-                Emissions_ReCiPe.(HouseTag).EmissionsfactProduced.(Indic{Indicator,1}) = (NetEmissions.(Indic{Indicator,1}) * Multiple) ./ En_Generation';
-                Emissions_ReCiPe.(HouseTag).EmissionHouseProduced.(Indic{Indicator,1}) = diag(Emissions_ReCiPe.(HouseTag).EmissionsfactProduced.(Indic{Indicator,1}) * MyInput2.Cons_Tot.(HouseTag).DataOutput(1:(end-1)));
-                NetImportCO2    = []    ;
-                NetProducedCO2  = []    ;
-                NetCO2          = []    ;
-%                 for ww = 1:size(En_Load,2) % ww = number of dates
-                    NetImportCO2(:,1) = (Traded.Import_Sweden * EmissionsCountry(Indicator,1) + ...
-                                          Traded.Import_Russia * EmissionsCountry(Indicator,2) + ...
-                                          Traded.Import_Estonia * EmissionsCountry(Indicator,3) + ...
-                                          Traded.Import_Norway * EmissionsCountry(Indicator,4)) ...
-                                          / 1000 ;
-%                     NetProducedCO2(:,1) = diag(EmissionFactor.(Indic{Indicator,1}) .* En_Generation'); - sum(Traded(1:2:size(Traded,1),ww))) ;
-                    
-                    NetProducedCO2(:,1) = diag(EmissionFactor.(Indic{Indicator,1}) .* ...
-                                                (En_Generation - (Traded.Export_Estonia + Traded.Export_Norway + Traded.Export_Russia + Traded.Export_Sweden))') ;
-                    
-                    NetCO2(:,1) = NetImportCO2 +  NetProducedCO2 ;
-%                 end
-                EmcountryTotal.(Indic{Indicator,1}) = NetCO2(:,1);
-                EmissionFactor.(Indic{Indicator,1}) = diag(NetCO2(:,1) ./ En_Generation' * Multiple) ;
-                Emissions_ReCiPe.(HouseTag).EmissionsfactNetto.(Indic{Indicator,1}) = EmissionFactor.(Indic{Indicator,1}) ;
-                Emissions_ReCiPe.(HouseTag).EmissionHouseNetto.(Indic{Indicator,1}) = diag(EmissionFactor.(Indic{Indicator,1}) * MyInput2.Cons_Tot.(HouseTag).DataOutput(1:(end-1))');
-                Emissions_ReCiPe.(HouseTag).EmissionHouseFixedFactor.(Indic{Indicator,1}) = (MyInput2.Cons_Tot.(HouseTag).DataOutput(1:(end-1))' * EmissionFix)';
+%                 Emissions_ReCiPe.(HouseTag).EmissionsfactProduced.(Indic{Indicator,1}) = (NetEmissions.(Indic{Indicator,1}) * Multiple) ./ En_Generation';
+%                 Emissions_ReCiPe.(HouseTag).EmissionHouseProduced.(Indic{Indicator,1}) = diag(Emissions_ReCiPe.(HouseTag).EmissionsfactProduced.(Indic{Indicator,1}) * MyInput2.Cons_Tot.(HouseTag).DataOutput(1:(end-1)));
+%                 NetImportCO2    = []    ;
+%                 NetProducedCO2  = []    ;
+%                 NetCO2          = []    ;
+% %                 for ww = 1:size(En_Load,2) % ww = number of dates
+%                     NetImportCO2(:,1) = (Traded.Import_Sweden * EmissionsCountry(Indicator,1) + ...
+%                                           Traded.Import_Russia * EmissionsCountry(Indicator,2) + ...
+%                                           Traded.Import_Estonia * EmissionsCountry(Indicator,3) + ...
+%                                           Traded.Import_Norway * EmissionsCountry(Indicator,4)) ...
+%                                           / 1000 ;
+% %                     NetProducedCO2(:,1) = diag(EmissionFactor.(Indic{Indicator,1}) .* En_Generation'); - sum(Traded(1:2:size(Traded,1),ww))) ;
+%                     
+%                     NetProducedCO2(:,1) = diag(EmissionFactor.(Indic{Indicator,1}) .* ...
+%                                                 (En_Generation - (Traded.Export_Estonia + Traded.Export_Norway + Traded.Export_Russia + Traded.Export_Sweden))') ;
+%                     
+%                     NetCO2(:,1) = NetImportCO2 +  NetProducedCO2 ;
+% %                 end
+%                 EmcountryTotal.(Indic{Indicator,1}) = NetCO2(:,1);
+%                 EmissionFactor.(Indic{Indicator,1}) = diag(NetCO2(:,1) ./ En_Generation' * Multiple) ;
+%                 Emissions_ReCiPe.(HouseTag).EmissionsfactNetto.(Indic{Indicator,1}) = EmissionFactor.(Indic{Indicator,1}) ;
+%                 Emissions_ReCiPe.(HouseTag).EmissionHouseNetto.(Indic{Indicator,1}) = diag(EmissionFactor.(Indic{Indicator,1}) * MyInput2.Cons_Tot.(HouseTag).DataOutput(1:(end-1))');
+%                 Emissions_ReCiPe.(HouseTag).EmissionHouseFixedFactor.(Indic{Indicator,1}) = (MyInput2.Cons_Tot.(HouseTag).DataOutput(1:(end-1))' * EmissionFix)';
          end
         Series_App = [1:21]';
 

@@ -15,6 +15,7 @@ Space_Heating_Efficiency    = varargin{7};
 % RTP                         = varargin{8};
 Heating_Ventil              = varargin{8};
 Temperature                 = varargin{9};
+TimeStep                    = varargin{10};
 
 %% The electric heating part
 % This part describes the direct electric space heating part with constant
@@ -26,7 +27,7 @@ Temperature                 = varargin{9};
 
 if Temp_inside > Temp_Set
             
-        Heater_Power = (1.2 * House_Volume * 1.007 + Building_Storage)/3.6 * (Temp_Set - Temp_inside) + Heat_Demand;
+        Heater_Power = (1.2 * House_Volume * 1.007 + Building_Storage)/(60*TimeStep/1000) * (Temp_Set - Temp_inside) + Heat_Demand;
         Heater_Power = max(0, Heater_Power);
             
 else
@@ -46,7 +47,7 @@ else
             
         elseif Temp_inside < Temp_Set && Heater_Power < Dwelling_env_heat
             
-            Heater_Power = Heater_Power + (1.2 * House_Volume * 1.007 + Building_Storage)/3.6 * (Temp_Set - Temp_inside);
+            Heater_Power = Heater_Power + (1.2 * House_Volume * 1.007 + Building_Storage)/(60*TimeStep/1000) * (Temp_Set - Temp_inside);
             
             if Heater_Power > Dwelling_env_heat
             
