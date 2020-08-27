@@ -4,7 +4,7 @@ function Launch_Sim(varargin)
 
 dbstop if error
 
-profilerboo = true ;
+profilerboo = false ;
 
 if profilerboo
     profile on;
