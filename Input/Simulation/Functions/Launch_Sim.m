@@ -259,58 +259,6 @@ else
     addLineSim(hObject,data,InfoDisp) ;
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%% Can be Removed as we are not using subfolders at the moment %%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% [Input_Data] = d(1:Nbr_Building+1,:);
-%         if strcmp('NaN', num2str(Input_Data{Nbr_Building,5}))
-%             choice = questdlg('Missing Houses information. Would you like to continue filling up the missing data?', ...
-%                         'Yes', ...
-%                         'No');
-%            switch choice
-%                 case 'Yes'
-%                     winopen('Variables and matrix.xlsm')
-%                     return
-%                 case 'No'
-%                     error('Not enough input argument in the Excel File. Fill the missing information and restart the simulation')
-%            end
-%         end
-%% Pre-Process before simulation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%% Can be Removed as we are not using subfolders at the moment %%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% for BuildFile = 2 : (Nbr_Building + 1)
-% %%%
-%     Layer1                  = num2str(Input_Data{BuildFile,2});
-%     Layer2                  = num2str(Input_Data{BuildFile,3});
-%     Layer3                  = num2str(Input_Data{BuildFile,4});
-%     IDhouse                 = strcat(Layer1,Layer2,Layer3,num2str(Input_Data{BuildFile,1}));
-% 
-%     SimDetails.IDhouselist(1, BuildFile - 1)= str2double(IDhouse); 
-% %%%
-%     %listing = dir(strcat(Output_Folder,filesep,Project_ID));
-%     if not(isdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1)))
-%         mkdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID),Layer1)
-%         if not(isdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2)))
-%             mkdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1),Layer2)
-%             if not(isdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2,filesep,Layer3)))
-%                 mkdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2),Layer3)
-%             end
-%         end
-%     elseif not(isdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2)))
-%         mkdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1),Layer2)
-%         if not(isdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2,filesep,Layer3)))
-%             mkdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2),Layer3)
-%         end
-%     elseif not(isdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2,filesep,Layer3)))
-%         mkdir(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,Layer1,filesep,Layer2),Layer3)
-%     end
-%     addpath(genpath(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID)));
-%end
-
-%toc;
-
 %% Time boundaries 
 %%%
 Allfieldsname = fieldnames(Input_Datav3) ;
@@ -625,6 +573,13 @@ SimulationStart     = min(Date_Sim(1,:)) ;
 SimulationEnd       = max(Date_Sim(2,:)) ;
 ResFinal = HouseInfo.Time_Step ;
 [xq, Time_Sim.stpOut, Time_Sim.ResFinalSecond] = TimeArray(ResFinal, SimulationStart, SimulationEnd) ;
+
+%% Add the DHW distribution 
+% The algorithm is based on the DHW_calcl calculation tool but the code was
+% entirely written as the code is not freely available. In case of any
+% mistake or modifications, please provide some inputs.
+
+
 
 %% Extract the array from the database & interpolation (Linear, spline, etc...)
  
