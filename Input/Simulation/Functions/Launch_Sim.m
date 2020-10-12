@@ -579,7 +579,7 @@ ResFinal = HouseInfo.Time_Step ;
 % entirely written as the code is not freely available. In case of any
 % mistake or modifications, please provide some inputs.
 
-
+All_Var.prob = DHW_distribution_LaunchSim(Time_Sim.MinperIter) ;
 
 %% Extract the array from the database & interpolation (Linear, spline, etc...)
  
