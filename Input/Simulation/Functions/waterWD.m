@@ -3,6 +3,8 @@ function [water_profile, prob] = waterWD(prob, istep, Time_Sim)
 randtest    = prob.Rand_Time(istep) ;
 loads       = fieldnames(prob.proba) ;
 
+
+
 for iload = 1:length(loads)
     loadname = loads{iload} ;
 
@@ -17,6 +19,11 @@ for iload = 1:length(loads)
     countprofile    = [loadname 'profile'] ;
     profilencr      = [loadname 'xincrease'] ;
     countwithdrawal = [loadname 'withdrawal'] ;
+    
+    if istep == 1 || mod(istep,24) == 0
+        % Reset the counter to zero at the beginning of each day
+        water_profile.(countnameday) = 0 ;
+    end
     
     if randtest <= prob_data && prob.timeleft.(countload) == 0
         % Then there is water draw-off and we start counting the number of

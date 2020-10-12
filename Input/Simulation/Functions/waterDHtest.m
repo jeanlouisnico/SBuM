@@ -4,7 +4,7 @@ prob = DHW_distribution_LaunchSim ;
 
 Time_Sim.stp  = 24 ; % number of steps per day
 
-for iday = 1:8760
+for iday = 0:8760
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%% FOR TEST PURPOSES %%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,12 +16,6 @@ for iday = 1:8760
     %%%%%%% FOR TEST PURPOSES %%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    
-    if iday == 1 || mod(iday,24) == 0
-        % Reset the counter to zero at the beginning of each day
-        water_profile.(countnameday) = 0 ;
-    end
-    
-    [water_profile, prob] = waterWD(prob, iday, Time_Sim) ;
+    [water_profile, prob] = waterWD(prob, iday + 1, Time_Sim) ;
     
 end
