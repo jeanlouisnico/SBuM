@@ -578,9 +578,19 @@ ResFinal = HouseInfo.Time_Step ;
 % The algorithm is based on the DHW_calcl calculation tool but the code was
 % entirely written as the code is not freely available. In case of any
 % mistake or modifications, please provide some inputs.
+% Also define A6 as the difference of time between the 
 
-All_Var.prob = DHW_distribution_LaunchSim(Time_Sim.MinperIter) ;
+NumDays         = SimulationEnd - SimulationStart + 1 ;
+TimeStr         = datetime(SimulationStart,'ConvertFrom','datenum') ;
+daystart        = TimeStr.Day ;
 
+Housenumber = fieldnames(data.Simulationdata) ;
+for i = 1:numel(Housenumber)
+    All_Var.prob.(Housenumber{i}) = DHW_distribution_LaunchSim('A4', Time_Sim.MinperIter,...
+                                                               'A6', NumDays, ...
+                                                               'A5', daystart,...
+                                                               'plotvar',false) ;
+end
 %% Extract the array from the database & interpolation (Linear, spline, etc...)
  
 
@@ -860,6 +870,10 @@ if Time_Sim.Series_Sim == 1
                 waitbar(step/TotalStepTime,SimulationTimeWindow,Message)
             end
         end
+        %% Get the water statistics
+        All_Var.water_profile.(HouseInfo.Headers) = Waterstats(All_Var.prob.(HouseInfo.Headers), All_Var.water_profile.(HouseInfo.Headers)) ;
+        
+        
         %%% Disaggregation
         % At the end of the simulation made on the building, we need to
         % disaggragate the consumption profile of each appliance and the

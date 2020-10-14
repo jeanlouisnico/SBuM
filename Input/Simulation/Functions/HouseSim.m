@@ -124,7 +124,9 @@ Time_Sim.Iteration5.(Input_Data.Headers)(1) = 1;
 
 %  [SDI.SDI,SDI.Emissions_Dwel.(Input_Data.Headers)(:, Time_Sim.myiter + 1),SDI.IndexEmissions] = Sus_Dynamic_Index(Time_Sim,Nbr_Building,All_Var,EnergyOuput.Price, ...
 %                                                                                                       EnergyOuput.Cons_Appli_Overall.(Input_Data.Headers)(Time_Sim.myiter + 1),SDI,Input_Data{BuildSim,1} );
-
+if Time_Sim.myiter == 500
+    vdwvde=1;
+end
 %% Thermal  Calculation for the Houses
 % [EnergyOutput.Thermal_Demand.(Input_Data.Headers)(Time_Sim.myiter + 1)] = Thermal_House(Input_Data, Time_Sim,BuildSim,All_Var);
 %% TO BE MODIFIED BY JARI TO ACCEPT THE NEW ARRAY
@@ -133,7 +135,11 @@ Time_Sim.Iteration5.(Input_Data.Headers)(1) = 1;
                                                                                    EnergyOutput.PVPower.(Input_Data.Headers)(Time_Sim.myiter+1),...
                                                                                    EnergyOutput.Cons_Appli_Overall.(Input_Data.Headers)(Time_Sim.myiter + 1),...
                                                                                    EnergyOutput.Occupancy.(Input_Data.Headers)(Time_Sim.myiter + 1)); 
-%%
+
+%% Water withdrawal profiles
+    All_Var.water_profile.(Input_Data.Headers).start = 0 ;
+    [All_Var.water_profile.(Input_Data.Headers), All_Var.prob.(Input_Data.Headers)] = waterWD(All_Var.prob.(Input_Data.Headers), Time_Sim.myiter + 1, Time_Sim, All_Var.water_profile.(Input_Data.Headers), EnergyOutput.Occupancy.(Input_Data.Headers)(Time_Sim.myiter + 1)) ;                                                                               
+                                                                               %%
 % %% Heat production
 % 
 %     [Power] = Heat_Pump(HP_Power, iter7, Temp_out, Thermal_Demand);

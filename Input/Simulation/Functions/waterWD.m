@@ -11,7 +11,11 @@ for iload = 1:length(loads)
     if strcmp(loadname,'SL')
         prob.proba.(loadname)(istep) ;
     end
-
+    
+    if occupancy > 0 
+        occupancy = 1 ;
+    end
+    
     prob_data       = prob.proba.(loadname)(istep) * occupancy ;
     countname       = ['count' loadname] ;
     countnameday    = ['countday' loadname] ;
@@ -46,7 +50,7 @@ for iload = 1:length(loads)
         case 'shower'
             Multi = (rand < (water_profile.(loadcorrect) * min(1,prob.A4 / 30)) ) ;
             if Multi
-                Multi = 1 ;
+                Multi = max(1,water_profile.(loadcorrect)) ;
             else
                 Multi = 0 ;
             end
@@ -63,13 +67,13 @@ for iload = 1:length(loads)
             if var > prob.A4
                 var = prob.A4 ;
             end
-            Multi = max(1,prob.incday.(loadname) * var / 28 * water_profile.(loadcorrect))  ;
+            Multi = max(1,prob.incday.(loadname) * var / 28 * min(prob.incday.(loadname) * 2,water_profile.(loadcorrect)))  ;
         case 'ML'
             var = 3.7 ;
             if var > prob.A4
                 var = prob.A4 ;
             end
-            Multi = max(1,prob.incday.(loadname) * var / 12 * water_profile.(loadcorrect)) ; %3.5 ; %
+            Multi = max(1,prob.incday.(loadname) * var / 12 * min(prob.incday.(loadname) * 2,water_profile.(loadcorrect))) ; %3.5 ; %
     end
     
     if randtest <= prob_data && prob.timeleft.(countload) == 0 && Multi > 0
@@ -107,3 +111,5 @@ for iload = 1:length(loads)
         
     water_profile.(countprofile)(istep) = water_profile.(countlength)(istep) * prob.(countwithdrawal)(istep) ;
 end
+
+water_profile.WaterWD = water_profile.bathprofile(istep) + water_profile.showerprofile(istep)  + water_profile.MLprofile(istep)  + water_profile.SLprofile(istep)  ;

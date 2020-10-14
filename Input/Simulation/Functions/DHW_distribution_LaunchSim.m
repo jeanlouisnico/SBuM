@@ -39,7 +39,7 @@ function prob = DHW_distribution_LaunchSim(varargin)
    defaultA5     = 1 ;                      % Start day of profile
    defaultA6     = 365 ;                    % Total duration (profile) [days]
    defaultA7     = 200 ;                    % Total mean daily draw-off volume [l/day]
-   defaultA8     = true ;                   % Daylight saving time (1.04 - 31 Oct.
+   defaultA8     = false ;                   % Daylight saving time (1.04 - 31 Oct.
    defaultA9     = 'DHW0001' ;              % File name of profile
    defaultA15    = 'DHW_input' ;            % Save profile name
    defaultA16    = '' ;                     % Load profile name needs a path
@@ -140,9 +140,12 @@ prob.A4         = results.A4;
 % Seasonal probability function
 t = 1:results.spantime;
 
-yseason = (100 + results.B3.*sin(1/results.spantime * 2 * pi * t - (results.peakm - 3)/results.spantime * 2 * pi))/100; % [%]
+yseason = (100 + results.B3.*sin(1/results.spantime * 2 * pi * t ...
+                                 - (results.peakm - 3)/results.spantime * 2 * pi ...
+                                 + (results.A5)/(365) * 2 * pi )) / 100; % [%]
 
 if results.plotvar
+    figure ;
     plot(t,yseason);
 end
 
