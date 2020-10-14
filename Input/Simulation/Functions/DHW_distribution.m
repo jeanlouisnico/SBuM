@@ -13,7 +13,7 @@ A8 = true ; % Daylight saving time (1.04 - 31 Oct.
 A9 = 'DHW0001' ; % File name of profile
 A15 = 'DHW_input' ; % Save profile name
 A16 = '' ; % Load profile name needs a path
-adjust = false ;
+adjust = true ;
 
 plotvar = false ;
 

@@ -1,4 +1,4 @@
-function [water_profile, prob] = waterWD(prob, istep, Time_Sim)
+function [water_profile, prob] = waterWD(prob, istep, Time_Sim, water_profile, occupancy)
 
 randtest    = prob.Rand_Time(istep) ;
 loads       = fieldnames(prob.proba) ;
@@ -12,95 +12,98 @@ for iload = 1:length(loads)
         prob.proba.(loadname)(istep) ;
     end
 
-    prob_data       = prob.proba.(loadname)(istep) ;
+    prob_data       = prob.proba.(loadname)(istep) * occupancy ;
     countname       = ['count' loadname] ;
     countnameday    = ['countday' loadname] ;
+    countnamedaystor= ['countdaystorage' loadname] ;
+    countndstor_Mean= ['countndstor_Mean' loadname] ;
     countload       = loadname ;
     countprofile    = [loadname 'profile'] ;
     profilencr      = [loadname 'xincrease'] ;
     countwithdrawal = [loadname 'withdrawal'] ;
+    countlength     = [loadname 'length'] ;
+    flow            = [loadname 'flow'] ;
     
-    if istep == 1 || mod(istep,24) == 0
+    loadcorrect     = [loadname 'correct'] ;
+    if istep == 1 || mod(istep,prob.sim1day) == 0
         % Reset the counter to zero at the beginning of each day
+        if ~(istep == 1)
+            water_profile.(countnamedaystor)(istep/prob.sim1day) = water_profile.(countnameday) ;
+            water_profile.(countndstor_Mean)                     = mean(water_profile.(countnamedaystor)) ;
+            if water_profile.(countndstor_Mean) == 0
+                water_profile.(loadcorrect)                      = prob.incday.(loadname) ;
+            else
+                water_profile.(loadcorrect)                      = prob.incday.(loadname) / water_profile.(countndstor_Mean) ;
+            end
+        else
+            water_profile.(loadcorrect) = 1 ;
+        end
         water_profile.(countnameday) = 0 ;
+        
+    end
+
+    switch loadname
+        case 'shower'
+            Multi = (rand < (water_profile.(loadcorrect) * min(1,prob.A4 / 30)) ) ;
+            if Multi
+                Multi = 1 ;
+            else
+                Multi = 0 ;
+            end
+        case 'bath'
+            Multi = 1 ;
+            Multi = (rand < 1/ (7*4)) ;
+            if Multi
+                Multi = 1 * max(1,water_profile.(loadcorrect)) ;
+            else
+                Multi = 0 ;
+            end
+        case 'SL'
+            var = 8.7 ;
+            if var > prob.A4
+                var = prob.A4 ;
+            end
+            Multi = max(1,prob.incday.(loadname) * var / 28 * water_profile.(loadcorrect))  ;
+        case 'ML'
+            var = 3.7 ;
+            if var > prob.A4
+                var = prob.A4 ;
+            end
+            Multi = max(1,prob.incday.(loadname) * var / 12 * water_profile.(loadcorrect)) ; %3.5 ; %
     end
     
-    if randtest <= prob_data && prob.timeleft.(countload) == 0
+    if randtest <= prob_data && prob.timeleft.(countload) == 0 && Multi > 0
         % Then there is water draw-off and we start counting the number of
         % draws-off
-        water_profile.(countnameday) = water_profile.(countnameday) + 1 ;
+        water_profile.(countnameday) = water_profile.(countnameday) + 1 * Multi ;
         water_profile.(countname)(istep) = 1 ;
-        water_profile.(countload)(istep) = 1 ;
+        water_profile.(countload)(istep) = 1 * Multi;
+        water_profile.(countlength)(istep) = 1 * Multi * prob.duration.(countload);
         prob.inuse.(countload) = 1 ;
-        prob.timeleft.(countload) = duration.(countload) ;
+        prob.timeleft.(countload) = prob.duration.(countload) / prob.A4 ;
     elseif prob.inuse.(countload)
         prob.timeleft.(countload) = max(0,prob.timeleft.(countload) - 1) ;
         if prob.timeleft.(countload) == 0
             prob.inuse.(countload) = 0 ;
+            water_profile.(countload)(istep) = 0 ;  
+            water_profile.(countlength)(istep) = 0 ;
         else
-            water_profile.(countload)(istep) = 1 ;
+            water_profile.(countload)(istep)   = 1 ;
+            water_profile.(countlength)(istep) = 1 * Multi * prob.duration.(countload);
         end
     else
         % no water draw
+        water_profile.(countload)(istep) = 0 ;
         prob.inuse.(countload) = 0 ;
+        water_profile.(countlength)(istep) = 0; 
     end
-
-    if adjust
-        if mod(istep,prob.sim1day) == 0
-            % at the end of each day, we reshuffle the array and assign a a
-            % time duration and a random mean flow rate of water and
-            % recalculate the total water usage.
-
-            %%% for the shower
-            instance = sum(water_profile.(countname)((istep - prob.sim1day + 1):istep)) ;
-            match_one = find(water_profile.(countname)((istep - prob.sim1day + 1):istep) == 1) ;
-            % Reduce the number of points if there are too many
-            if instance > incday.(countload)
-                if instance == 0
-                    A_instance = 0;
-                else
-                    A_instance = genrand(instance, incday.(countload)) ;
-                end
-
-                if A_instance == 0
-                    selected_point = [] ;
-                else
-                    selected_point = nonzeros(match_one .* A_instance) ;
-                    arraymult = ones(length(selected_point),1) ;
-                end
-            else % Increase the number of points in case there are not enough
-                try
-                    water_profile.(profilencr) = water_profile.(profilencr) + 1 ;
-                catch
-                    water_profile.(profilencr) = 1 ;
-                end
-
-                if instance == 0
-                    A_instance = 0              ;
-                    selected_point = [] ;
-                else
-                    maxpoint        = A4 / duration.(loadname) ;
-                    arraymult       = min(round(normalize(RandBetween(0,1,instance,1),'norm',1)*incday.(loadname)),maxpoint) ;
-                    selected_point  = match_one ;
-                end
-            end
-            if ~isempty(selected_point)
-%                 selectedx = genrandgauss(length(selected_point), mu.(countload), amp.(countload)) ;
-                for i = 1:length(selected_point)
-                    water_profile.(countprofile)(istep - prob.sim1day + 1 + selected_point(i):(istep - prob.sim1day + 1 + selected_point(i) + duration.(loadname) - 1)) = arraymult(i) ;
-                end
-            end
+    if water_profile.(countlength)(istep) > 0
+        try
+            prob.(flow)(end + 1,1) = prob.(countwithdrawal)(istep) ;
+        catch
+            prob.(flow)(1,1) = prob.(countwithdrawal)(istep) ;
         end
-    else
-        water_profile.(countprofile)(istep) = water_profile.(countname)(istep) ;
-%             if mod(istep,prob.sim1day) == 0
-%                 match_one = find(water_profile.(countname)((istep - prob.sim1day + 1):istep) == 1) ;
-%                 selected_point = nonzeros(match_one .* A3) ;
-%                 arraymult = ones(length(selected_point),1) ;
-%                 
-%                 for i = 1:length(selected_point)
-%                     water_profile.(countprofile)(istep - prob.sim1day + 1 + selected_point(i):(istep - prob.sim1day + 1 + selected_point(i) + duration.(loadname) - 1)) = arraymult(i) ;
-%                 end
-%             end
     end
+        
+    water_profile.(countprofile)(istep) = water_profile.(countlength)(istep) * prob.(countwithdrawal)(istep) ;
 end
