@@ -328,6 +328,12 @@ prob.proba.SL      = prob_year' .* prob_weekday' .* prob_holiday .* prob_array.S
 prob.proba.ML      = prob_year' .* prob_weekday' .* prob_holiday .* prob_array.ML ;
 prob.proba.bath    = prob_year' .* prob_weekday' .* prob_holiday .* prob_array.bath ;
 
+prob.A4 = results.A4 ;
+prob.A6 = results.A6 ;
+prob.incday = incday         ;
+prob.duration = duration     ;
+prob.MeanVolume = MeanVolume ;
+
 rng(1)
 prob.randgen = rand(simulation_size,1) ;
 
