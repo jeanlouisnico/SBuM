@@ -9,6 +9,12 @@ _Citation:_
 
 _J.-N. Louis, A. Caló, K. Leiviskä, and E. Pongrácz, ‘Modelling home electricity management for sustainability: The impact of response levels, technological deployment & occupancy’, Energy Build., vol. 119, pp. 218–232, May 2016, doi: http://doi.org/10.1016/j.enbuild.2016.03.012_
 
+### Pre-requisite
+
+Make sure that you have the necessary add-ons to run the model from MatLab. The interface uses the Gui Layout Toolbox that needs to be installed independently from MatLab.
+
+It is available on MatLab File Exchange: [https://se.mathworks.com/matlabcentral/fileexchange/47982-gui-layout-toolbox](https://se.mathworks.com/matlabcentral/fileexchange/47982-gui-layout-toolbox "Gui Layout Toolbox")
+
 ### How to run the model
 
 Once installed, you can simply send the command '_SBuM_' from the command window and the following interface should pop up.
