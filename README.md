@@ -15,6 +15,9 @@ Make sure that you have the necessary add-ons to run the model from MatLab. The 
 
 It is available on MatLab File Exchange: [https://se.mathworks.com/matlabcentral/fileexchange/47982-gui-layout-toolbox](https://se.mathworks.com/matlabcentral/fileexchange/47982-gui-layout-toolbox "Gui Layout Toolbox")
 
+### Pre-requisite
+Some of the dataset are not available from this repository and requires to be downloaded separately. You can access them from the Zenodo repository at the follwing address: [https://doi.org/10.5281/zenodo.4291941](https://doi.org/10.5281/zenodo.4291941 "Smart Building Model (SBuM) Data")
+
 ### How to run the model
 
 Once installed, you can simply send the command '_SBuM_' from the command window and the following interface should pop up.
