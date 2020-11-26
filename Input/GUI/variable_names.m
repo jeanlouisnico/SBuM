@@ -1979,7 +1979,7 @@ varnamecell.vent_elec.ShortName             = 'vent_elec';
         varnamecell.vent_elec.LowLimit          = 0;
         varnamecell.vent_elec.HighLimit         = Inf;
         varnamecell.vent_elec.Exception         = -1;
-varnamecell.HeatingTechnology.ShortName         = 'HeatingTechnolgy';
+varnamecell.HeatingTechnology.ShortName         = 'HeatingTechnology';
         varnamecell.HeatingTechnology.LongName  = 'Heating Technology';
         varnamecell.HeatingTechnology.Unit      = '[]';
         varnamecell.HeatingTechnology.Defaultvalue = 'Direct Electric Space Heating';
@@ -2111,6 +2111,17 @@ varnamecell.DemandVentilation.ShortName             = 'DemandVentilation';
         varnamecell.DemandVentilation.LowLimit      = 0;
         varnamecell.DemandVentilation.HighLimit     = 1;
         varnamecell.DemandVentilation.Exception     = -1;
+varnamecell.Appliances.ShortName             = 'Appliances';
+        varnamecell.Appliances.LongName  = 'Appliances';
+        varnamecell.Appliances.Unit      = '[]';
+        varnamecell.Appliances.Defaultvalue = struct();
+        varnamecell.Appliances.Tooltip      = 'It contains all the applicances as a structure format. Copy the whole structure to duplicate the appliances';
+        varnamecell.Appliances.Comparefield = 'Compare';
+        varnamecell.Appliances.Defaultcreate = '0';
+        varnamecell.Appliances.Type          = 'structure';
+        varnamecell.Appliances.LowLimit      = 0;
+        varnamecell.Appliances.HighLimit     = 1;
+        varnamecell.Appliances.Exception     = -1;
         
         
 % varnamecell.TemperatureFile.ShortName       = 'Temperature File';
