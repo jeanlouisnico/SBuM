@@ -4,8 +4,11 @@ import mlreportgen.report.*
 import mlreportgen.dom.*
 
 FullPath  = mfilename('fullpath')       ;
+PathSplit = strsplit(FullPath,filesep)  ;
+MainFolder = PathSplit{length(PathSplit)-3} ;
 
-PathSmartHome = getfolder(FullPath,'SBuM') ;
+
+PathSmartHome = getfolder(FullPath,MainFolder) ;
 
 PathExtrFunc = [PathSmartHome,filesep,'Input',filesep,'Extra Functions'] ;
 
