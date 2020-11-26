@@ -3752,7 +3752,7 @@ end  % mouseMovedCallback
 %--------------------------------------------------------------------------%
     function AddRemVar(src,~)
         %str={'Short Name' 'Long Name' 'Unit' 'Value' 'Description'}
-        profile on
+        %profile on
         waitwindow = waitbar(0,'Add/Delete new variables','Name','Variables',...
                                      'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
         setappdata(waitwindow,'canceling',0);
@@ -3811,6 +3811,9 @@ end  % mouseMovedCallback
                             varSel = AllVar{i} ;
                             %Message = strcat({'Adding:'},spacecell,{varSel}) ;
                             %waitbar(i/(length(AllVar)),waitwindow) ;
+                            if strcmp(varSel,'Appliances')
+                                m = 1;
+                            end
                             if ~isempty(varSel)
                                 try
                                     value2copy = data.SummaryStructure.(houseSel).(varSel) ;
