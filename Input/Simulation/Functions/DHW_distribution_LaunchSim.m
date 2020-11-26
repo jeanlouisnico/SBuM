@@ -39,7 +39,7 @@ function prob = DHW_distribution_LaunchSim(varargin)
    defaultA5     = 1 ;                      % Start day of profile
    defaultA6     = 365 ;                    % Total duration (profile) [days]
    defaultA7     = 200 ;                    % Total mean daily draw-off volume [l/day]
-   defaultA8     = false ;                   % Daylight saving time (1.04 - 31 Oct.
+   defaultA8     = true ;                   % Daylight saving time (1.04 - 31 Oct.
    defaultA9     = 'DHW0001' ;              % File name of profile
    defaultA15    = 'DHW_input' ;            % Save profile name
    defaultA16    = '' ;                     % Load profile name needs a path
@@ -73,8 +73,7 @@ function prob = DHW_distribution_LaunchSim(varargin)
     defaultdistri_bath   = [0 0 0 0 0 0 0 0 0.45/24 0.65/24 0.9/24 1/24 1.2/24 1.3/24 1.4/24 1.42/24 1.4/24 1.3/24 3.4/24 5.3/24 3.4/24 0.6/24 0.3/24 0];
         
     p = inputParser;
-   validScalarPosNumint = @(x) isnumeric(x) && isscalar(x) && (x > 0) && (mod(x,1)==0);
-   validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0) ;
+   validScalarPosNum = @(x) isnumeric(x) && isscalar(x) && (x > 0) && (mod(x,1)==0);
    
    validVector = @(x) all(isnumeric(x)) && all(isvector(x)) ;
 %    addRequired(p,'width',validScalarPosNum);
@@ -99,19 +98,19 @@ function prob = DHW_distribution_LaunchSim(varargin)
    
    addParameter(p,'duration_SL',defaultduration_SL,validScalarPosNum);
    addParameter(p,'MeanVolume_SL',defaultMeanVolume_SL,validScalarPosNum);
-   addParameter(p,'incday_SL',defaultincday_SL,validScalarPosNumint);
+   addParameter(p,'incday_SL',defaultincday_SL,validScalarPosNum);
    
    addParameter(p,'duration_ML',defaultduration_ML,validScalarPosNum);
    addParameter(p,'MeanVolume_ML',defaultMeanVolume_ML,validScalarPosNum);
-   addParameter(p,'incday_ML',defaultincday_ML,validScalarPosNumint);
+   addParameter(p,'incday_ML',defaultincday_ML,validScalarPosNum);
    
    addParameter(p,'duration_shower',defaultduration_shower,validScalarPosNum);
    addParameter(p,'MeanVolume_shower',defaultMeanVolume_shower,validScalarPosNum);
-   addParameter(p,'incday_shower',defaultincday_shower,validScalarPosNumint);
+   addParameter(p,'incday_shower',defaultincday_shower,validScalarPosNum);
 
    addParameter(p,'duration_bath',defaultduration_bath,validScalarPosNum);
    addParameter(p,'MeanVolume_bath',defaultMeanVolume_bath,validScalarPosNum);
-   addParameter(p,'incday_bath',defaultincday_bath,validScalarPosNumint);
+   addParameter(p,'incday_bath',defaultincday_bath,validScalarPosNum);
    
    addParameter(p,'distri_shower',defaultdistri_shower,validVector);
    addParameter(p,'distri_SL',defaultdistri_SL,validVector);
@@ -121,7 +120,7 @@ function prob = DHW_distribution_LaunchSim(varargin)
    parse(p, varargin{:});
    
    results = p.Results ; 
-
+   
 p_WD = (results.A7 * 7 / (5 + 2 * results.B2/100)) / results.A7 ;
 p_WE = p_WD * results.B2/100 ;
 
@@ -135,31 +134,26 @@ Default.SL      = normalize(results.distri_SL,'norm',1) ;
 Default.ML      = normalize(results.distri_ML,'norm',1) ;
 Default.bath    = normalize(results.distri_bath,'norm',1) ;
 
-prob.plotvar    = results.plotvar ;
-prob.A4         = results.A4;
 % Seasonal probability function
 t = 1:results.spantime;
 
-yseason = (100 + results.B3.*sin(1/results.spantime * 2 * pi * t ...
-                                 - (results.peakm - 3)/results.spantime * 2 * pi ...
-                                 + (results.A5)/(365) * 2 * pi )) / 100; % [%]
+yseason = (100 + results.B3.*sin(1/results.spantime * 2 * pi * t - (results.peakm - 3)/results.spantime * 2 * pi))/100; % [%]
 
 if results.plotvar
-    figure ;
     plot(t,yseason);
 end
 
 %%%%% Medium Load
-prob.duration.ML     = results.duration_ML    ; % [min]
-prob.MeanVolume.ML   = results.MeanVolume_ML    ; % [l/min]
-prob.incday.ML       = results.incday_ML   ;
+duration.ML     = results.duration_ML    ; % [min]
+MeanVolume.ML   = results.MeanVolume_ML    ; % [l/min]
+incday.ML       = results.incday_ML   ;
 
-prob.ysum.ML            = prob.MeanVolume.ML * prob.duration.ML * prob.incday.ML  * 365;
+ysum.ML            = MeanVolume.ML * duration.ML * incday.ML  * 365;
 
 sigma   = sqrt(2) ;
-mu.ML   = prob.MeanVolume.ML ;
+mu.ML   = MeanVolume.ML ;
 
-f = @(xamp) myfunDHW(xamp, mu.ML, sigma)-prob.ysum.ML  ;
+f = @(xamp) myfunDHW(xamp, mu.ML, sigma)-ysum.ML ;
 amp.ML = fsolve(f,200) ;
 
 x.ML = max(0.2,mu.ML - 2*sigma):.2:(mu.ML + 2*sigma) ;
@@ -167,59 +161,52 @@ y.ML = amp.ML / (1/(sqrt(2*pi)*sigma))*normpdf(x.ML,mu.ML,sigma);
 
 zMLproduct = sum(x.ML .* y.ML) ;
 
-if prob.plotvar
-    prob.distifig = figure ;
-    figure(prob.distifig);
+if results.plotvar
+    distifig = figure ;
+    figure(distifig);
     plot(x.ML,y.ML)
     grid on
     grid minor 
     hold on
+    prob.distifig = distifig ;
 end
 
 %%%%% Short Load
-prob.duration.SL     = results.duration_SL    ; % [min]
-MeanVolume.SL        = results.MeanVolume_SL * .4    ; % [l/min]
-prob.incday.SL       = results.incday_SL   ;
+duration.SL     = results.duration_SL    ; % [min]
+MeanVolume.SL   = results.MeanVolume_SL    ; % [l/min]
+incday.SL       = results.incday_SL   ;
 
-prob.ysum.SL         = MeanVolume.SL * prob.duration.SL * prob.incday.SL  * 365;
+ysum.SL            = MeanVolume.SL * duration.SL * incday.SL  * 365;
 
-sigma   = sqrt(4) ;
+sigma   = sqrt(2) ;
 mu.SL   = MeanVolume.SL ;
 
-f = @(xamp) myfunDHW(xamp, mu.SL, sigma)-prob.ysum.SL ;
+f = @(xamp) myfunDHW(xamp, mu.SL, sigma)-ysum.SL ;
 amp.SL = fsolve(f,200)  ;
 
-% This is for statistic purpose and account for the right amount meant ot
-% be calculated
-
-prob.ysum.SL         = results.MeanVolume_SL * prob.duration.SL * prob.incday.SL  * 365;
-prob.MeanVolume.SL   = results.MeanVolume_SL ;
-
-x.SL = max(0.4,mu.SL - 2*sigma):.2:(mu.SL + 2*sigma) ;
+x.SL = max(0,mu.SL - 2*sigma):.2:(mu.SL + 2*sigma) ;
 y.SL = amp.SL / (1/(sqrt(2*pi)*sigma))*normpdf(x.SL,mu.SL,sigma);
 
 pd      = makedist('Normal','mu',mu.SL,'sigma',sigma) ;
-t_pd    = truncate(pd,max(0.4,mu.SL - 2*sigma),(mu.SL + 2*sigma)) ;
-y.SL    = amp.SL / (1/(sqrt(2*pi)*sigma)) * pdf(t_pd,x.SL) ;
-amplitude = 728 ;
-y.SL    = amplitude * exp(-(x.SL - mu.SL).^2 / sigma^2) ;
+t_pd    = truncate(pd,max(0,mu.SL - 2*sigma),(mu.SL + 2*sigma)) ;
+y.SLv2  = amp.SL / (1/(sqrt(2*pi)*sigma)) * pdf(t_pd,x.SL) ;
 
 zSLproduct = sum(x.SL .* y.SL) ;
 
-if prob.plotvar
+if results.plotvar
     plot(x.SL,y.SL)
 end
 
 %%%% Shower 
-prob.duration.shower     = results.duration_shower    ; % [min]
-prob.MeanVolume.shower   = results.MeanVolume_shower    ; % [l/min]
-prob.incday.shower       = results.incday_shower    ;
+duration.shower     = results.duration_shower    ; % [min]
+MeanVolume.shower   = results.MeanVolume_shower    ; % [l/min]
+incday.shower       = results.incday_shower    ;
 
-prob.ysum.shower                = prob.MeanVolume.shower * prob.duration.shower * prob.incday.shower  * 365;
+ysum.shower                = MeanVolume.shower * duration.shower * incday.shower  * 365;
 sigma               = sqrt(2) ;
-mu.shower           = prob.MeanVolume.shower ;
+mu.shower           = MeanVolume.shower ;
 
-f = @(xamp) myfunDHW(xamp, mu.shower, sigma)-prob.ysum.shower  ;
+f = @(xamp) myfunDHW(xamp, mu.shower, sigma)-ysum.shower ;
 amp.shower = fsolve(f,200) ;
 
 x.shower = max(0.2,mu.shower - 2*sigma):.2:(mu.shower + 2*sigma) ;
@@ -228,20 +215,20 @@ y.shower = amp.shower / (1/(sqrt(2*pi)*sigma))*normpdf(x.shower,mu.shower,sigma)
 
 zshowerproduct = sum(x.shower .* y.shower) ;
 
-if prob.plotvar
+if results.plotvar
     plot(x.shower,y.shower)
 end
 %%%%% Bath
-prob.duration.bath     = results.duration_bath    ; % [min]
-prob.MeanVolume.bath   = results.MeanVolume_bath         ; % [l/min]
-prob.incday.bath       = results.incday_bath      ;
+duration.bath     = results.duration_bath    ; % [min]
+MeanVolume.bath   = results.MeanVolume_bath         ; % [l/min]
+incday.bath       = results.incday_bath      ;
 
-prob.ysum.bath  = prob.MeanVolume.bath * prob.duration.bath * prob.incday.bath  * 365;
+ysum.bath = MeanVolume.bath * duration.bath * incday.bath  * 365;
 % amp     = 30 ;
 sigma       = sqrt(2) ;
-mu.bath     = prob.MeanVolume.bath  ;
+mu.bath     = MeanVolume.bath  ;
 
-f = @(xamp) myfunDHW(xamp, mu.bath, sigma)-prob.ysum.bath ;
+f = @(xamp) myfunDHW(xamp, mu.bath, sigma)-ysum.bath ;
 amp.bath = fsolve(f,200)  ;
 
 x.bath = max(0.2,mu.bath - 2*sigma):.2:(mu.bath + 2*sigma) ;
@@ -249,7 +236,7 @@ y.bath = amp.bath / (1/(sqrt(2*pi)*sigma))*normpdf(x.bath,mu.bath,sigma);
 
 zbathproduct = sum(x.bath .* y.bath)  ;
 
-if prob.plotvar
+if results.plotvar
     plot(x.bath,y.bath)
     hold off
 end
@@ -333,6 +320,8 @@ prob.A6 = results.A6 ;
 prob.incday = incday         ;
 prob.duration = duration     ;
 prob.MeanVolume = MeanVolume ;
+prob.ysum = ysum ;
+prob.plotvar = results.plotvar ;
 
 rng(1)
 prob.randgen = rand(simulation_size,1) ;
@@ -343,22 +332,16 @@ for iload = 1:length(loads)
     loadname            = loads{iload} ;
     countprofile        = [loadname 'profile'] ;
     countwithdrawal     = [loadname 'withdrawal'] ;
-    meanvol             = ['MeanVolume_' loadname ] ;
     
     distx       = repelem(x.(loadname),floor(y.(loadname)));
     distxrand   = distx(randperm(length(distx)));
     if length(distxrand) > simulation_size
-        prob.(countwithdrawal) = distxrand(1:simulation_size) ; % Shrink the array to the same size
+        xstop = 1 ; % Shrink the array to the same size
     else
-        temparr                = repmat(distxrand,ceil(simulation_size / length(distxrand)),1) ;
+        temparr                                 = repmat(distxrand,ceil(simulation_size / length(distxrand)),1) ;
         prob.(countwithdrawal) = temparr(1:simulation_size) ;
-        if any(strcmp(loadname,{'SL', 'ML'}))
-            ratiomean = mean(prob.(countwithdrawal)) / results.(meanvol) ;
-            prob.(countwithdrawal) = prob.(countwithdrawal) / ratiomean;
-        end
         % ratio is used to have the right mean otherwise the SL components
         % is incorrect as the gaussian distribution is truncated.
-        
+%         ratiomean                               = mean(water_profile.(countwithdrawal).temparr) / MeanVolume.(loadname) ;
     end
 end
-

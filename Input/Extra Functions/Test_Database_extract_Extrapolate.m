@@ -1,4 +1,4 @@
-function [OutputArray, OutputArrayTimed, xq] = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic, OutHeaders)
+function [OutputArray, OutputArrayTimed, xq, errormess] = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic, OutHeaders)
 
 if size(Array_In,1)<size(Array_In,2)
     Array_In = Array_In';
@@ -7,6 +7,8 @@ end
 Input.Data         = Array_In    ;
 Input.StartYear    = ArrayStartYear         ;
 Input.Res          = ResIni                  ;
+
+errormess.trigger = 0;
 
 switch Input.Res
     case 'Hourly'
@@ -22,6 +24,7 @@ switch Input.Res
 end
 
 [xq, stpOut] = TimeArray(ResFinal, SimulationStart, SimulationEnd) ;
+%xq = xq(1:end-1,1);
 
 Time2Extract = min(size(Input.Data,1) - 1,((SimulationEnd - SimulationStart) + 1) * (24 / stpIn)) ;
 
@@ -32,6 +35,7 @@ for ii = 1:size(Input.Data,2)
 end
 
 x = (datetime(SimulationStart,'ConvertFrom','datenum'):seconds(3600*stpIn):datetime(SimulationEnd + 1,'ConvertFrom','datenum'))';
+%x = x(1:end-1,1);
 x.Format = 'dd/MM/yyyy HH:mm';
 OutHeaders = [{'Time'} OutHeaders] ;
 
@@ -59,7 +63,14 @@ OutputArray = zeros(size(xq,1),(length(OutHeaders)-1)) ;
          OutputArrayTimed = table(xq,'VariableNames',OutHeaders(1)) ;
          for ii = 1:(length(OutHeaders)-1)
             OutputArraytemp = repelem(WeatherData.(OutHeaders{ii + 1}), RepCount) ;
-            OutputArray(:,ii) = OutputArraytemp(1:size(xq,1)) ;         
+            if size(OutputArraytemp,1) < size(xq,1) 
+                % Add the missing values as 0 + add a warning message
+                OutputArray(1:size(OutputArraytemp,1),ii) = OutputArraytemp ; 
+                errormess.trigger = 1;
+                errormess.text    = 'WARNING: Missing data from the original dataset. Set value to 0';
+            else
+                OutputArray(:,ii) = OutputArraytemp(1:min(size(xq,1),size(OutputArraytemp,1))) ; 
+            end 
             OutputArrayTimed  = [OutputArrayTimed table(OutputArray(:,ii),'VariableNames',OutHeaders(ii + 1))] ;
          end 
      case 'None'

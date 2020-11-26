@@ -281,7 +281,7 @@ Allfieldsname = fieldnames(Input_Datav3) ;
 %% Distribution
 % For size reason, in the distributed version, the database is restricted
 % to the year 2012.
-Public = 0 ; %1: distributed, 0:working file.
+Public = 1 ; %1: distributed, 0:working file.
 if Public == 1
     Time_Sim.YearStartSim = 2012 ;
     Time_Sim.YearStartSim2004 = 2012 ;
@@ -395,18 +395,30 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
     elseif strcmp(data.WeatherSelection,'Default')    
         
         Default_Var = load('Smart_House_Data_MatLab.mat');
+        %%%% Add the public version that starts at 2012
         
         ResIniTemp          = 'Hourly'     ;
         Array_InTemp        = Default_Var.Hourly_Temperature ;
-        ArrayStartYearTemp  = datenum(2000,1,1) ;
-        
+        if Public == 1
+            ArrayStartYearTemp  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearTemp  = datenum(2000,1,1) ; %2000
+        end
         ResIniSolar         = 'Hourly'     ;
         Array_InSolar       = Default_Var.Hourly_Solar_Radiation ;
-        ArrayStartYearSolar = datenum(2000,1,1) ;
-
+        if Public == 1
+            ArrayStartYearSolar  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearSolar  = datenum(2000,1,1) ; %2000
+        end
+        
         ResIniPrice         = 'Hourly'     ;
         Array_InPrice       = Default_Var.Hourly_Real_Time_Pricing ;
-        ArrayStartYearPrice = datenum(2004,1,1) ;
+        if Public == 1
+            ArrayStartYearPrice  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearPrice  = datenum(2004,1,1) ; %2000
+        end
         
     elseif strcmp(data.WeatherSelection,'Individual')
         Default_Var = load('Smart_House_Data_MatLab.mat');
@@ -538,12 +550,31 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
     All_Var.Hourly_TemperatureTimed = Hourly_TemperatureTimed ;
     
     % Sizing the Radiation array for the simulation
-    [Hourly_Solar_Radiation, Hourly_Solar_RadiationTimed, ~] = Test_Database_extract_Extrapolate(Array_InSolar,ArrayStartYearSolar,ResIniSolar,ResFinal, SimulationStart, SimulationEnd, ReplicSolar, 'DataOutput') ;
+    [Hourly_Solar_Radiation, Hourly_Solar_RadiationTimed, ~] = Test_Database_extract_Extrapolate(Array_InSolar,...
+                                                                                                 ArrayStartYearSolar,...
+                                                                                                 ResIniSolar,...
+                                                                                                 ResFinal,...
+                                                                                                 SimulationStart,...
+                                                                                                 SimulationEnd,...
+                                                                                                 ReplicSolar,...
+                                                                                                 'DataOutput') ;
     All_Var.Hourly_Solar_Radiation  = Hourly_Solar_Radiation(1:(end-1)) ;
     All_Var.Hourly_Solar_RadiationTimed = Hourly_Solar_RadiationTimed ;
     
     % Sizing the Price array for the simulation
-    [Hourly_Real_Time_Pricing, Hourly_Real_Time_PricingTimed, xq] = Test_Database_extract_Extrapolate(Array_InPrice,ArrayStartYearPrice,ResIniPrice,ResFinal, SimulationStart, SimulationEnd, ReplicPrice, 'DataOutput') ;
+    [Hourly_Real_Time_Pricing, Hourly_Real_Time_PricingTimed, xq, errormess] = Test_Database_extract_Extrapolate(Array_InPrice,...
+                                                                                                      ArrayStartYearPrice,...
+                                                                                                      ResIniPrice,...
+                                                                                                      ResFinal,...
+                                                                                                      SimulationStart,...
+                                                                                                      SimulationEnd,...
+                                                                                                      ReplicPrice,...
+                                                                                                      'DataOutput') ;
+    if errormess.trigger
+        AddText = errormess.text ;
+        addLineSim(hObject,data,AddText)                                                                                              
+    end
+    
     All_Var.Hourly_Real_Time_Pricing      = Hourly_Real_Time_Pricing(1:(end-1)) ;
     All_Var.Hourly_Real_Time_PricingTimed = table2timetable(Hourly_Real_Time_PricingTimed) ;
     
@@ -658,7 +689,9 @@ end
     Replic   = 'Interpolate'  ;
     ResFinal = HouseInfo.Time_Step ;
     Array_In = sum(All_Var.Hourly_Emissions(:,1:6),2) ;
-    ArrayStartYear = datenum(2004,1,1) ;
+    
+    %%% Add the public version for the year 2012
+    ArrayStartYear = datenum(2012,1,1) ; %2004
     SimulationStart = Date_Sim(1,1) ;
     SimulationEnd   = Date_Sim(2,1) ;
 %     All_Var.Hourly_Temperature = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic) ;
