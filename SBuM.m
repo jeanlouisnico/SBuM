@@ -9440,7 +9440,7 @@ end
             % The appliance is already listed, check if the rating
             % is also rated. Create a temporary new array to search
             row2modify  = find(ArrayApp == 1) ;
-            if isfield(gui, 'popupApp')
+            if isfield(gui, 'popupApp') && isvalid(gui.popupApp)
                 if strcmp(get(gui.popupApp,'enable'),'off')
                     % This means we do not add up but we
                     % modifiy the quantity of appliances as well as
