@@ -72,9 +72,8 @@ if nbr_appliances > 0
         AppQty      = All_Var.GuiInfo.SummaryStructure.(HouseName).Appliances.(AppSimu{nbr_appliance}).Qty   ;
         AppClass    = All_Var.GuiInfo.SummaryStructure.(HouseName).Appliances.(AppSimu{nbr_appliance}).Class ;
         AppDB       = All_Var.GuiInfo.SummaryStructure.(HouseName).Appliances.(AppSimu{nbr_appliance}).DB    ;
-        
-        % 0207806399
-        % 020486-347W
+        Appnumber   = find(strcmp(AppList(:,3), AppName)) ;
+        % ApplianceClass = AppList{nbr_appliance,4}   ;
         
         if isa(AppQty,'char')
             AppQty = str2double(AppQty) ;
@@ -168,7 +167,7 @@ if nbr_appliances > 0
                 if App.Info.(AppName)(subapp).(HouseName).InUse
                     % 1. Check how much time there is left
                     [App_Energy, App] = PowerConsumption(App, AppName, subapp, HouseName, Time_Sim, App.PowerConsProfile, AppList, ...
-                                                         nbr_appliance,  Input_Data, Power_Level, All_Var, LongAppName,SecperIter, App10s, AppClass) ;
+                                                         Appnumber,  Input_Data, Power_Level, All_Var, LongAppName,SecperIter, App10s, AppClass) ;
                     % 2. Process the time left
                     % 3. Get the power/energy demand
                     % 4. Go to next app
@@ -303,12 +302,12 @@ if nbr_appliances > 0
                     
                     % 6. Calculate the power output from the appliance
                         [App_Energy, App] = PowerConsumption(App, AppName, subapp, HouseName, Time_Sim, App.PowerConsProfile, AppList, ...
-                                                             nbr_appliance,  Input_Data, Power_Level, All_Var, LongAppName,SecperIter, App10s, AppClass) ;
+                                                             Appnumber,  Input_Data, Power_Level, All_Var, LongAppName,SecperIter, App10s, AppClass) ;
                         
                     else
                     %    If the appliance cannot generate, look for residual power and continue to the next appliance   
                         App.Info.(AppName)(subapp).(HouseName).ActionQtyStep(myiter + 1) = 0 ;
-                        [App, App_Energy,AppInUse]  = ResidualPower(Power_Level,App,AppName,subapp, HouseName, myiter, AppList, nbr_appliance, Input_Data, All_Var, stepreal, LongAppName, AppClass) ;
+                        [App, App_Energy,AppInUse]  = ResidualPower(Power_Level,App,AppName,subapp, HouseName, myiter, AppList, Appnumber, Input_Data, All_Var, stepreal, LongAppName, AppClass) ;
                         [App]                       = Allocate_Energy(App_Energy,App,AppName,subapp,HouseName,myiter, AppInUse) ;
                         continue ;
                     end
