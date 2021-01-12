@@ -4057,12 +4057,17 @@ end  % mouseMovedCallback
                 ApplianceCode       = data.AppliancesList{ij,3} ;
                 AppliancerateCode   = data.AppliancesList{ij,4} ;
                 
-                % MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
-                MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
+                try
+                    AppLG = data.varname.(ApplianceCode).LongName ;
 
-                MinQty = 0;
-                AppQty = round(RandBetween(MinQty,MaxQty)) ; %fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
-                
+                    % MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
+                    MaxQty = data.ApplianceMax{find(strcmp(AppLG,data.ApplianceMax(:,1))==1),Inh+1} ;
+
+                    MinQty = 0;
+                    AppQty = round(RandBetween(MinQty,MaxQty)) ; %fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
+                catch
+                    AppQty = 1 ; % Applied to the lighting system
+                end
                 if AppQty > 0
                     for appqty = 1:AppQty
                         AppQtyReport(appqty) = {'1'}; 
