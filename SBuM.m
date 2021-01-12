@@ -4097,12 +4097,14 @@ end  % mouseMovedCallback
                                 end
                             else
                                 MinQty = 2;
+                                LastApp = [] ;
                                 MaxQty = numel(data.Lightopt);
                                 for apprate = 1:AppQty
                                     AppRatetmp = fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
                                     AppRatetmp = data.Lightopt{AppRatetmp} ;
                                     AppRate(apprate) = {AppRatetmp}; 
                                 end
+                                SaveData('clLight', HouseList{i}, AppRatetmp) ;
                             end
                                 
                         case 'None'
