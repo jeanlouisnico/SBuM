@@ -20,9 +20,16 @@ guiwait.Figure = figure( ...
                                 'HandleVisibility', 'on',...
                                 'Visible','off');
 open_Waiting_Window ;
-builtversion =  '2.3.4' ;
+builtversion =  '2.3.5' ;
 x=1;
-IsExeFile = 0 ;
+
+SBuMPath = mfilename('fullpath') ;
+
+if isempty(findstr(SBuMPath,'SBuMApp'))
+    IsExeFile = 0 ;
+else
+    IsExeFile = 1 ;
+end
 if ~IsExeFile
     CheckToolBox(builtversion) ;
 end
@@ -425,9 +432,11 @@ displayEndOfDemoMessage('')
         if strcmp(MachineInfo.name,'jlouis')
             DebugMode = 1 ;
             DvptMode  = 1 ;
+            Public    = 0 ;
         else
             DebugMode = 0 ;
             DvptMode  = 0 ;
+            Public    = 0 ;
         end
         
         App10s = 0 ;
@@ -552,6 +561,7 @@ displayEndOfDemoMessage('')
             'WeatherSelection',WeatherSelection,...
             'DebugMode',DebugMode,...
             'DvptMode',DvptMode,...
+            'Public',Public,...
             'App10s',App10s,...
             'Profile1distri',{Profile1distri},...
             'Profile2distri',{Profile2distri},...
@@ -6673,6 +6683,11 @@ end  % mouseMovedCallback
                                                     'String', 'Access Development mode', ...
                                                     'Tag', 'DevelopmentMode', ...
                                                     'callback', @AccessDevelopmentMode);
+                    gui.Public = uicontrol('Parent', gui.DevelopmentBox,...
+                                                    'Style', 'pushbutton', ...
+                                                    'Value',1,...
+                                                    'Tag', 'Public', ...
+                                                    'callback', @AccessDevelopmentMode);
                     gui.App10s = uicontrol('Parent', gui.DevelopmentBox,...
                                                     'Style', 'checkbox', ...
                                                     'String', 'Record detailed appliance signature - 10s', ...
@@ -6682,7 +6697,7 @@ end  % mouseMovedCallback
                    uix.Empty('Parent', gui.DevelopmentBox);                             
                    set(gui.DevelopmentTick, 'Value', data.DebugMode)
                     
-                    set(gui.DevelopmentBox,'Heights',[23 23 -1]);
+                    set(gui.DevelopmentBox,'Heights',[23 23 23 -1]);
         gui.Peferences.Visible = 'on' ;
     end %onTools
 %--------------------------------------------------------------------------%
@@ -8283,6 +8298,7 @@ end
 % the running mode
 
     function AccessDevelopmentMode(src,~)
+        persistent chk
         switch src.Tag
             case 'App10s'
                 data.App10s  = abs(data.App10s-1) ;
@@ -8296,8 +8312,27 @@ end
                         DefineDates(Housenumber);
                     end
                 else
-                    DefineDates(gui.ListBox.String{gui.ListBox.Value});
+                    if ~isempty(gui.ListBox.String)
+                        DefineDates(gui.ListBox.String{gui.ListBox.Value});
+                    end
                 end
+            case 'Public'
+                
+                if isempty(chk)
+                      chk = 1;
+                      pause(0.2); %Add a delay to distinguish single click from a double click
+                      if chk == 1
+                          % Execute a single click action  
+                          fprintf(1,'\nI am doing a single-click.\n\n');
+                          chk = [];
+                      end
+                else
+                      % Execute a double click action   
+                      fprintf(1,'\nI am doing a double-click.\n\n');
+                      chk = [];
+                      data.Public = abs(data.Public-1) 
+                end
+                
         end
     end
 %--------------------------------------------------------------------------%

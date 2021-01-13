@@ -281,8 +281,11 @@ Allfieldsname = fieldnames(Input_Datav3) ;
 %% Distribution
 % For size reason, in the distributed version, the database is restricted
 % to the year 2012.
-Public = 1 ; %1: distributed, 0:working file.
+Public = data.Public ; %1: distributed, 0:working file.
 if Public == 1
+    AddText = 'Distributed Version' ;
+          addLineSim(hObject,data,AddText)
+
     Time_Sim.YearStartSim = 2012 ;
     Time_Sim.YearStartSim2004 = 2012 ;
      if or(min(Starting_Days) < datenum(2012,1,1), datenum(2012,12,31) < max(Ending_Dates))
@@ -741,6 +744,7 @@ All_Var.AppConssignature        = readtable('AppProf.csv');
 
 All_Var.Nuc = load('Emissions_Nuc.mat');
 All_Var.DebugMode = data.DebugMode ; % If this is to be distributed, set this value to 0, otherwise 1 (It does not save many variables meant for debugging)
+All_Var.Public = Public ;
 All_Var.GuiInfo   = data ;
 
 

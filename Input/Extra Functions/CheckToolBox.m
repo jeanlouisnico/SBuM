@@ -34,6 +34,7 @@ function CheckToolBox(builtversion)
                     return;
             end
         end
+        v = v(1) ;
         if ~strcmp(v.Version,builtversion)
             IndBuilt = split(builtversion,'.');
             IndRun = split(v.Version,'.');
