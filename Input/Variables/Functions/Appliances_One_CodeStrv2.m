@@ -580,7 +580,10 @@ varargout{1} = App;
             ValOccup   = 0;
         end
         if isfield(All_Var.GuiInfo.SelfDefinedAppliances,HouseName)
-            LightPlace = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),'Lighting System');
+            if isfield(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName),'Lights')
+                LightPlace = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).Lights.Rate ;
+                LightPlace = convert2double(LightPlace) ;    
+            end
         end
         if isa(clLight,'cell')
             clLight = clLight{1} ;
@@ -591,7 +594,7 @@ varargout{1} = App;
             case 'Incandescent bulbs'
                 Power_Light = ValOccup * Building_Area * 0.012;
             case 'Self-defined'         % JARI'S ADDITION
-                Power_Light = ValOccup * Building_Area * All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){LightPlace,1} ;   % JARI'S ADDITION
+                Power_Light = ValOccup * Building_Area * LightPlace ;   % JARI'S ADDITION
         end
     end % Lighting
 %--------------------------------------------------------------------------%

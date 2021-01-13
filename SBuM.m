@@ -5089,14 +5089,19 @@ end  % mouseMovedCallback
                             if get(popupRateobj,'value') > 2 && popupRateobj.Value ~= 5 % Second on JARI
                                     set(popupRateobj,'value',1);    % ORIGINAL!!
                             end
-                            DbList = fieldnames(data.AppProfile.(data.AppliancesList{PositionApp,3})) ;
-                                ToInsert = 'Select database...';
-                                DbList(2:end+1,:) = DbList(1:end,:);
-                                DbList(1,:) = {ToInsert};
-                                DbList = orderalphacellarray(DbList,2,numel(DbList));
-                            set(gui.popupDB,'String', DbList) ;
-                            if get(gui.popupDB,'Value') > length(DbList)
-                                set(gui.popupDB,'Value',1)
+                            if strcmp(SelectedValue,'Lighting System') % create an exception for the lighting system
+                                set(gui.popupDB,'Enable', 'off') ;
+                            else
+                                DbList = fieldnames(data.AppProfile.(data.AppliancesList{PositionApp,3})) ;
+                                    ToInsert = 'Select database...';
+                                    DbList(2:end+1,:) = DbList(1:end,:);
+                                    DbList(1,:) = {ToInsert};
+                                    DbList = orderalphacellarray(DbList,2,numel(DbList));
+                                set(gui.popupDB,'Enable', 'on') ;
+                                set(gui.popupDB,'String', DbList) ;
+                                if get(gui.popupDB,'Value') > length(DbList)
+                                    set(gui.popupDB,'Value',1)
+                                end
                             end
                             if gui.ownSelection == 1            % JARI
                                 if strcmp(SelectedValue, 'Rate') % JARI
@@ -5231,11 +5236,14 @@ end  % mouseMovedCallback
                             uiwait(msgbox('Please select an appliance','Error','modal'));
                             return;
                         end
-                        AppName = data.AppliancesList{find(strcmp(Inputstr1{1},data.AppliancesList(:,1)) == 1),3} ;
-                        
+                        if strcmp(Inputstr1,'Lighting System')
+                            AppName = 'Lights' ;
+                        else
+                            AppName = data.AppliancesList{find(strcmp(Inputstr1{1},data.AppliancesList(:,1)) == 1),3} ;
+                        end
                     Check4 = gui.popupDB ;
                         Inputstr4 = Check4.String(Check4.Value) ;    
-                        if strcmp(Inputstr4,'Select database...') 
+                        if strcmp(Inputstr4,'Select database...') && ~strcmp(Inputstr1,'Lighting System') 
                             uiwait(msgbox('Please select a database','Error','modal'));
                             return;
                         end
@@ -5247,11 +5255,9 @@ end  % mouseMovedCallback
                             return;
                         elseif strcmp(Inputstr2,'-')
                         elseif strcmp(Inputstr2,'Self-defined')
-                            for hh = 1:size(HouseSelected,1)
-                               data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(Inputstr4{1}).Rate = str2double(gui.ApplianceRate.String)    ;
-                               data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(Inputstr4{1}).Sleep = str2double(gui.ApplianceSleep.String)   ;
-                               data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(Inputstr4{1}).StandBy = str2double(gui.ApplianceStandBy.String) ;
-                            end
+                            [data, gui] = saveSelfDefined(data, HouseSelected,'ApplianceStandBy', gui, AppName, Inputstr1, Inputstr4{1}) ;
+                            [data, gui] = saveSelfDefined(data, HouseSelected,'ApplianceRate', gui, AppName, Inputstr1, Inputstr4{1}) ;
+                            [data, gui] = saveSelfDefined(data, HouseSelected,'ApplianceSleep', gui, AppName, Inputstr1, Inputstr4{1}) ;
                         end
                     Check3 = gui.popupQty ;
                         Inputstr3 = Check3.String(Check3.Value) ;
@@ -5301,7 +5307,11 @@ end  % mouseMovedCallback
                                 if ~isempty(codedatabase)
                                     SaveData(codedatabase,HouseTag,NewDataDB)
                                 end
-                                SaveData('Appliances', HouseTag, codeAppliance) ;
+                                if strcmp(Inputstr1, 'Lighting System')
+                                    SaveData('clLight', HouseTag, NewDataRate) ;
+                                else
+                                    SaveData('Appliances', HouseTag, codeAppliance) ;
+                                end
                                 MaxApp = maxAppcount(HouseTag) ;
                                 SaveData('Appliance_Max',HouseTag,MaxApp)
                             end
@@ -5391,8 +5401,7 @@ end  % mouseMovedCallback
                         setratingapp(ApplianceRates) ;                                    
                     end
                 case {'ApplianceStandBy', 'ApplianceRate', 'ApplianceSleep' } 
-                    Housenumber     = gui.ListBox.String(gui.ListBox.Value);
-                    AppName         = data.AppliancesList{find(strcmp(data.AppliancesList(:,1), gui.popupApp.String{gui.popupApp.Value})),3} ;
+                    HouseSelected   = gui.ListBox.String(gui.ListBox.Value) ;
                     DBsel           = gui.popupDB.String{gui.popupDB.Value} ;
                     
                     %%% Check for errors before proceeding
@@ -5402,35 +5411,24 @@ end  % mouseMovedCallback
                         return;
                     end
                     
-                    if strcmp(DBsel,'Select database...') 
+                    if strcmp(DBsel,'Select database...')  && ~strcmp(Inputstr1,'Lighting System') 
                         uiwait(msgbox('Please select a database','Error','modal'));
                         return;
                     end
                     
+                    if strcmp(Inputstr1,'Lighting System')
+                        AppName = 'Lights' ;
+                    else
+                        AppName = data.AppliancesList{find(strcmp(Inputstr1{1},data.AppliancesList(:,1)) == 1),3} ;
+                    end
                     %%% Retrieve the value and store it in the self defined
                     %%% variable
-                    
-                    for hh = 1:size(Housenumber,1)
-                        switch Source
-                            case 'ApplianceStandBy'
-                                data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).StandBy    = str2double(gui.(Source).String)   ;
-                            case 'ApplianceRate' 
-                                data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Rate       = str2double(gui.(Source).String)   ;
-                            case 'ApplianceSleep'
-                                data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Sleep      = str2double(gui.(Source).String)   ;
-                        end
-                        % Fill in the missing fields if they have never
-                        % been declared before
-                        if ~isfield(data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel),'Rate')
-                            data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Rate   = 0 ;
-                        end
-                        if ~isfield(data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel),'StandBy')
-                            data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).StandBy   = 0 ;
-                        end
-                        if ~isfield(data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel),'Sleep')
-                            data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Sleep   = 0 ;
-                        end
-                    end  
+                    try
+                        [data, gui] = saveSelfDefined(data, HouseSelected,Source, gui, AppName, Inputstr1) ;
+                    catch
+                        % do not do anything, it is most likely already
+                        % saved
+                    end
                 otherwise
             end
         end
@@ -9248,7 +9246,11 @@ end
             selectedQuantity    = varargin{3};
             selectedDB          = varargin{4};
             AppCodeLine = find(strcmp(data.AppliancesList(:,1),selectedAppliance) == 1) ;
-            AppCodeVal  = data.AppliancesList{AppCodeLine,3} ;
+            if strcmp(selectedAppliance, 'Lighting System')
+                AppCodeVal  = 'Lights' ;
+            else
+                AppCodeVal  = data.AppliancesList{AppCodeLine,3} ;
+            end
         end
         
         Mfigpos = get(gui.Window,'OuterPosition') ;
@@ -9372,7 +9374,11 @@ end
         if nargin > 0
             HouseTag = gui.ListBox.String{gui.ListBox.Value(1)} ;
             if strcmp(selectedRank,'Self-defined')
-                Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})       ;
+                if strcmp(AppCodeVal,'Lights')
+                    Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal)       ;
+                else
+                    Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})       ;
+                end
                 NominalPower    = Power.Rate ;
                 Stdby           = Power.StandBy ;
                 Offpower        = Power.Sleep ;
@@ -9441,25 +9447,65 @@ end
         %%% UPDATE THE UIMULTICOLLIST     
         % Get the data from the multi column list to compare them
         % with thenew input data
-        str = uimulticollist( gui.multicolumnApp, 'string' ) ;
-        ArrayApp = strcmp(str(:,2), Rate) .* strcmp(str(:,1), AppName) .* strcmp(str(:,4), DB) ;
-        if sum(ArrayApp) >= 1
-            % The appliance is already listed, check if the rating
-            % is also rated. Create a temporary new array to search
-            row2modify  = find(ArrayApp == 1) ;
-            if isfield(gui, 'popupApp') && isvalid(gui.popupApp)
-                if strcmp(get(gui.popupApp,'enable'),'off')
-                    % This means we do not add up but we
-                    % modifiy the quantity of appliances as well as
-                    % the rate if necessary
-                    if isa(Qty,'cell')
-                        Newqty = str2double(Qty) ;
-                    elseif isa(Qty,'double')
-                        Newqty = Qty ;
-                    end
-                    Newqty = num2str(Newqty) ;
-                    uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )
-                else                            
+        if strcmp(AppName, 'Lighting System') % Exception for the lighting system as we cannot have 2 at the same time
+            str = uimulticollist( gui.multicolumnApp, 'string' ) ;
+            ArrayApp = strcmp(str(:,1), AppName) ;
+            if sum(ArrayApp) > 1
+                % if there are multiple lighting system defined, this is a
+                % mistake and should be corrected witht he latest
+                % information
+                row2modify  = find(ArrayApp == 1) ;
+                for irowdel = 2:length(row2modify)
+                    % Delete all but the first one
+                    selectedrow = row2modify(irowdel) ;
+                    uimulticollist( gui.multicolumnApp, 'delRow', selectedrow )
+                end
+                % Modify the remaining one with the latest information
+                updateuimulticollist(AppName, Rate, Qty, DB) ;
+            elseif sum(ArrayApp) == 1
+                % If the lighting system was already defined then we
+                % replace its value by the newest value
+                row2modify  = find(ArrayApp == 1) ;
+                uimulticollist(gui.multicolumnApp, 'changeItem', Rate{1}, row2modify, 2 )
+            else
+                % If no lighting system was defined prevously, we define a
+                % new one
+                rowItems = [AppName, Rate, Qty, DB] ;
+                uimulticollist(gui.multicolumnApp, 'addRow', rowItems , 2 )
+            end
+        else
+            str = uimulticollist( gui.multicolumnApp, 'string' ) ;
+            ArrayApp = strcmp(str(:,2), Rate) .* strcmp(str(:,1), AppName) .* strcmp(str(:,4), DB) ;
+            if sum(ArrayApp) >= 1
+                % The appliance is already listed, check if the rating
+                % is also rated. Create a temporary new array to search
+                row2modify  = find(ArrayApp == 1) ;
+                if isfield(gui, 'popupApp') && isvalid(gui.popupApp)
+                    if strcmp(get(gui.popupApp,'enable'),'off')
+                        % This means we do not add up but we
+                        % modifiy the quantity of appliances as well as
+                        % the rate if necessary
+                        if isa(Qty,'cell')
+                            Newqty = str2double(Qty) ;
+                        elseif isa(Qty,'double')
+                            Newqty = Qty ;
+                        end
+                        Newqty = num2str(Newqty) ;
+                        uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )
+                    else                            
+                        % this particular appliance already exist --> add
+                        % the quantity selected to this row
+                        Originalqty = str(row2modify,3) ;
+                        if isa(Qty,'cell')
+                            Newqty = str2double(Originalqty) + str2double(Qty) ;    
+                        elseif isa(Qty,'double')
+                            Newqty = str2double(Originalqty) + Qty ;    
+                        end
+
+                        Newqty = num2str(Newqty) ;
+                        uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )                            
+                    end  
+                else
                     % this particular appliance already exist --> add
                     % the quantity selected to this row
                     Originalqty = str(row2modify,3) ;
@@ -9467,26 +9513,14 @@ end
                         Newqty = str2double(Originalqty) + str2double(Qty) ;    
                     elseif isa(Qty,'double')
                         Newqty = str2double(Originalqty) + Qty ;    
-                    end
-                    
+                    end  
                     Newqty = num2str(Newqty) ;
-                    uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )                            
-                end  
+                    uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )  
+                end
             else
-                % this particular appliance already exist --> add
-                % the quantity selected to this row
-                Originalqty = str(row2modify,3) ;
-                if isa(Qty,'cell')
-                    Newqty = str2double(Originalqty) + str2double(Qty) ;    
-                elseif isa(Qty,'double')
-                    Newqty = str2double(Originalqty) + Qty ;    
-                end  
-                Newqty = num2str(Newqty) ;
-                uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )  
+                rowItems = [AppName, Rate, Qty, DB] ;
+                uimulticollist(gui.multicolumnApp, 'addRow', rowItems , 2 )
             end
-        else
-            rowItems = [AppName, Rate, Qty, DB] ;
-            uimulticollist(gui.multicolumnApp, 'addRow', rowItems , 2 )
         end
     end
 %% Get the appliance Ref from the summarystructure
