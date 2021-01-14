@@ -25,7 +25,7 @@ x=1;
 
 SBuMPath = mfilename('fullpath') ;
 
-if isempty(findstr(SBuMPath,'SBuMApp'))
+if ~contains(SBuMPath,'SBuMApp')
     IsExeFile = 0 ;
 else
     IsExeFile = 1 ;
@@ -39,6 +39,7 @@ if ~isnetavl
 end
 
 data = createData();
+
 % If the process has been aborted, abort also the main function
 if isempty(data)
     msgbox('The model could not be opened', 'Warning','warn');
@@ -428,15 +429,22 @@ displayEndOfDemoMessage('')
         else
             MachineInfo = whoami;
         end
-        
-        if strcmp(MachineInfo.name,'jlouis')
-            DebugMode = 1 ;
-            DvptMode  = 1 ;
-            Public    = 0 ;
-        else
+        SBuMPath = mfilename('fullpath') ;
+
+        if ~contains(SBuMPath,'SBuMApp')
             DebugMode = 0 ;
             DvptMode  = 0 ;
-            Public    = 0 ;
+            Public    = 1 ;
+        else
+            if strcmp(MachineInfo.name,'jlouis')
+                DebugMode = 1 ;
+                DvptMode  = 1 ;
+                Public    = 0 ;
+            else
+                DebugMode = 0 ;
+                DvptMode  = 0 ;
+                Public    = 1 ;
+            end
         end
         
         App10s = 0 ;
@@ -4903,7 +4911,7 @@ end  % mouseMovedCallback
                     end
                     arg = arg{1} ;
                 elseif isa(str.(fields{i}),'struct')
-                    
+                    continue ;
                 else
                     arg = str.(fields{i}) ;
                 end
@@ -6030,7 +6038,11 @@ end  % mouseMovedCallback
                     else
                         for m = 1:size(data.SelfDefinedAppliances.(addedHouses{i}),1)
                             for n = 2:4
-                                data.SelfDefinedAppliances.(addedHouses{i}){m,n} = str2double(data.SelfDefinedAppliances.(addedHouses{i})(m,n));
+                                try 
+                                    data.SelfDefinedAppliances.(addedHouses{i}){m,n} = str2double(data.SelfDefinedAppliances.(addedHouses{i})(m,n));
+                                catch
+                                    continue ;
+                                end
                             end
                         end
                     end

@@ -2,9 +2,20 @@ function BackEnd_SB(varargin)
 
 dbstop if error
 
-builtversion =  '2.3.4' ;
+builtversion =  '2.3.5' ;
 
-CheckToolBox(builtversion) ;
+
+SBuMPath = mfilename('fullpath') ;
+
+if ~contains(SBuMPath,'SBuMApp')
+    IsExeFile = 0 ;
+else
+    IsExeFile = 1 ;
+end
+if ~IsExeFile
+    CheckToolBox(builtversion) ;
+end
+
 dataBE = createData(varargin);
 if isempty(dataBE)
     return
@@ -51,8 +62,8 @@ set(guiBackEnd.Graphing,'Visible','on');
         Controller  = load(strcat(Output_Folder,filesep,Project_ID,filesep,'Cont.mat'));
             Controller  = Controller.Cont   ;
         try    
-            Emissions   = load(strcat(Output_Folder,filesep,Project_ID,filesep,'Emissions_ReCiPe.mat'));
-                Emissions = Emissions.Emissions_ReCiPe ;
+            Emissions   = load(strcat(Output_Folder,filesep,Project_ID,filesep,'Emissions_Houses.mat'));
+%                 Emissions = Emissions.Emissions_Houses ;
         catch
             warning('Missing Emissions files in the output') ;
             Emissions = 0 ;
@@ -121,6 +132,16 @@ set(guiBackEnd.Graphing,'Visible','on');
         MainVar = Controller.(Fieldname)                 ;
         VariablesList = CreateSubLayers(MainVar,VariablesList,Fieldname) ;
     end
+    AllFields = fieldnames(Emissions) ;
+    for i = 1:numel(fieldnames(Emissions))
+        Fieldname = AllFields{i} ;
+        VariablesList.(Fieldname).Name = Fieldname ;
+        VariablesList.(Fieldname).Variable = 'Emissions' ;
+
+        MainVar = Emissions.(Fieldname)                 ;
+        VariablesList = CreateSubLayers(MainVar,VariablesList,Fieldname) ;
+    end
+    
     AllFields = fieldnames(SDI) ;
     for i = 1:numel(fieldnames(SDI))
         Fieldname = AllFields{i} ;
@@ -803,6 +824,8 @@ end % Minimize
                end
                % Extract the specific dimension
                if isa(AllVariables.(ComboBoxContent),'table')
+                   AllVariables = AllVariables.(ComboBoxContent).DataOutput(SubLayerComboBox_QtyVal) ;
+               elseif isa(AllVariables.(ComboBoxContent),'timetable')
                    AllVariables = AllVariables.(ComboBoxContent).DataOutput(SubLayerComboBox_QtyVal) ;
                else
                    AllVariables = AllVariables.(ComboBoxContent)(SubLayerComboBox_QtyVal) ;

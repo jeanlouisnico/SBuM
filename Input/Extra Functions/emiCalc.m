@@ -14,7 +14,7 @@ Emissionextract = Emissions(S,:);
 xq = Emissionextract.Time;
 
 Apps = fieldnames(AppOut.(HouseInfo.Headers).Appliances_ConsStr) ;
-EmissionsIndic = Emissionextract.Properties.VariableNames(2:end) ;
+EmissionsIndic = Emissionextract.Properties.VariableNames ;
 
 for iEmi = 1:length(EmissionsIndic)
     % Loop for each App and then calculate the total emissions
