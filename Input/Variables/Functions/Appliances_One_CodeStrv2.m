@@ -583,7 +583,11 @@ varargout{1} = App;
             if isfield(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName),'Lights')
                 LightPlace = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).Lights.Rate ;
                 LightPlace = convert2double(LightPlace) ;    
+            else
+                LightPlace = 0 ;
             end
+        else
+            LightPlace = 0 ;
         end
         if isa(clLight,'cell')
             clLight = clLight{1} ;
