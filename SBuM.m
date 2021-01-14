@@ -607,7 +607,10 @@ function gui = createInterface()
             uimenu( gui.FileMenu, 'Label', 'Copy', 'Callback', @onEdit);
             uimenu( gui.FileMenu, 'Label', 'Delete', 'Callback', @onEdit);
             uimenu( gui.FileMenu, 'Label', 'Import', 'Callback', @onEdit);
-        
+            Randomcrea = uimenu('Parent',gui.FileMenu,'Label','Generate');
+                    uimenu('Parent',Randomcrea, 'Label', 'Random generation for all houses',...
+                        'Callback', {@ContextMenuResponse},...
+                        'Tag','RandAll');
         % + View menu
         gui.ViewMenu = uimenu( gui.Window, 'Label', 'View' );
         displayssubmenu = uimenu( gui.ViewMenu, 'Label', 'Display');
@@ -628,7 +631,7 @@ function gui = createInterface()
         
         % + Tools menu
         helpMenu = uimenu( gui.Window, 'Label', 'Tools' );
-        uimenu( helpMenu, 'Label', 'Preferences', 'Callback', @onTools );
+        uimenu( helpMenu, 'Label', 'Preferences', 'Callback', @onTools, 'Accelerator','P' );
         
         % + Help menu
         helpMenu = uimenu( gui.Window, 'Label', 'Help' );
