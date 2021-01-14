@@ -337,8 +337,9 @@ for iload = 1:length(loads)
     distxrand   = distx(randperm(length(distx)));
     if length(distxrand) > simulation_size
         xstop = 1 ; % Shrink the array to the same size
+        prob.(countwithdrawal) = distxrand(1:simulation_size) ;
     else
-        temparr                                 = repmat(distxrand,ceil(simulation_size / length(distxrand)),1) ;
+        temparr = repmat(distxrand,ceil(simulation_size / length(distxrand)),1) ;
         prob.(countwithdrawal) = temparr(1:simulation_size) ;
         % ratio is used to have the right mean otherwise the SL components
         % is incorrect as the gaussian distribution is truncated.

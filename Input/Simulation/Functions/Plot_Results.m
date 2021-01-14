@@ -212,6 +212,20 @@ function [nbr_applinces, Action_Resume, Avg_Week, time_per_cycle, Daily_Profile_
     % Allocate Variable Size Appliance_Max
     Houseused = fieldnames(Input_Data.Input_Data) ;
     AppMax = 0;
+    % Myinput1info
+    in1_info = whos('MyInput1') ;
+    
+    if in1_info.bytes < 50000000
+        % if the size od the Smart_House_Data_MatLab.mat is below 50Mb then
+        % it is a distribution file and there are limited data associated
+        % to it.
+        Emissionstartdate = datenum(2012,1,1) ;
+        Fingridstartdate  = datenum(2012,1,1) ;
+    else
+        Emissionstartdate = datenum(2000,1,1) ;
+        Fingridstartdate  = datenum(2004,1,1) ;
+    end
+    
     for i = 1:numel(Houseused)
         AppMax = max(AppMax,str2double(Input_Data.Input_Data.(Houseused{i}).Appliance_Max)) ;  
     end
@@ -268,7 +282,7 @@ function [nbr_applinces, Action_Resume, Avg_Week, time_per_cycle, Daily_Profile_
                 
                 
                 [HourlyEmissions, HourlyEmissions_Time] = Test_Database_extract_Extrapolate(MyInput1.Hourly_CO2_ReCiPe, ...
-                                                          datenum(2000,1,1),...
+                                                          Emissionstartdate,...
                                                           'Hourly',...
                                                           Time_Step, ...
                                                           Date_Sim(1,Housenumber), ...
@@ -304,7 +318,8 @@ function [nbr_applinces, Action_Resume, Avg_Week, time_per_cycle, Daily_Profile_
             Em_End2 = Em_End2 + Em_Start2;
         end
         % END OF JARI'S ADDITION  
-        [~, Hourly_Fingrid] = Test_Database_extract_Extrapolate(MyInput1.Hourly_Fingrid,datenum(2004,1,1),...
+        [~, Hourly_Fingrid] = Test_Database_extract_Extrapolate(MyInput1.Hourly_Fingrid,...
+                                                          Fingridstartdate,...
                                                           'Hourly',...
                                                           Time_Step, ...
                                                           Date_Sim(1,Housenumber), ...

@@ -381,7 +381,7 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
         Array_InSolar       = EPW_Var.Global_Horizontal_Radiation        ;
         ResIniSolar         = 'Hourly'                                   ;
         ArrayStartYearSolar = datenum(SimDate.Year,EPWDate(1).Month, EPWDate(1).Day)                           ;
-        
+                
         if leapyear(SimDate.Year)
             Array_InTemp = [Array_InTemp(1:1416,:) ;...
                                                          Array_InTemp(1393:1416,:) ;...
@@ -394,6 +394,15 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
         ResIniPrice         = 'Hourly'                                   ;
         Array_InPrice       = Default_Var.Hourly_Real_Time_Pricing       ;
         ArrayStartYearPrice = datenum(2004,1,1)                          ;
+        
+        ResIniEmissions     = 'Hourly'     ;
+        Array_InEmissions       = Default_Var.EmissionFactorNetto ; % This integrates the import and export from the country
+        
+        if Public == 1
+            ArrayStartYearEmissions  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearEmissions  = datenum(2011,1,1) ; %2000
+        end
         
     elseif strcmp(data.WeatherSelection,'Default')    
         
@@ -421,6 +430,15 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
             ArrayStartYearPrice  = datenum(2012,1,1) ; %2000
         else
             ArrayStartYearPrice  = datenum(2004,1,1) ; %2000
+        end
+        
+        ResIniEmissions     = 'Hourly'     ;
+        Array_InEmissions       = Default_Var.EmissionFactorNetto ; % This integrates the import and export from the country
+        
+        if Public == 1
+            ArrayStartYearEmissions  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearEmissions  = datenum(2011,1,1) ; %2000
         end
         
     elseif strcmp(data.WeatherSelection,'Individual')
@@ -522,8 +540,17 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
     ReplicTemp          = 'Interpolate' ;
     ReplicSolar         = 'Interpolate' ;
     ReplicPrice         = 'Replicate'  ;
+    ReplicEmissions     = 'Replicate'  ;
+    
     % Sizing the temperature array for the simulation
-    [Hourly_Temperature, Hourly_TemperatureTimed, ~] = Test_Database_extract_Extrapolate(Array_InTemp,ArrayStartYearTemp,ResIniTemp,ResFinal, SimulationStart, SimulationEnd, ReplicTemp, 'DataOutput') ;
+    [Hourly_Temperature, Hourly_TemperatureTimed, ~] = Test_Database_extract_Extrapolate(Array_InTemp,...
+                                                                                         ArrayStartYearTemp,...
+                                                                                         ResIniTemp,...
+                                                                                         ResFinal,...
+                                                                                         SimulationStart,...
+                                                                                         SimulationEnd,...
+                                                                                         ReplicTemp,...
+                                                                                         'DataOutput') ;
     
     switch ResIniTemp
         case 'Hourly'
@@ -573,6 +600,19 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
                                                                                                       SimulationEnd,...
                                                                                                       ReplicPrice,...
                                                                                                       'DataOutput') ;
+    % Sizing the Radiation array for the simulation
+    [Hourly_Emissions, Hourly_EmissionsTimed, ~] = Test_Database_extract_Extrapolate(Array_InEmissions,...
+                                                                                                 ArrayStartYearEmissions,...
+                                                                                                 ResIniEmissions,...
+                                                                                                 ResFinal,...
+                                                                                                 SimulationStart,...
+                                                                                                 SimulationEnd,...
+                                                                                                 ReplicEmissions,...
+                                                                                                 {'CC' 'OD' 'TA' 'FEut' 'MEut' 'HT' 'POF' 'PMF' 'TEco' 'FEco' 'MEco' 'IR' 'ALO' 'ULO' 'NLT' 'WD' 'MD' 'FD'}) ;
+    All_Var.Hourly_Emissions  = Hourly_Emissions(1:(end-1),:) ;
+    All_Var.Hourly_EmissionsTimed = Hourly_EmissionsTimed ;
+                                                                                                  
+
     if errormess.trigger
         AddText = errormess.text ;
         addLineSim(hObject,data,AddText)                                                                                              
@@ -633,7 +673,7 @@ end
 % Pre-Allocate the array for creating the output --> make a separate
 % function
 
-    Emissions_Houses        = zeros(Nbr_Building, maxnbrstep + 1);
+%     Emissions_Houses        = zeros(Nbr_Building, maxnbrstep + 1);
 %     ExcelImport = 2;
 % if ExcelImport == 1    
 %     cell2csv2(strcat(SimDetails.Output_Folder,filesep,SimDetails.Project_ID,filesep,'Input_House.csv'),Input_Data(2:end,2:end),',');
@@ -926,6 +966,8 @@ if Time_Sim.Series_Sim == 1
             toc
         end
         
+        % Calculate the emissions per appliance and total and 
+        
 %         [Cont, ~, ~, ~]     = ReAssignHousev2(ContLoop,ContLoop,HouseInfo.Headers, xq, data.AppliancesList(:,3))         ;
 %         [Time_Sim, ~, ~, ~] = ReAssignHousev2(Time_SimLoop,Time_SimLoop,HouseInfo.Headers, xq, data.AppliancesList(:,3))         ;
         % WeatherData = table(x,Input.DataSim,'VariableNames',{'Time','DataOutput'}) ;
@@ -938,6 +980,9 @@ if Time_Sim.Series_Sim == 1
         Occupancy.(HouseInfo.Headers) = array2timetable(Occupancy1','Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'DataOutput'},'StartTime',stime) ; %table(xq,Occupancy1','VariableNames',{'Time','DataOutput'}) ;
         Price.(HouseInfo.Headers) = array2timetable(Price1','Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'DataOutput'},'StartTime',stime) ; %table(xq,Price1','VariableNames',{'Time','DataOutput'}) ;
         NewVar1 = AppOut.(HouseInfo.Headers).NewVar1 ;
+        
+        Emissions_Houses.(HouseInfo.Headers).EmissionsArray=emiCalc(AppOut, HouseInfo, All_Var, Cons_Tot) ;
+        
         s = {'Building Number',' ', num2str(BuildSim),' out of ',' ',num2str(Nbr_Building),' Completed'};
         AddText = [s{:}];
         addLineSim(hObject,data,AddText)
