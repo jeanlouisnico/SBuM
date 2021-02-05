@@ -337,29 +337,7 @@ function chap = BuildChapters(chap,HousesData,VarReport)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                   
     ChapterAppliances = BuildSection('Appliances') ;
         section1 = BuildSection('Kitchen',...
-                                'CheckVariables',{'WashMach' 'clWashMach' 
-                                                  'DishWash' 'clDishWash'    
-                                                  'Elec'     ''
-                                                  'Kettle'   'clKettle'
-                                                  'Oven'     'clOven'
-                                                  'Coffee'   'clCoffee'
-                                                  'MW'       'clMW'     
-                                                  'Toas'     'clToas'
-                                                  'Waff'     'clWaff'
-                                                  'Fridge'   'clFridge'
-                                                  'Tele'     'clTele'
-                                                  'Laptop'   'clLaptop'
-                                                  'Shaver'   'clShaver'
-                                                  'Hair'     'clHair'
-                                                  'Stereo'   'clStereo'
-                                                  'Vacuum'   'clVacuum'
-                                                  'Charger'  'clCharger'
-                                                  'Iron'     'clIron'
-                                                  'Elecheat' ''
-                                                  'Sauna'    ''
-                                                  'Radio'    'clRadio'  
-                                                  ''         'clLight'  
-                                                  },...
+                                'CheckVariables',{'Appliances'},...
                                  HousesData) ;
         ChapterAppliances = CompileChapter(ChapterAppliances,section1) ; 
     
@@ -701,17 +679,17 @@ function [Table,Text] = TableVar(LoopVariable,HousesData,VarReport)
                     Var2Look = LoopVariable{VarVal,2} ;
                 end
             end
-            if sum(strcmp(AppliancesList,Var2Look))
+            if any(strcmp('Appliances',Var2Look))
                 % This means that this is an appliance. 1 Exception has to be made for the lighting system                
-                Apprun = find(strcmp(AppliancesList,Var2Look)==1) ;
-                ApprunCat = AppliancesListCat{Apprun} ; 
-                if ~isempty(ApprunCat)
-                    AllCategories = DataHouse.(ApprunCat) ;
-                else
-                    AllCategories = '' ;
-                end
+%                 Apprun = find(strcmp(AppliancesList,Var2Look)==1) ;
+%                 ApprunCat = AppliancesListCat{Apprun} ; 
+%                 if ~isempty(ApprunCat)
+%                     AllCategories = DataHouse.(ApprunCat) ;
+%                 else
+%                     AllCategories = '' ;
+%                 end
                 App = 1 ;
-            elseif sum(strcmp(AppliancesListCat,Var2Look))
+            elseif any(strcmp(AppliancesListCat,Var2Look))
                 if strcmp(Var2Look,'clLight')
                     App = 1 ;
                 else
@@ -720,6 +698,20 @@ function [Table,Text] = TableVar(LoopVariable,HousesData,VarReport)
             end
             
         % Look for the default value in the varname
+        if App == 1
+               uniqueelem = unique(fieldnames(DataHouse.(Var2Look))) ;
+               VariableSize2 = numel(uniqueelem) ;
+               VarDefault = VariableSize2;
+               for icell = 1:VariableSize2
+                   String1 = uniqueelem{icell} ;
+                   Appname = DataHouse.(Var2Look).(String1).SN ;
+                   ID{icell}      = Appname ;
+                   Name{icell}    = HousesData.varname.(Appname).LongName ;
+                   Class{icell}   = DataHouse.(Var2Look).(String1).Class ;
+                   Value{icell}   = DataHouse.(Var2Look).(String1).Qty ;
+                   Defined{icell} = 'User defined' ;
+               end
+        else
             VariableSize = size(DataHouse.(Var2Look),1) ;
             defVal = HousesData.varname.(Var2Look).Defaultvalue;
             %%%%% Compare the default value with the input value
@@ -738,40 +730,40 @@ function [Table,Text] = TableVar(LoopVariable,HousesData,VarReport)
                 VarUD = VarUD + 1;
                 VarUD_Display = VarUD_Display + 1;
             end
-            
+        end
             % If it is an appliance, create a different table
             if App == 1
-                if isa(AllCategories,'char')
-                    AllCategories = {AllCategories} ;
-                end
-               uniqueelem = unique(AllCategories) ;
-               VariableSize2 = numel(uniqueelem) ;
-               for icell = 1:VariableSize2
-                   String1 = uniqueelem{icell} ;
-                   Quantity = sum(strcmp(String1,AllCategories)) ;
-                   Quantity2 = DataHouse.(Var2Look) ;
-                   if Quantity > 0
-                        if icell > 1
-                           ID{end + 1}      = '';
-                           Name{end + 1}    = '';
-                           Class{end + 1}   = String1 ;
-                           Value{end + 1}   = Quantity ;
-                           Defined{end + 1} = 'User defined' ;
-                        elseif ~strcmp(Quantity2,'0')
-                           ID{end + 1}      = Var2Look ;
-                           Name{end + 1}    = HousesData.varname.(Var2Look).LongName;
-                           Class{end + 1}   = String1 ;
-                           Value{end + 1}   = Quantity ;
-                           Defined{end + 1} = 'User defined' ;
-                        else
-                           ID{end + 1} = Var2Look;
-                           Name{end + 1} = HousesData.varname.(Var2Look).LongName ;
-                           Class{end + 1} = '' ;
-                           Value{end + 1}   = Quantity ;
-                           Defined{end + 1} = 'Default Value' ;
-                        end
-                   end
-               end
+%                 if isa(AllCategories,'char')
+%                     AllCategories = {AllCategories} ;
+%                 end
+%                uniqueelem = unique(fieldnames(DataHouse.(Var2Look))) ;
+%                VariableSize2 = numel(uniqueelem) ;
+%                for icell = 1:VariableSize2
+%                    String1 = uniqueelem{icell} ;
+%                    Quantity = sum(strcmp(String1,AllCategories)) ;
+%                    Quantity2 = DataHouse.(Var2Look) ;
+%                    if Quantity > 0
+%                         if icell > 1
+%                            ID{end + 1}      = '';
+%                            Name{end + 1}    = '';
+%                            Class{end + 1}   = String1 ;
+%                            Value{end + 1}   = Quantity ;
+%                            Defined{end + 1} = 'User defined' ;
+%                         elseif ~strcmp(Quantity2,'0')
+%                            ID{end + 1}      = Var2Look ;
+%                            Name{end + 1}    = HousesData.varname.(Var2Look).LongName;
+%                            Class{end + 1}   = String1 ;
+%                            Value{end + 1}   = Quantity ;
+%                            Defined{end + 1} = 'User defined' ;
+%                         else
+%                            ID{end + 1} = Var2Look;
+%                            Name{end + 1} = HousesData.varname.(Var2Look).LongName ;
+%                            Class{end + 1} = '' ;
+%                            Value{end + 1}   = Quantity ;
+%                            Defined{end + 1} = 'Default Value' ;
+%                         end
+%                    end
+%                end
             else
                 ID{VarUD} = Var2Look ;
                 Name{VarUD} = HousesData.varname.(Var2Look).LongName;
