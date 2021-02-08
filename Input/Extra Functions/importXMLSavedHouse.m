@@ -50,62 +50,85 @@ for i = 1:length(AllElements)
 end
 
     function dataout = unloadstruct(ElementContent, AppList, datain, VarName, HouseNbr2Input, VarNameHouse)
-        if isfield(ElementContent,'CONTENT')
+        if strcmp(VarName, 'Appliances')
+            GetallFields    = fieldnames(ElementContent) ;
+            for mm = 2:numel(GetallFields)
+                switch GetallFields{mm}
+                    case {'CONTENT','ATTRIBUTE'}
+                        % Do nothing
+                    otherwise
+                        ElementContentName = ElementContent.(GetallFields{mm}) ;
+                        if ~isempty(ElementContentName)
+                            dataout.(VarName).(GetallFields{mm}) = ElementContentName;
+                        end
+                end
+            end
+            try
+                % Check if the variable was assigned
+                dataout.(VarName) ;
+            catch
+                % If not assign an empty struct to it
+                dataout.(VarName) = struct ;
+            end
+        elseif isfield(ElementContent,'CONTENT')
             % This is the last layer and we can start dispatching the
             % result.
             GetallInfo      = ElementContent.ATTRIBUTE;
             GetallFields    = fieldnames(GetallInfo) ;
-            
-            for mm = 2:numel(GetallFields)
-                Field2retrieve = GetallFields{mm} ;
-                Value2Input = GetallInfo.(Field2retrieve) ;
+            if numel(GetallFields) > 1
+                for mm = 2:numel(GetallFields)
+                    Field2retrieve = GetallFields{mm} ;
+                    Value2Input = GetallInfo.(Field2retrieve) ;
 
-                if numel(GetallFields) > 2 || sum(strcmp(VarName, AppList(:,3))) >= 1
-                    % In this case, store each variable as a
-                    % cell
-                    if isnumeric(Value2Input)
-                        Value2Input = num2str(Value2Input) ;
-                    end
-                    if any(strcmp(VarName,AppList(:,4)))
-                        % This means that this is a class
-                        % variable
-                        % Get the appliance variable name
-                        AppLoc = find(strcmp(VarName, AppList(:,4))==1) ;
-                        AppName  = AppList{AppLoc,3} ;
+                    if numel(GetallFields) > 2 || sum(strcmp(VarName, AppList(:,3))) >= 1
+                        % In this case, store each variable as a
+                        % cell
+                        if isnumeric(Value2Input)
+                            Value2Input = num2str(Value2Input) ;
+                        end
+                        if any(strcmp(VarName,AppList(:,4)))
+                            % This means that this is a class
+                            % variable
+                            % Get the appliance variable name
+                            AppLoc = find(strcmp(VarName, AppList(:,4))==1) ;
+                            AppName  = AppList{AppLoc,3} ;
 
-                        if isempty(AppName)
-                            % This means that this is the
-                            % lighting system
-                            % In this case, do nothing
+                            if isempty(AppName)
+                                % This means that this is the
+                                % lighting system
+                                % In this case, do nothing
+                            else
+                                InfoApp = datain.(AppName) ;
+                            end
+                            if mm > (1 + numel(InfoApp))
+                                continue
+                            end
                         else
-                            InfoApp = datain.(AppName) ;
+                            %This means that this is a appliance
+                            %variable name 
+                            if mm > 2 && strcmp(Value2Input,'0')
+                                continue
+                            end
                         end
-                        if mm > (1 + numel(InfoApp))
-                            continue
-                        end
+
+                        dataout.(VarName)(mm-1) = {Value2Input} ;
+                    elseif strcmp(VarName,'HouseNbr')
+                        % Only this variable is stroed as a double
+                        dataout.(VarName) = HouseNbr2Input ;
+                    elseif strcmp(VarName,'Headers')
+                        % Only this variable is stroed as a double
+                        dataout.(VarName) = VarNameHouse ;
                     else
-                        %This means that this is a appliance
-                        %variable name 
-                        if mm > 2 && strcmp(Value2Input,'0')
-                            continue
+                        % In this case, store each variable as a
+                        % string
+                        if isnumeric(Value2Input)
+                            Value2Input = num2str(Value2Input) ;
                         end
+                        dataout.(VarName) = Value2Input ;
                     end
-                    
-                    dataout.(VarName)(mm-1) = {Value2Input} ;
-                elseif strcmp(VarName,'HouseNbr')
-                    % Only this variable is stroed as a double
-                    dataout.(VarName) = HouseNbr2Input ;
-                elseif strcmp(VarName,'Headers')
-                    % Only this variable is stroed as a double
-                    dataout.(VarName) = VarNameHouse ;
-                else
-                    % In this case, store each variable as a
-                    % string
-                    if isnumeric(Value2Input)
-                        Value2Input = num2str(Value2Input) ;
-                    end
-                    dataout.(VarName) = Value2Input ;
                 end
+            else
+                dataout.(VarName) = '' ;
             end
         else
             if isa(ElementContent, 'struct')
