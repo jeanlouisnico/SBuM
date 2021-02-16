@@ -50,6 +50,7 @@ ErrorList = {};
                                        VarVal  = DTField.HighLimit             ;
                                    else
                                        VarSize = 'defined accordingly' ;
+                                       VarVal  = DTField.LowLimit              ;
                                    end
                                    Errormessage(end+1) = strcat({'The input data should should be'},space,{VarSize},space,{num2str(VarVal)});
                                end

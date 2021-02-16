@@ -16,7 +16,7 @@
 % where hourly selling (Sp) and purchasing (Pp) price is available at the network level. Data
 % are handled by Fingrid. To evaluate what would be the potential hourly price at the dwelling level, historical data
 % about the electricity price (DHpm) have been used (EMV, 2012) by distinguishing the
-% building type. Ten different building architectures are defined where three ï¿½single houseï¿½
+% building type. Ten different building architectures are defined where three ï¿½ï¿½ï¿½single houseï¿½ï¿½ï¿½
 % categories are differentiated. Equations ... and ... are used to link the market price and
 % the electricity price at the building level to draw an hourly vector of electricity price for
 % purchasing and selling. 
@@ -27,11 +27,11 @@
 %%%
 % $$S_{DH}=DH_{pm}\cdot \frac{Max(10,\, S_{p})}{\overline{S}_{pm}}$$
 %%%
-% Where, PDH is the hourly electricity purchase price of a detached house [ï¿½ cent/kWh], Ppm
-% is the mean monthly purchasing price at the network level [ï¿½/MWh], Pp is the hourly purchasing
-% price at the network level [ï¿½/MWh], DHpm is the monthly purchasing price at the
-% building level [ï¿½ cent/kWh]. The constant 10 is added for setting the minimum purchase
-% price at 10 ï¿½/MWh because the data contain negative values for some hours, meaning that
+% Where, PDH is the hourly electricity purchase price of a detached house [ï¿½ï¿½ï¿½ cent/kWh], Ppm
+% is the mean monthly purchasing price at the network level [ï¿½ï¿½ï¿½/MWh], Pp is the hourly purchasing
+% price at the network level [ï¿½ï¿½ï¿½/MWh], DHpm is the monthly purchasing price at the
+% building level [ï¿½ï¿½ï¿½ cent/kWh]. The constant 10 is added for setting the minimum purchase
+% price at 10 ï¿½ï¿½ï¿½/MWh because the data contain negative values for some hours, meaning that
 % people were paid to use electricity.
 %%%
 % This method allows calculating a purchasing price for every hour, based on the historical
@@ -81,11 +81,11 @@ Diff = (timeyear - 2000) * 12 + timemonth       ;
             case 2
                 ColPrice = 1;
         end
-    % Tax on energy ~2.5 ï¿½cts/kWh
+    % Tax on energy ~2.5 ï¿½ï¿½ï¿½cts/kWh
     Distribution_IncTax_Fix   = Price_Tax(Diff,ColPrice);
     % Fixe energy tax ~24 %
     Energy_Tax_VAT   = Price_Tax(Diff,7);
-    % Variable Energy Tax ~2 ï¿½cts/kWh
+    % Variable Energy Tax ~2 ï¿½ï¿½ï¿½cts/kWh
     Energy_Tax_Var   = Price_Tax(Diff,8);
 if strcmp(ContElec,'Varmavirta') || strcmp(ContElec,'Vihrevirta') || strcmp(ContElec,'Tuulivirta')
 %% Contracts
@@ -93,10 +93,10 @@ if strcmp(ContElec,'Varmavirta') || strcmp(ContElec,'Vihrevirta') || strcmp(Cont
 % electricity price within the price table. The price table is available
 % hereafter.
     switch Contracts
-        case 'Fixed price'
+        case 'Fixed Tariff'
             ToUTariff = 0;
             FixedTariff = 1;
-        case 'Time of Use'
+        case 'ToU Tariff'
             ToUTariff = 1;
             FixedTariff = 0;
     end
@@ -111,14 +111,14 @@ if strcmp(ContElec,'Varmavirta') || strcmp(ContElec,'Vihrevirta') || strcmp(Cont
         Price_Vector = zeros(48/Time_Sim.stepreal,1) ;
         if timehour >= 18
             for varprice = (timehour - 18):Time_Sim.stepreal:(timehour + 30)
-                [varseason, varweekday, varhour] = Forecaste_Timeslot(Time_Sim, varprice, BuildSim) ;
+                [varseason, varweekday, varhour] = Forecaste_Timeslot(Time_Sim, varprice, Input_Data) ;
                 Tableoption = [varseason,varweekday,varhour]';
                 Price_Vector(varp) = Season_Price_Variation(Tableoption, ContElec, timeyear, Energy_Tax_VAT, Distribution_IncTax_Fix, Energy_Tax_Var) ;
                 varp = varp + 1;
             end
         else
             for varprice = (-(timehour + 6)):Time_Sim.stepreal:(42 - timehour)
-                [varseason, varweekday, varhour] = Forecaste_Timeslot(Time_Sim, varprice, BuildSim) ;
+                [varseason, varweekday, varhour] = Forecaste_Timeslot(Time_Sim, varprice, Input_Data) ;
                 Tableoption = [varseason,varweekday,varhour]';
                 Price_Vector(varp) = Season_Price_Variation(Tableoption, ContElec, timeyear, Energy_Tax_VAT, Distribution_IncTax_Fix, Energy_Tax_Var) ;
                 varp = varp + 1;
@@ -163,7 +163,7 @@ else
         High_Price = inf ;
     end
     Limitation_Low = Low_Price ; % Oulun energia doesn't has low limitation
-    Limitation_High = High_Price ; % OE uses 8.6 cts€ as a limit
+    Limitation_High = High_Price ; % OE uses 8.6 ctsï¿½ as a limit
     %%%
     if Limitation_High == inf
         MonthlyFee = 0 ;

@@ -236,7 +236,7 @@ end
 % In case the solution with the fix priceing is used or the ToU is used,
 % the selection for the cheapest hour is chosen.
 if ~(strcmp(ContElec,'Real-time pricing'))
-    if EnergyOuput.Season == 1
+    if EnergyOuput.Season.(Input_Data.Headers)(myiter + 1) == 1
         High_Price_List = [7.21, 7.36, 7.01]';
     else
         High_Price_List = [6.86, 7.01, 7.16]';
