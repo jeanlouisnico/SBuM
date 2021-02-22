@@ -27,11 +27,20 @@ AllElements = fieldnames(tree) ;
 
 for i = 1:length(AllElements)
     for ik = 1:size(tree.Element, 1)
-        ElementName     = tree.Element(ik).CONTENT      ;
-        ElementContent  = tree.Element(ik).subElement   ; %Struct array
+        if ik == size(tree.Element, 1)
+            x=1;
+        end
+        if isa( tree.Element(ik), 'cell')
+            ElementName     = tree.Element{ik}.CONTENT      ;
+            ElementContent  = tree.Element{ik}.subElement   ; %Struct array
+        else
+            ElementName     = tree.Element(ik).CONTENT      ;
+            ElementContent  = tree.Element(ik).subElement   ; %Struct array
+        end
+        
 
         for iHouse = 1:numel(ElementContent)
-            if ik == 103
+            if ik == 104
                 x = 1;
             end
             HouseNbr2Input  = iHouse + HouseNbr ;   
@@ -51,7 +60,8 @@ end
 
     function dataout = unloadstruct(ElementContent, AppList, datain, VarName, HouseNbr2Input, VarNameHouse)
         if strcmp(VarName, 'Appliances')
-            GetallFields    = fieldnames(ElementContent) ;
+            ElementContent  = orderfields(ElementContent) ;
+            GetallFields    = fieldnames(ElementContent)  ;
             for mm = 2:numel(GetallFields)
                 switch GetallFields{mm}
                     case {'CONTENT','ATTRIBUTE'}

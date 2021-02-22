@@ -5787,24 +5787,31 @@ end  % mouseMovedCallback
                    msgbox('No house to be saved','Information','help');
                    return;
                end
-               Eachfield = fieldnames(AllData.(Housenumber{1}));
-               for i = 1:numel(Eachfield)
-                   MaxValue = 1;
-                   for ii = 1:numel(Housenumber)
-                       if ~isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')
-                           if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'cell')
-                                MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;
+               
+               for ii = 1:numel(Housenumber)
+                   Eachfield = fieldnames(AllData.(Housenumber{ii}));
+                   for i = 1:numel(Eachfield)
+                       MaxValue = 1;
+                       try
+                           if ~isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')
+                               if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'cell')
+                                    MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;
+                               end
+                           else                 % Jari's addition
+                               if any(strcmp(Eachfield{i},data.AppliancesList(:,3)) == 1) || any(strcmp((Eachfield{i}),data.AppliancesList(:,4))==1)    % J
+                                   if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')                                                              % J 
+                                       % If value for appliance is a char
+                                       % change it to a cell! J
+                                       AllData.(Housenumber{ii}).(Eachfield{i}) = {AllData.(Housenumber{ii}).(Eachfield{i})};                           % J
+                                       % Assign same char value in to the cell.
+                                       MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;                                      % J
+                                   end                                                                                                                  % J
+                               end                                                                                                                      % J
                            end
-                       else                 % Jari's addition
-                           if any(strcmp(Eachfield{i},data.AppliancesList(:,3)) == 1) || any(strcmp((Eachfield{i}),data.AppliancesList(:,4))==1)    % J
-                               if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')                                                              % J 
-                                   % If value for appliance is a char
-                                   % change it to a cell! J
-                                   AllData.(Housenumber{ii}).(Eachfield{i}) = {AllData.(Housenumber{ii}).(Eachfield{i})};                           % J
-                                   % Assign same char value in to the cell.
-                                   MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;                                      % J
-                               end                                                                                                                  % J
-                           end                                                                                                                      % J
+                       catch
+                           % If there is an error then skip the field and
+                           % go to the next field
+                           continue;
                        end
                    end
                    % Restructure the variable for saving it
@@ -5815,24 +5822,30 @@ end  % mouseMovedCallback
                    data.Simulationdata.(Housenumber{i}) = AllData.(Housenumber{i}) ;
                    % Restructure the variable for saving it
                    for ii = 1:numel(Eachfield)
-                       % Restructure the variable for saving it
-                       if strcmp(Eachfield{ii},'Charger')
-                           x = 1;
-                       end
-                       if isa(AllData.(Housenumber{i}).(Eachfield{ii}),'cell')
-                           MaxApp = 0 ;
-                           for jjHouse = 1:numel(Housenumber)
-                               MaxApp = max(MaxApp,size(AllData.(Housenumber{jjHouse}).(Eachfield{ii}),2)) ;
+                       try
+                           % Restructure the variable for saving it
+                           if strcmp(Eachfield{ii},'Charger')
+                               x = 1;
                            end
-                           for ij = 1:MaxApp
-                               if ij <= size(AllData.(Housenumber{i}).(Eachfield{ii}),2)
-                                    s.(Eachfield{ii}){i,ij} = AllData.(Housenumber{i}).(Eachfield{ii}){1,ij};
-                               else
-                                    s.(Eachfield{ii}){i,ij} = '0' ;
+                           if isa(AllData.(Housenumber{i}).(Eachfield{ii}),'cell')
+                               MaxApp = 0 ;
+                               for jjHouse = 1:numel(Housenumber)
+                                   MaxApp = max(MaxApp,size(AllData.(Housenumber{jjHouse}).(Eachfield{ii}),2)) ;
                                end
+                               for ij = 1:MaxApp
+                                   if ij <= size(AllData.(Housenumber{i}).(Eachfield{ii}),2)
+                                        s.(Eachfield{ii}){i,ij} = AllData.(Housenumber{i}).(Eachfield{ii}){1,ij};
+                                   else
+                                        s.(Eachfield{ii}){i,ij} = '0' ;
+                                   end
+                               end
+                           else
+                               s.(Eachfield{ii}){i,1} = AllData.(Housenumber{i}).(Eachfield{ii});
                            end
-                       else
-                           s.(Eachfield{ii}){i,1} = AllData.(Housenumber{i}).(Eachfield{ii});
+                       catch
+                           % If there is an error then skip the field and
+                           % go to the next field
+                           continue;
                        end
                    end
                end

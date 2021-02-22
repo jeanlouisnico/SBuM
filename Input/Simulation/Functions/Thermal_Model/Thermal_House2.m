@@ -197,10 +197,10 @@ function [Thermal_Model, Input_Data] = Thermal_House2(Input_Data, Time_Sim, All_
     % recalculated automatically for the next day. The update time can be set
     % up.
 
-    % Distribution_Cost                   = 0.028387; % Oulun Energia siirto ja jakelu, VAT is deducted from the price. Fixed contract. No annual price is added as it will be paid anyway. Price is in €/kWh.     % Add the distribution cost here. If ToU tariff is wanted, add a vector for the whole simulation time.
-    % Elec_Tax                            = 0.0279;   % Add the electricity taxes as €/kWh.
+    % Distribution_Cost                   = 0.028387; % Oulun Energia siirto ja jakelu, VAT is deducted from the price. Fixed contract. No annual price is added as it will be paid anyway. Price is in ï¿½/kWh.     % Add the distribution cost here. If ToU tariff is wanted, add a vector for the whole simulation time.
+    % Elec_Tax                            = 0.0279;   % Add the electricity taxes as ï¿½/kWh.
     % VAT                                 = 1.24;     % VAT for electricity and distribution is nowadays 24%, thus multiplying by 1.24
-    % Generation_distribution             = 0.0007;   % Distribution cost for the generated electricity which is sold to the grid. €/kWh
+    % Generation_distribution             = 0.0007;   % Distribution cost for the generated electricity which is sold to the grid. ï¿½/kWh
 
     Time_Step                           = Input_Data.Time_Step;
 
@@ -222,7 +222,7 @@ function [Thermal_Model, Input_Data] = Thermal_House2(Input_Data, Time_Sim, All_
 
     PV_CO2                              = str2double(Input_Data.PVEmissions) * (str2double(Input_Data.MaxPowerPV)/1000) * str2double(Input_Data.NbrmodTot); %1850 * 0.2 * Input_Data{27};            % CO2 emissions from the PV production (LCA). This value is by kgCO2eq./kWp. This is later trasferred to gCO2eq./kWh. Value is an estimation from (Laleman et al. 2011), and one panel is considered to be 200Wp, which is multiplied by the number of panels.
 
-    Battery_CO2                         = (str2double(Input_Data.BatteryEmissions) * BatteryCapacity * Nbr_batteries)/1000; % (18.3 * 14 * Nbr_batteries)/1000;            % CO2 emissions from the battery related electricity (LCA) in g of CO2 eq. per cycle (one battery has capacity of 14 kWh (Tesla 2018), average cycle life of 6000 with 80% Depth of Discharge and has 110 kg of CO2 eq. emissions per kWh of storage capacity) (Peters et al. 2017; Rydh and Sandén 2005)
+    Battery_CO2                         = (str2double(Input_Data.BatteryEmissions) * BatteryCapacity * Nbr_batteries)/1000; % (18.3 * 14 * Nbr_batteries)/1000;            % CO2 emissions from the battery related electricity (LCA) in g of CO2 eq. per cycle (one battery has capacity of 14 kWh (Tesla 2018), average cycle life of 6000 with 80% Depth of Discharge and has 110 kg of CO2 eq. emissions per kWh of storage capacity) (Peters et al. 2017; Rydh and Sandï¿½n 2005)
 
     % CHECK THE VALUE OF THE CO2 EMISSIONS ARE THEY IN kg OR g ????????????????????????????
 
@@ -2306,7 +2306,7 @@ end
 
                             % Calculate the heating scheme.
 
-                            [Heating_scheme]                = CostOptimizationHeating(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Solar_Heat_Gain_For1, Solar_Radiation_vertical_For1, Solar_Radiation_For, Temperatures_nodal);            
+                            [Heating_scheme]                = CostOptimizationHeating(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Solar_Heat_Gain_For1, Solar_Radiation_vertical_For1, Solar_Radiation_For, Temperatures_nodal, Time_Sim.MinperIter);            
 
                             Heating_scheme1(1:nPeriods)     = Heating_scheme;
                             Heater_Power                    = Heating_scheme(1);
@@ -2466,7 +2466,7 @@ end
                             end
                         elseif myiter+1 ~= Time_Sim.nbrstep.(Input_Data.Headers)           % Other than the last hour that do not include optimizing
                             Heating_scheme1                 = Thermal_Model.Heating.Heating_Scheme;
-                            [Heating_scheme]                = CostOptimizationHeating(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Solar_Heat_Gain_For1, Solar_Radiation_vertical_For1, Solar_Radiation_For, Temperatures_nodal);            
+                            [Heating_scheme]                = CostOptimizationHeating(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Solar_Heat_Gain_For1, Solar_Radiation_vertical_For1, Solar_Radiation_For, Temperatures_nodal, Time_Sim.MinperIter);            
                             if isempty(Heating_scheme) == 1 && mean(All_Var.Hourly_Temperature(myiter-nPeriods+1:myiter+1)) > 15
                                 Heating_scheme              = zeros(1,nPeriods);
                             elseif mean(All_Var.Hourly_Temperature(1+myiter-nPeriods+1:myiter+1)) > 15
@@ -2601,7 +2601,7 @@ end
                             else
                                 Dwelling_env_heat1 = Dwelling_env_heat;
                             end
-                            [Heating_scheme] = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset+myiter+nPeriods), Rounded_Hourly_temp_forecast_random(myiter+1:myiter+nPeriods), Dwelling_env_heat1, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1);            
+                            [Heating_scheme] = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset+myiter+nPeriods), Rounded_Hourly_temp_forecast_random(myiter+1:myiter+nPeriods), Dwelling_env_heat1, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Time_Sim.MinperIter);            
 
                             Heating_scheme1(1:nPeriods)     = Heating_scheme;
                             Heater_Power                    = Heating_scheme(mod(myiter+1/nPeriods));
@@ -2694,7 +2694,7 @@ end
                                 Dwelling_env_heat1 = Dwelling_env_heat;
                             end
 
-                            [Heating_scheme] = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset+myiter+nPeriods), Rounded_Hourly_temp_forecast_random(myiter+1:myiter+nPeriods), Dwelling_env_heat1, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1);            
+                            [Heating_scheme] = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset+myiter+nPeriods), Rounded_Hourly_temp_forecast_random(myiter+1:myiter+nPeriods), Dwelling_env_heat1, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, myiter+1, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Time_Sim.MinperIter);            
 
                             if isempty(Heating_scheme) == 1 && mean(All_Var.Hourly_Temperature(myiter-nPeriods+1:myiter+1)) > 15
                                 Heating_scheme              = zeros(1,nPeriods);
@@ -2771,7 +2771,7 @@ end
 
                             % Calculate the heating scheme.
 
-                            [Heating_scheme] = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, m, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1);            
+                            [Heating_scheme] = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, m, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Time_Sim.MinperIter);            
 
                             Heating_scheme1(1:nPeriods)     = Heating_scheme;
                             Heater_Power                    = Heating_scheme(1);
@@ -2983,7 +2983,7 @@ end
                             Heating_scheme1                 = Thermal_Model.Heating.Heating_Scheme(BuildSim,:);
                             Heat_Demand                     = (Total_Loss) * (Temp_inside - Temperature) + Loss_Ventil + Loss_floor * (Temp_inside - T_ground_hourly) - Internal_Heat_Gain;
                             RTP_forecast                    = RTP;
-                            [Heating_scheme]                = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, m, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1);            
+                            [Heating_scheme]                = CostOptimizationHeating(RTP_forecast(RTP_offset+myiter+1:RTP_offset + myiter + nPeriods), Rounded_Hourly_temp_forecast_random(Timeoffset + myiter + 1 : Timeoffset + myiter + nPeriods), Dwelling_env_heat, Thermal_time_constant, Total_Heat_capacity, Total_Loss, N0, House_Volume, T_inlet, T_ground_hourly, Loss_floor, Internal_Heat_Gain, m, Heat_recovery_ventil_annual, Temp_inside, lgte, lgts, nPeriods, LowerTempLimit1, UpperTempLimit1, Time_Sim.MinperIter);            
                             if isempty(Heating_scheme) == 1 && mean(All_Var.Hourly_Temperature(myiter-nPeriods+1:myiter+1)) > 15
                                 Heating_scheme              = zeros(1,nPeriods);
                             elseif mean(All_Var.Hourly_Temperature(myiter-nPeriods+1:myiter+1)) > 15

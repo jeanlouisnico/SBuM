@@ -112,7 +112,7 @@ if (nargin>1)
   if (isfield(Pref, 'Debug'    )), Debug           = Pref.Debug   ;  end
   if (isfield(Pref, 'PreserveSpace')), DPref.PreserveSpace = Pref.PreserveSpace; end
 end
-if ischar(DPref.Str2Num), % convert from character description to numbers
+if ischar(DPref.Str2Num) % convert from character description to numbers
   DPref.Str2Num = find(strcmpi(DPref.Str2Num, {'never', 'smart', 'always'}))-1;
   if isempty(DPref.Str2Num), DPref.Str2Num=1; end % 1-smart by default
 end

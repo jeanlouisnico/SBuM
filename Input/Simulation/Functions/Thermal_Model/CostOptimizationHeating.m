@@ -35,7 +35,7 @@ solar_heat_gain         = varargin{21};
 solar_radiation_vertical = varargin{22};
 solar_radiation         = varargin{23};
 Temperatures_nodal      = varargin{24};
-
+MinperIter              = varargin{25};
 Temperatures_nodal      = repmat(Temperatures_nodal',1,nPeriods);
 
 Temperature             = Weather_forecast(1:nPeriods)';      % Forecasted weather
@@ -101,10 +101,10 @@ for i = 1:nPeriods
 %     if i < nPeriods
         
             Heater_Power0                      = 0;
-            [T0, ~, To0, ~]               = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, N0, internal_heat_gain, solar_heat_gain(i), Heater_Power0, Temperature(i), T_ground_hourly(i), T_inlet(i), Temperatures_nodal(:,i), solar_radiation_vertical(i), solar_radiation(i));
+            [T0, ~, To0, ~]               = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, N0, internal_heat_gain, solar_heat_gain(i), Heater_Power0, Temperature(i), T_ground_hourly(i), T_inlet(i), Temperatures_nodal(:,i), solar_radiation_vertical(i), solar_radiation(i), MinperIter);
             T_inside0(i) = T0; 
 %             T_operative0(i) = To0;
-            [TMax, ~, ToMax, ~]             = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, N0, internal_heat_gain, solar_heat_gain(i), Dwelling_env_heat, Temperature(i), T_ground_hourly(i), T_inlet(i), Temperatures_nodal(:,i), solar_radiation_vertical(i), solar_radiation(i));
+            [TMax, ~, ToMax, ~]             = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, N0, internal_heat_gain, solar_heat_gain(i), Dwelling_env_heat, Temperature(i), T_ground_hourly(i), T_inlet(i), Temperatures_nodal(:,i), solar_radiation_vertical(i), solar_radiation(i), MinperIter);
             T_insideMax(i) = TMax; 
 %             T_operativeMax(i) = ToMax;
             

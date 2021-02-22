@@ -301,15 +301,22 @@ if Metering > 1
     % Cheap price delay - Long Time delay
     if ~(strcmp(ContElec, 'Real-time pricing'))
         switch Contracts
-            case 'Fixed price'
-                longdelay = 0;
-            case 'Time of Use'
+            case 'Fixed Tariff'
+                delayperiod = 0;
+            case 'ToU Tariff'
                 if and(timehour >= 7, timehour < 22)
-                    longdelay = Cont.Rand_HourStr.(Input_Data.Headers)(myiter + 1) - timehour;
+                    delayperiod = Cont.Rand_HourStr.(Input_Data.Headers)(myiter + 1) - timehour;
                 else
-                    longdelay = 0;
+                    delayperiod = 0;
                 end
         end
+        Endtime     = 7 ; % This is the morning time by which the night is officially finished
+                          % To be modified and modifiable from the
+                          % Front_End.m interface
+        Starttime   = 22 ; % This is the morning time by which the night is officially finished
+                          % To be modified and modifiable from the
+                          % Front_End.m interface 
+        Delay = CheapDelay(Starttime, Endtime, delayperiod, timehour, Time_Sim, Forecast) ;
     else
 %         if timehour >= 18
 %             Rowhour = timehour + 1;
@@ -428,6 +435,8 @@ function Delay = CheapDelay(Starttime, Endtime, delayperiod, timehour, Time_Sim,
         
         if EndLine > size(Forecast,1)
             EndLine = size(Forecast,1) ;
+        elseif EndLine == 0
+            EndLine = 1 ;
         end
         
         if and(timehour >= Endtime, timehour < Starttime)

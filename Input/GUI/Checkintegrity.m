@@ -21,7 +21,17 @@ ErrorList = {};
            for ii = 1:numel(Eachfield)
                % Get the data type
                DTField = datastructure.(Eachfield{ii}) ;
-               if isfield(simuldata.(Housenumber{i}), Eachfield{ii})
+               if contains(DTField.LongName,'Class')
+                   continue; % By pass checking all the fields of class that are from the previous version of the model.
+               end
+               try
+                  if contains(DTField.ClassName,'cl')
+                       continue; % By pass checking all the fields of class that are from the previous version of the model.
+                  end 
+               catch
+                   % Nothing happens, just continues
+               end
+                   if isfield(simuldata.(Housenumber{i}), Eachfield{ii})
                    if ~strcmp(Eachfield{ii},'Appliances')
                        DatatoCheck = simuldata.(Housenumber{i}).(Eachfield{ii}) ;
         %                if strcmp(Eachfield{ii},'ContElec')
