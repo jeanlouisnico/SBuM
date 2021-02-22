@@ -6334,6 +6334,9 @@ end  % mouseMovedCallback
                       return;
                 end
                 data.Simulationdata = Simulationdata ;
+                if ~isfield(data,'ProfileUserdistri')
+                    profileupdate('Update Sim') ;
+                end
                 Launch_Sim(gui.OutputFolEdit.String,gui.NameSimEdit.String,data,gui.SimLogWindow)
             case 'Cancel'
                 delete(gui.runWindow)
