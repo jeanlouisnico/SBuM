@@ -6354,12 +6354,26 @@ end  % mouseMovedCallback
                     i = i + 1; 
                 end
                 ValidInput = Checkintegrity(Simulationdata, data.datastructure) ;
+                [data] = CheckAppliances(Simulationdata, data.datastructure, data) ;
                 if ~isempty(ValidInput)
                       % display a new figure with an UIMultiList, 3 columns
                       displayerror(ValidInput)
                       uiwait();
                       return;
                 end
+                
+                nbrhsel = 0 ;
+                i = 1;
+                while nbrhsel < SelectedHousesnbr
+                    if sum(strcmp(Housenumber{i},SelectedHouses))
+                        % JARI's change and commented line was original
+%                         Simulationdata.(Housenumber{i}) = data.SummaryStructure.(Housenumber{i}) ;
+                        Simulationdata.(Housenumber{i}) = data.Simulationdata.(Housenumber{i});         % J
+                        nbrhsel = nbrhsel + 1 ;
+                    end
+                    i = i + 1; 
+                end
+
                 data.Simulationdata = Simulationdata ;
                 if ~isfield(data,'ProfileUserdistri')
                     profileupdate('Update Sim') ;
