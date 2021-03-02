@@ -6318,6 +6318,7 @@ end  % mouseMovedCallback
                     Simulationdata = data.Simulationdata ;
                     % Check completeness of the information
                     ValidInput = Checkintegrity(Simulationdata, data.datastructure) ;
+                    [data] = CheckAppliances(Simulationdata, data.datastructure, data) ;
                     if ~isempty(ValidInput)
                           % display a new figure with an UIMultiList, 3 columns
                           displayerror(ValidInput)

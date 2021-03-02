@@ -1,6 +1,6 @@
 function [ErrorList] = Checkintegrity(simuldata, datastructure)
     Housenumber = fieldnames(simuldata);
-    Eachfield = fieldnames(datastructure);
+    Eachfield   = fieldnames(datastructure);
 %     for i = 1:numel(Eachfield)
 %        % Restructure the variable for saving it
 %        s.(Eachfield{i}) = {};
@@ -127,7 +127,6 @@ ErrorList = {};
                        % If this is an appliance then check that all
                        % self-defined rate are set in the selfDefined
                        % variable
-                       x = 1;
                        DatatoCheck = simuldata.(Housenumber{i}).(Eachfield{ii}) ;
                        AppNames = fieldnames(DatatoCheck) ;
                        for iApp = 1:length(AppNames)

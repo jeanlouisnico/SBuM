@@ -799,7 +799,7 @@ varargout{1} = App;
                     case 'E or F class'
                         App_Powerfun = Power_Level(4) * 10/3 ;%* stepreal;
                     case 'Self-defined'                         % JARI
-                        Placefun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).(ShortAppName).(AppDB).StandBy ;
+                        Placefun = All_Var.GuiInfo.Simulationdata.(HouseName).SelfDefinedAppliances.(ShortAppName).(AppDB).StandBy ;
                         App_Powerfun = Placefun ;%* stepreal;
                 end
             %%% Off Mode
@@ -814,7 +814,7 @@ varargout{1} = App;
                     case 'E or F class'
                         App_Powerfun = Power_Level(5) * 3.0 ;%* stepreal;
                     case 'Self-defined'                         % JARI
-                        Placefun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).(ShortAppName).(AppDB).Sleep ;
+                        Placefun = All_Var.GuiInfo.Simulationdata.(HouseName).SelfDefinedAppliances.(ShortAppName).(AppDB).Sleep ;
                         App_Powerfun = Placefun ;%* stepreal;
                 end
             end
@@ -832,8 +832,7 @@ varargout{1} = App;
                 case 'E or F class'
                     App_Powerfun = Power_Level(4) * 10/3 ;%* stepreal;
                 case 'Self-defined'                         % JARI
-                    Placefun = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),ShortAppName);
-                    App_Powerfun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){Placefun,3} ;%* stepreal;
+                    App_Powerfun = All_Var.GuiInfo.Simulationdata.(HouseName).SelfDefinedAppliances.(ShortAppName).(AppDB).Sleep ;%* stepreal;
             end
              App_Energy = App_Powerfun;
              AppInUse   = false;        % JARI'S ADDITION
@@ -966,7 +965,7 @@ varargout{1} = App;
                 case 'E or F class'
                     App_Energy = Power_Level(3) * Powerprofile ;%* Time_Sim.stepreal ;
                 case 'Self-defined'                         % JARI
-                    Place = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).(ShortAppName).(AppDB).Rate ;
+                    Place = All_Var.GuiInfo.Simulationdata.(HouseName).SelfDefinedAppliances.(ShortAppName).(AppDB).Rate ;
                     App_Energy = Place * Powerprofile ;%* Time_Sim.stepreal ;
                 otherwise
                     App_Energy = Power_Level(1)  * Powerprofile ;%* Time_Sim.stepreal ;
