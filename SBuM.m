@@ -626,6 +626,7 @@ function gui = createInterface()
         uimenu( gui.ViewMenu, 'Label', 'Filter...','Callback', @onDisplay);
         uimenu( gui.ViewMenu, 'Label', 'Reset Filter','Callback', @onDisplay);
         gui.DisplayVarName = uimenu( gui.ViewMenu, 'Label', 'Use variable long name','Callback', @onDisplay,'Checked','off');
+        uimenu( gui.ViewMenu, 'Label', 'Access Database','Callback', @onDisplay);
         uimenu( gui.ViewMenu, 'Label', 'Report','Callback', @onDisplay);
         uimenu( gui.ViewMenu, 'Label', 'Delete all waiting bars','Callback', @onDisplay,'Separator','on');
         uimenu( gui.ViewMenu, 'Label', 'View map','Callback', @onDisplay,'Separator','on');
@@ -664,7 +665,7 @@ function gui = createInterface()
         
         % The Javaframe is meant to pre-load the element before it is being
         % built.
-        jFrame = get(gui.Window,'JavaFrame');
+        jFrame = get(gui.Window, 'JavaFrame');
         jMenuBar = jFrame.(gui.Handle_Graphics).getMenuBar;
         pause(.1)
         
@@ -2993,6 +2994,11 @@ end
                         gui.(HouseSelected).Enable = 'on' ;
                     end
                 end
+            case 'Access Database'
+                opendata = data ;
+                opendata = orderfields(opendata) ;
+                assignin('base','opendata',opendata) ;
+                open opendata;
             case 'Rename'
                 % Rename the selected house
                 
@@ -3753,6 +3759,9 @@ end  % mouseMovedCallback
                     elseif isa(arg,'struct')
                         if isempty(fieldnames(arg))
                             arg = 'No field to display';
+                        else
+                            argfield = fieldnames(arg) ;
+                            arg      = arg.(argfield{1}) ;
                         end
                     elseif isa(arg,'double')
                         arg = num2str(arg) ;
@@ -9460,7 +9469,18 @@ end
                 if strcmp(AppCodeVal,'Lights')
                     Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal)       ;
                 else
-                    Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})       ;
+                    try
+                        Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})       ;
+                    catch
+                        % This means that the self appliance was not
+                        % properly set. Therefore set some default for
+                        % correcting the values that can be corrected by
+                        % the user later
+                        data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1}).StandBy = 0  ;
+                        data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1}).Rate = 0     ;
+                        data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1}).Sleep = 0    ;
+                        Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})      ;
+                    end
                 end
                 NominalPower    = Power.Rate ;
                 Stdby           = Power.StandBy ;

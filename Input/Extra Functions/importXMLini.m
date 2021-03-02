@@ -82,3 +82,8 @@ for i = 1:length(AllElements)
         data.Detail_Appliance.(AllElements{i}) = array2table(C,'VariableNames',{'MaxUse'    'Temp'    'TimeUsage'   'Weekdistr'    'Weekdayweight'    'Weekdayacc'    'Delay'    'Power'}) ;
     end
 end
+% Add the lighting system that is not saved in the ini file
+data.AppliancesList{end+1,1}    = 'Lighting System';
+data.AppliancesList{end,2}      = 'Rate';
+data.AppliancesList{end,3}      = '';
+data.AppliancesList{end,4}      = 'clLight';

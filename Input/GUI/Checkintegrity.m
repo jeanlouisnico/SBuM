@@ -31,7 +31,7 @@ ErrorList = {};
                catch
                    % Nothing happens, just continues
                end
-                   if isfield(simuldata.(Housenumber{i}), Eachfield{ii})
+               if isfield(simuldata.(Housenumber{i}), Eachfield{ii})
                    if ~strcmp(Eachfield{ii},'Appliances')
                        DatatoCheck = simuldata.(Housenumber{i}).(Eachfield{ii}) ;
         %                if strcmp(Eachfield{ii},'ContElec')
@@ -121,6 +121,42 @@ ErrorList = {};
                            for ierror = 1:numel(Errormessage)
                                ErrorListNew = {Housenumber{i} Eachfield{ii} Errormessage{ierror}};
                                ErrorList = [ErrorList;ErrorListNew] ;
+                           end
+                       end
+                   else
+                       % If this is an appliance then check that all
+                       % self-defined rate are set in the selfDefined
+                       % variable
+                       x = 1;
+                       DatatoCheck = simuldata.(Housenumber{i}).(Eachfield{ii}) ;
+                       AppNames = fieldnames(DatatoCheck) ;
+                       for iApp = 1:length(AppNames)
+                           App2Check = DatatoCheck.(AppNames{iApp}) ;
+                           if strcmp(App2Check.Class, 'Self-defined')
+                               if ~isfield(simuldata.(Housenumber{i}).SelfDefinedAppliances, App2Check.SN)
+                                    simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN).(App2Check.DB).StandBy = 0  ;
+                                    simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN).(App2Check.DB).Rate = 0  ;
+                                    simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN).(App2Check.DB).Sleep = 0  ;
+                                    warning(['Self defined appliance ' App2Check.SN ' in ' Housenumber{i} ' was set to 0 as it was missing']) ;
+                               elseif ~isfield(simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN), App2Check.DB)
+                                    data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(App2Check.DB).StandBy = 0  ;
+                                    data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(App2Check.DB).Rate = 0     ;
+                                    data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(App2Check.DB).Sleep = 0    ;
+                                    warning(['Self defined appliance ' App2Check.SN ' in ' Housenumber{i} ' was set to 0 as it was missing']) ;
+                               else
+                                   if ~isfield(simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN).(App2Check.DB), 'StandBy')
+                                       data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(App2Check.DB).StandBy = 0  ;
+                                       warning(['Self defined appliance ' App2Check.SN ' in ' Housenumber{i} ' was set to 0 as it was missing']) ;
+                                   end
+                                   if ~isfield(simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN).(App2Check.DB), 'Rate')
+                                       data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(App2Check.DB).Rate = 0  ;
+                                       warning(['Self defined appliance ' App2Check.SN ' in ' Housenumber{i} ' was set to 0 as it was missing']) ;
+                                   end
+                                   if ~isfield(simuldata.(Housenumber{i}).SelfDefinedAppliances.(App2Check.SN).(App2Check.DB), 'Sleep')
+                                       data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(App2Check.DB).Sleep = 0  ;
+                                       warning(['Self defined appliance ' App2Check.SN ' in ' Housenumber{i} ' was set to 0 as it was missing']) ;
+                                   end
+                               end
                            end
                        end
                    end
