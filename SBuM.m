@@ -3750,6 +3750,10 @@ end  % mouseMovedCallback
                     arg = str.(fields{i}) ;
                     if iscell(arg) && (size(arg,2) > 1 || size(arg,1) > 1)
                         arg = 'multiple value possible' ;
+                    elseif isa(arg,'struct')
+                        if isempty(fieldnames(arg))
+                            arg = 'No field to display';
+                        end
                     elseif isa(arg,'double')
                         arg = num2str(arg) ;
                     end
@@ -5655,6 +5659,7 @@ end  % mouseMovedCallback
                   data.Exit = 'Saved' ; 
                   return; 
                end
+               
                %See if it has already been saved
                if isempty(data.savedname)
                    % It has not been save yet
@@ -5687,6 +5692,16 @@ end  % mouseMovedCallback
                    else
                        data.SummaryStructure.(Housenumber{i}).SelfDefinedAppliances = 0;
                    end
+
+                   try 
+                       data.SummaryStructure.(Housenumber{i}).clLight ;
+                   catch
+                       
+                       data.SummaryStructure.(Housenumber{i}).clLight = 'Low consumption bulbs' ;
+                       AddText = 'Light class was not set. It is now set to Low consumption bulbs' ;
+                       warning(AddText)
+                   end
+                   
                end                                      % JARI'S ADDITION ENDS
                AllData = data.SummaryStructure ;
                
@@ -6046,7 +6061,9 @@ end  % mouseMovedCallback
                 for i = 1:size(addedHouses,2) %fieldnames(data.SummaryStructure))
                     data.SelfDefinedAppliances.(addedHouses{i}) = data.SummaryStructure.(addedHouses{i}).SelfDefinedAppliances;
 %                     if isnumeric(data.SelfDefinedAppliances.(addedHouses{i})(1))
-                    if strcmp(data.SelfDefinedAppliances.(addedHouses{i})(1),'0')
+                    if isempty(data.SelfDefinedAppliances.(addedHouses{i}))
+                        data.SelfDefinedAppliances = rmfield(data.SelfDefinedAppliances,addedHouses{i});
+                    elseif strcmp(data.SelfDefinedAppliances.(addedHouses{i})(1),'0')
                         data.SelfDefinedAppliances = rmfield(data.SelfDefinedAppliances,addedHouses{i});
                     else
                         for m = 1:size(data.SelfDefinedAppliances.(addedHouses{i}),1)

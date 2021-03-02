@@ -100,6 +100,7 @@ if nbr_appliances > 0
         AppHistory{nbr_appliance,2} = AppQty ;
         
         LongAppName = All_Var.GuiInfo.datastructure.(AppName).LongName ; %AppList(nbr_appliance,1)  ;
+        ShortAppName = All_Var.GuiInfo.datastructure.(AppName).ShortName ; %AppList(nbr_appliance,1)  ;
         if isempty(AppName)
             % resume to the next applicance
             continue; % This is for the lighting system
@@ -167,7 +168,7 @@ if nbr_appliances > 0
                 if App.Info.(AppName)(subapp).(HouseName).InUse
                     % 1. Check how much time there is left
                     [App_Energy, App] = PowerConsumption(App, AppName, subapp, HouseName, Time_Sim, App.PowerConsProfile, AppList, ...
-                                                         Appnumber,  Input_Data, Power_Level, All_Var, LongAppName,SecperIter, App10s, AppClass) ;
+                                                         Appnumber,  Input_Data, Power_Level, All_Var, ShortAppName,SecperIter, App10s, AppClass, AppDB) ;
                     % 2. Process the time left
                     % 3. Get the power/energy demand
                     % 4. Go to next app
@@ -302,12 +303,12 @@ if nbr_appliances > 0
                     
                     % 6. Calculate the power output from the appliance
                         [App_Energy, App] = PowerConsumption(App, AppName, subapp, HouseName, Time_Sim, App.PowerConsProfile, AppList, ...
-                                                             Appnumber,  Input_Data, Power_Level, All_Var, LongAppName,SecperIter, App10s, AppClass) ;
+                                                             Appnumber,  Input_Data, Power_Level, All_Var, ShortAppName,SecperIter, App10s, AppClass, AppDB) ;
                         
                     else
                     %    If the appliance cannot generate, look for residual power and continue to the next appliance   
                         App.Info.(AppName)(subapp).(HouseName).ActionQtyStep(myiter + 1) = 0 ;
-                        [App, App_Energy,AppInUse]  = ResidualPower(Power_Level,App,AppName,subapp, HouseName, myiter, AppList, Appnumber, Input_Data, All_Var, stepreal, LongAppName, AppClass) ;
+                        [App, App_Energy,AppInUse]  = ResidualPower(Power_Level,App,AppName,subapp, HouseName, myiter, AppList, Appnumber, Input_Data, All_Var, stepreal, ShortAppName, AppClass, AppDB) ;
                         [App]                       = Allocate_Energy(App_Energy,App,AppName,subapp,HouseName,myiter, AppInUse) ;
                         continue ;
                     end
@@ -783,7 +784,7 @@ varargout{1} = App;
         end
     end
 %--------------------------------------------------------------------------%
-    function [App, App_Energy,AppInUse] = ResidualPower(Power_Level,App,AppName,subapp, HouseName, myiter, AppList, nbr_appliance, Input_Data, All_Var, stepreal, LongAppName, AppClass)
+    function [App, App_Energy,AppInUse] = ResidualPower(Power_Level,App,AppName,subapp, HouseName, myiter, AppList, nbr_appliance, Input_Data, All_Var, stepreal, ShortAppName, AppClass, AppDB)
         if ~Power_Level(5)==0
             bed1lap_actfun = [0,0.147,1]';                                 % Include the stand-by power to the calculation
             %%% Sleeping mode
@@ -798,8 +799,8 @@ varargout{1} = App;
                     case 'E or F class'
                         App_Powerfun = Power_Level(4) * 10/3 ;%* stepreal;
                     case 'Self-defined'                         % JARI
-                        Placefun = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),LongAppName);
-                        App_Powerfun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){Placefun,3} ;%* stepreal;
+                        Placefun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).(ShortAppName).(AppDB).StandBy ;
+                        App_Powerfun = Placefun ;%* stepreal;
                 end
             %%% Off Mode
             elseif and(App.rand_actStr.(AppName)(subapp).(HouseName)(myiter + 1) > bed1lap_actfun(2), App.rand_actStr.(AppName)(subapp).(HouseName)(myiter + 1) <= bed1lap_actfun(3))
@@ -813,8 +814,8 @@ varargout{1} = App;
                     case 'E or F class'
                         App_Powerfun = Power_Level(5) * 3.0 ;%* stepreal;
                     case 'Self-defined'                         % JARI
-                    Placefun = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),LongAppName);
-                    App_Powerfun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){Placefun,4} ;%* stepreal;
+                        Placefun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).(ShortAppName).(AppDB).Sleep ;
+                        App_Powerfun = Placefun ;%* stepreal;
                 end
             end
             App_Energy = App_Powerfun;
@@ -831,7 +832,7 @@ varargout{1} = App;
                 case 'E or F class'
                     App_Powerfun = Power_Level(4) * 10/3 ;%* stepreal;
                 case 'Self-defined'                         % JARI
-                    Placefun = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),LongAppName);
+                    Placefun = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),ShortAppName);
                     App_Powerfun = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){Placefun,3} ;%* stepreal;
             end
              App_Energy = App_Powerfun;
@@ -911,7 +912,7 @@ varargout{1} = App;
     end
 %--------------------------------------------------------------------------%    
     function [App_Energy, App] = PowerConsumption(App, AppName, subapp, HouseName, Time_Sim, PowerConsProfile, AppList, ...
-                                           nbr_appliance,  Input_Data, Power_Level, All_Var, LongAppName, SecperIter, App10s, AppClass)
+                                           nbr_appliance,  Input_Data, Power_Level, All_Var, ShortAppName, SecperIter, App10s, AppClass, AppDB)
                                        
         if App.ActionStart.(AppName)(subapp).(HouseName) <= Time_Sim.TimeStr
             Powerprofile10s = App.OutputSignal10s.(AppName)(subapp).(HouseName) ;
@@ -936,7 +937,7 @@ varargout{1} = App;
             
             if App.Info.(AppName)(subapp).(HouseName).InUse10s
                 if App10s && (App.Info.(AppName)(subapp).(HouseName).StepUse == 1)
-                    App_EnergyArray10s                                      = ClassPower(AppClass,Power_Level, Powerprofile10s, Time_Sim, All_Var, HouseName, LongAppName) ;                
+                    App_EnergyArray10s                                      = ClassPower(AppClass,Power_Level, Powerprofile10s, Time_Sim, All_Var, HouseName, ShortAppName, AppDB) ;                
 %                     StartLine                                               = Time_Sim.myiter * SecperIter + 1  ;
 %                     EndLine                                                 = StartLine + length(App_EnergyArray10s) - 1 ;
 %                     ReAllocate                                              = App.Info.(AppName)(subapp).(HouseName).App_Energy10s ;
@@ -951,12 +952,12 @@ varargout{1} = App;
                 App.Info.(AppName)(subapp).(HouseName).InUse10s             = false ;
             end
             
-            App_Energy = ClassPower(AppClass,Power_Level, Powerprofile, Time_Sim, All_Var, HouseName, LongAppName);
+            App_Energy = ClassPower(AppClass,Power_Level, Powerprofile, Time_Sim, All_Var, HouseName, ShortAppName, AppDB);
         else
             App_Energy = 0 ;
         end
         %% Function to retrieve the Profile of 10s
-        function App_Energy = ClassPower(Classrateined,Power_Level, Powerprofile, Time_Sim, All_Var, HouseName, LongAppName)
+        function App_Energy = ClassPower(Classrateined,Power_Level, Powerprofile, Time_Sim, All_Var, HouseName, ShortAppName, AppDB)
             switch Classrateined
                 case 'A or B class'
                     App_Energy = Power_Level(1) * Powerprofile ;%* Time_Sim.stepreal ;
@@ -965,8 +966,8 @@ varargout{1} = App;
                 case 'E or F class'
                     App_Energy = Power_Level(3) * Powerprofile ;%* Time_Sim.stepreal ;
                 case 'Self-defined'                         % JARI
-                    Place = strcmp(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName)(:,1),LongAppName);
-                    App_Energy = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName){Place,2}  * Powerprofile ;%* Time_Sim.stepreal ;
+                    Place = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).(ShortAppName).(AppDB).Rate ;
+                    App_Energy = Place * Powerprofile ;%* Time_Sim.stepreal ;
                 otherwise
                     App_Energy = Power_Level(1)  * Powerprofile ;%* Time_Sim.stepreal ;
             end

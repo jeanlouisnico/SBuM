@@ -40,7 +40,7 @@ for i = 1:length(AllElements)
         
 
         for iHouse = 1:numel(ElementContent)
-            if ik == 104
+            if ik == 1
                 x = 1;
             end
             HouseNbr2Input  = iHouse + HouseNbr ;   
@@ -79,6 +79,18 @@ end
             catch
                 % If not assign an empty struct to it
                 dataout.(VarName) = struct ;
+            end
+        elseif strcmp(VarName, 'SelfDefinedAppliances')
+            ElementContent  = orderfields(ElementContent) ;
+            try
+                ElementContent  = rmfield(ElementContent,'ATTRIBUTE') ;
+            catch
+ 
+            end
+            try
+                dataout.(VarName)  = rmfield(ElementContent,'CONTENT') ;
+            catch
+                dataout.(VarName)  = ElementContent ;
             end
         elseif isfield(ElementContent,'CONTENT')
             % This is the last layer and we can start dispatching the
