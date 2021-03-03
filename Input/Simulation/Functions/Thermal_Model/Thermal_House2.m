@@ -133,7 +133,9 @@ function [Thermal_Model, Input_Data] = Thermal_House2(Input_Data, Time_Sim, All_
                 end
         end 
     else
-        vent_elec = str2double(Input_Data.vent_elec);    
+        if ~isa(Input_Data.vent_elec, 'double')
+            vent_elec = str2double(Input_Data.vent_elec);    
+        end
         switch Ventilation_Type
             case 'Natural ventilation'
                 vent_elec = 0;          % This is always 0.
@@ -827,7 +829,8 @@ end
                         
                         %UseDefault = true ;                        
                         if UseDefault == true
-                            El{1} = 1.5 ;
+                            El{1} = '1.5' ;
+                            warning('A standard value of 1.5 kWh/m3/s is set')
                         else
                             El = inputdlg('Currently the electricity consumption for mechanical ventilation is 0. Please assign the electricity consumption for the ventilation in kWh/m3/s. Default option is 1.5 kWh/m3/s.', 'Electricity consumption for ventilation error!');
                         end                        
@@ -884,7 +887,8 @@ end
                         warning(msg)
                         %UseDefault = true ;
                         if UseDefault == true
-                            El{1} = 2 ;
+                            El{1} = '2' ;
+                            warning('A standard value of 2 kWh/m3/s is set')
                         else
                             El = inputdlg('Currently the electricity consumption for Air-Air H-EX ventilation is 0. Please assign the electricity consumption for the ventilation in kWh/m3/s. Default option is 2 kWh/m3/s.', 'Electricity consumption for ventilation error!');
                         end                        
@@ -1044,7 +1048,8 @@ end
                         %UseDefault = true ;
                         
                         if UseDefault == true
-                            El{1} = 2 ;
+                            El{1} = '2' ;
+                            warning('A standard value of 2 kWh/m3/s is set')
                         else
                             El = inputdlg('Currently the electricity consumption for balanced ventilation is 0. Please assign the electricity consumption for the ventilation in kWh/m3/s. Default option is 2 kWh/m3/s.', 'Electricity consumption for ventilation error!');
                         end                        
