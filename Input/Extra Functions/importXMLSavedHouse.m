@@ -165,7 +165,9 @@ end
                     end
                 end
             elseif isa(ElementContent, 'char')    
-                dataout = ElementContent ;
+                dataout.(VarName) = ElementContent ;
+            elseif isa(ElementContent, 'cell')    
+                dataout.(VarName) = ElementContent{1} ;
             end
         end
     end
