@@ -56,6 +56,7 @@ OutputArray = zeros(size(xq,1),(length(OutHeaders)-1)) ;
          OutputArrayTimed = table(xq,'VariableNames',OutHeaders(1)) ;
          for ii = 1:(length(OutHeaders)-1)
             OutputArray(:,ii) = interp1(WeatherData.Time, WeatherData.(OutHeaders{ii + 1}), xq, 'linear') ;     
+            OutputArray(isnan(OutputArray)) = 0 ;
             OutputArrayTimed  = [OutputArrayTimed table(OutputArray(:,ii),'VariableNames',OutHeaders(ii + 1))] ;
          end 
      case 'Replicate'
@@ -66,10 +67,12 @@ OutputArray = zeros(size(xq,1),(length(OutHeaders)-1)) ;
             if size(OutputArraytemp,1) < size(xq,1) 
                 % Add the missing values as 0 + add a warning message
                 OutputArray(1:size(OutputArraytemp,1),ii) = OutputArraytemp ; 
+                OutputArray(isnan(OutputArray)) = 0 ;
                 errormess.trigger = 1;
                 errormess.text    = 'WARNING: Missing data from the original dataset. Set value to 0';
             else
                 OutputArray(:,ii) = OutputArraytemp(1:min(size(xq,1),size(OutputArraytemp,1))) ; 
+                OutputArray(isnan(OutputArray)) = 0 ;
             end 
             OutputArrayTimed  = [OutputArrayTimed table(OutputArray(:,ii),'VariableNames',OutHeaders(ii + 1))] ;
          end 
@@ -79,11 +82,13 @@ OutputArray = zeros(size(xq,1),(length(OutHeaders)-1)) ;
             OutHeadersLabel = OutHeaders{i} ; 
             OutputArray(:,i)       = WeatherData.(OutHeadersLabel) ;
          end
+         OutputArray(isnan(OutputArray)) = 0 ;
          OutputArrayTimed  = WeatherData             ;
      otherwise
          OutputArrayTimed = table(xq,'VariableNames',OutHeaders(1)) ;
          for ii = 1:(length(OutHeaders)-1)
             OutputArray(:,ii) = interp1(WeatherData.Time, WeatherData.(OutHeaders{ii + 1}), xq, 'linear') ;         % 5 Methods, could select any of them   
+            OutputArray(isnan(OutputArray)) = 0 ;
             OutputArrayTimed  = [OutputArrayTimed table(OutputArray(:,ii),'VariableNames',OutHeaders(ii + 1))] ;
          end 
  end

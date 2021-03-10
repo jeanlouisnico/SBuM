@@ -424,6 +424,22 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
             ArrayStartYearSolar  = datenum(2000,1,1) ; %2000
         end
         
+        ResIniWind         = 'Hourly'     ;
+        Array_InWind       = Default_Var.Hourly_Wind_Speed ;
+        if Public == 1
+            ArrayStartYearWind  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearWind  = datenum(2000,1,1) ; %2000
+        end
+        
+        ResIniWater         = 'Hourly'     ;
+        Array_InWater       = Default_Var.T_water ;
+        if Public == 1
+            ArrayStartYearWater  = datenum(2012,1,1) ; %2000
+        else
+            ArrayStartYearWater  = datenum(2000,1,1) ; %2000
+        end
+        
         ResIniPrice         = 'Hourly'     ;
         Array_InPrice       = Default_Var.Hourly_Real_Time_Pricing ;
         if Public == 1
@@ -433,7 +449,7 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
         end
         
         ResIniEmissions     = 'Hourly'     ;
-        Array_InEmissions       = Default_Var.EmissionFactorNetto ; % This integrates the import and export from the country
+        Array_InEmissions   = Default_Var.EmissionFactorNetto ; % This integrates the import and export from the country
         
         if Public == 1
             ArrayStartYearEmissions  = datenum(2012,1,1) ; %2000
@@ -539,6 +555,8 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
     SimulationEnd       = max(Date_Sim(2,:)) ;
     ReplicTemp          = 'Interpolate' ;
     ReplicSolar         = 'Interpolate' ;
+    ReplicWind          = 'Interpolate' ;
+    ReplicWater         = 'Interpolate' ;
     ReplicPrice         = 'Replicate'  ;
     ReplicEmissions     = 'Replicate'  ;
     
@@ -591,6 +609,30 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
     All_Var.Hourly_Solar_Radiation  = Hourly_Solar_Radiation(1:(end-1)) ;
     All_Var.Hourly_Solar_RadiationTimed = Hourly_Solar_RadiationTimed ;
     
+    % Sizing the wind speed array for the simulation
+    [Hourly_WindSpeed, Hourly_WindSpeedTimed, ~] = Test_Database_extract_Extrapolate(Array_InWind,...
+                                                                                                 ArrayStartYearWind,...
+                                                                                                 ResIniWind,...
+                                                                                                 ResFinal,...
+                                                                                                 SimulationStart,...
+                                                                                                 SimulationEnd,...
+                                                                                                 ReplicWind,...
+                                                                                                 'DataOutput') ;
+    All_Var.Hourly_WindSpeed  = Hourly_WindSpeed(1:(end-1)) ;
+    All_Var.Hourly_WindSpeedTimed = Hourly_WindSpeedTimed ;
+    
+    % Sizing the wind speed array for the simulation
+    [Hourly_Water, Hourly_WaterTimed, ~] = Test_Database_extract_Extrapolate(Array_InWater,...
+                                                                                                 ArrayStartYearWater,...
+                                                                                                 ResIniWater,...
+                                                                                                 ResFinal,...
+                                                                                                 SimulationStart,...
+                                                                                                 SimulationEnd,...
+                                                                                                 ReplicWater,...
+                                                                                                 'DataOutput') ;
+    All_Var.Hourly_Water  = Hourly_Water(1:(end-1)) ;
+    All_Var.Hourly_WaterTimed = Hourly_WaterTimed ;
+    
     % Sizing the Price array for the simulation
     [Hourly_Real_Time_Pricing, Hourly_Real_Time_PricingTimed, xq, errormess] = Test_Database_extract_Extrapolate(Array_InPrice,...
                                                                                                       ArrayStartYearPrice,...
@@ -609,8 +651,8 @@ All_Var.Global_Irradiance_For_Monthly2050 = table2timetable(All_Var.Global_Irrad
                                                                                                  SimulationEnd,...
                                                                                                  ReplicEmissions,...
                                                                                                  {'CC' 'OD' 'TA' 'FEut' 'MEut' 'HT' 'POF' 'PMF' 'TEco' 'FEco' 'MEco' 'IR' 'ALO' 'ULO' 'NLT' 'WD' 'MD' 'FD'}) ;
-    All_Var.Hourly_Emissions  = Hourly_Emissions(1:(end-1),:) ;
-    All_Var.Hourly_EmissionsTimed = Hourly_EmissionsTimed ;
+    All_Var.Hourly_Emissions        = Hourly_Emissions(1:(end-1),:) ;
+    All_Var.Hourly_EmissionsTimed   = Hourly_EmissionsTimed ;
                                                                                                   
 
     if errormess.trigger
@@ -685,62 +727,62 @@ end
 All_Var.Price_Tax           = Default_Var.Price_Tax ;
 All_Var.Detail_Appliance    = Default_Var.Detail_Appliance ;
 
-Database = 3;
-All_Var.Database = Database;
-
-switch Database
-    case 1
-        Envi_Database = 'EcoInvent'         ;
-    case 2
-        Envi_Database = 'ENVIMAT' ;
-    case 3
-        Envi_Database = 'ReCiPe' ;
-    otherwise
-        Envi_Database = 'ReCiPe' ;    
-end
-
-% JARI'S ADDITION
-if isfield(data, 'FileSelection')
-    if isfield(data.FileSelection, 'EmissionsFile')
-        if ~isempty(data.FileSelection.EmissionsFile)
-            switch Database
-                case 1
-                    All_Var.Hourly_CO2_EcoInvent = EmissionFile.(FieldName_Emissions{:})         ;
-                case 2
-                    All_Var.Hourly_CO2_ENVIMAT = EmissionFile.(FieldName_Emissions{:})         ;
-                case 3
-                    All_Var.Hourly_CO2_ReCiPe = EmissionFile.(FieldName_Emissions{:})         ;
-                otherwise
-                    All_Var.Hourly_CO2_ReCiPe = EmissionFile.(FieldName_Emissions{:})         ;    
-            end
-        end
-    end
-end
-
-switch Database
-    case 1
-        All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_EcoInvent         ;
-    case 2
-        All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_ENVIMAT         ;
-    case 3
-        All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_ReCiPe         ;
-    otherwise
-        All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_ReCiPe         ;  
-end
-
-    ResIni   = 'Hourly'       ;
-    Replic   = 'Interpolate'  ;
-    ResFinal = HouseInfo.Time_Step ;
-    Array_In = sum(All_Var.Hourly_Emissions(:,1:6),2) ;
-    
-    %%% Add the public version for the year 2012
-    ArrayStartYear = datenum(2012,1,1) ; %2004
-    SimulationStart = Date_Sim(1,1) ;
-    SimulationEnd   = Date_Sim(2,1) ;
-%     All_Var.Hourly_Temperature = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic) ;
-    [Hourly_Hourly_Emissions, Hourly_Hourly_EmissionsTimed] = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic, 'DataOutput') ;
-    All_Var.Hourly_Hourly_Emissions      = Hourly_Hourly_Emissions(2:end) ;
-    All_Var.Hourly_Hourly_EmissionsTimed = Hourly_Hourly_EmissionsTimed ;
+% Database = 3;
+% All_Var.Database = Database;
+% 
+% switch Database
+%     case 1
+%         Envi_Database = 'EcoInvent'         ;
+%     case 2
+%         Envi_Database = 'ENVIMAT' ;
+%     case 3
+%         Envi_Database = 'ReCiPe' ;
+%     otherwise
+%         Envi_Database = 'ReCiPe' ;    
+% end
+% 
+% % JARI'S ADDITION
+% if isfield(data, 'FileSelection')
+%     if isfield(data.FileSelection, 'EmissionsFile')
+%         if ~isempty(data.FileSelection.EmissionsFile)
+%             switch Database
+%                 case 1
+%                     All_Var.Hourly_CO2_EcoInvent = EmissionFile.(FieldName_Emissions{:})         ;
+%                 case 2
+%                     All_Var.Hourly_CO2_ENVIMAT = EmissionFile.(FieldName_Emissions{:})         ;
+%                 case 3
+%                     All_Var.Hourly_CO2_ReCiPe = EmissionFile.(FieldName_Emissions{:})         ;
+%                 otherwise
+%                     All_Var.Hourly_CO2_ReCiPe = EmissionFile.(FieldName_Emissions{:})         ;    
+%             end
+%         end
+%     end
+% end
+% 
+% switch Database
+%     case 1
+%         All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_EcoInvent         ;
+%     case 2
+%         All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_ENVIMAT         ;
+%     case 3
+%         All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_ReCiPe         ;
+%     otherwise
+%         All_Var.Hourly_Emissions = Default_Var.Hourly_CO2_ReCiPe         ;  
+% end
+% 
+%     ResIni   = 'Hourly'       ;
+%     Replic   = 'Interpolate'  ;
+%     ResFinal = HouseInfo.Time_Step ;
+%     Array_In = sum(All_Var.Hourly_Emissions(:,1:6),2) ;
+%     
+%     %%% Add the public version for the year 2012
+%     ArrayStartYear = datenum(2012,1,1) ; %2004
+%     SimulationStart = Date_Sim(1,1) ;
+%     SimulationEnd   = Date_Sim(2,1) ;
+% %     All_Var.Hourly_Temperature = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic) ;
+%     [Hourly_Hourly_Emissions, Hourly_Hourly_EmissionsTimed] = Test_Database_extract_Extrapolate(Array_In,ArrayStartYear,ResIni,ResFinal, SimulationStart, SimulationEnd, Replic, 'DataOutput') ;
+%     All_Var.Hourly_Hourly_Emissions      = Hourly_Hourly_Emissions(2:end) ;
+%     All_Var.Hourly_Hourly_EmissionsTimed = Hourly_Hourly_EmissionsTimed ;
 
 % END OF ADDITION
 

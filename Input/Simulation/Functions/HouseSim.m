@@ -95,7 +95,7 @@ Time_Sim.Iteration.(Input_Data.Headers)(1) = 1;
 %% Activate the Wind Turbine function 
 if str2double(Input_Data.WindTurbine) == 1
     [EnergyOutput.WTPower.(Input_Data.Headers)(Time_Sim.myiter+1)] = WindTurbinefunc(Time_Sim, Input_Data, All_Var, BuildSim);
-    Time_Sim.Iteration2.(Input_Data.Headers)(1) = 1;
+    Time_Sim.Iteration2.(Input_Data.Headers) = 1;
 else
     EnergyOutput.WTPower.(Input_Data.Headers)(Time_Sim.myiter+1) = 0;
 end 
@@ -104,8 +104,8 @@ end
 Time_Sim.Iteration3.(Input_Data.Headers)(1) = 1; 
 %% Activate the Electrolyser and FC
 if str2double(Input_Data.FuelCell) == 1
-    [EnergyOutput.ElecPower.(Input_Data.Headers)(Time_Sim.myiter+1),EnergyOutput.FCPower.(Input_Data.Headers)(Time_Sim.myiter+1)] = Electroylzer(Time_Sim.timehour, Time_Sim.myiter);
-    Time_Sim.Iteration4.(Input_Data.Headers)(1) = 1;
+    [EnergyOutput.ElecPower.(Input_Data.Headers)(Time_Sim.myiter+1),EnergyOutput.FCPower.(Input_Data.Headers)(Time_Sim.myiter+1), All_Var] = Electroylzer(Time_Sim, All_Var, Input_Data, EnergyOutput);
+    Time_Sim.Iteration4.(Input_Data.Headers) = 1;
 else
     EnergyOutput.FCPower.(Input_Data.Headers)(Time_Sim.myiter+1) = 0;
 end 

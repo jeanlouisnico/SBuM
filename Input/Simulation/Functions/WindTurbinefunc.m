@@ -13,7 +13,7 @@
 % the simulation (hourlt or half-hourly).
 %% 
 function [PowerWS] = WindTurbinefunc(varargin)
-global Wind_Speed
+
 Input_Data = varargin{2};
 Time_Sim = varargin{1};
 All_Var = varargin{3};
@@ -39,13 +39,16 @@ WTPowertot = str2double(Input_Data.WTPowertot) ;
 % EfficiencyWT
 %if Input_Data{26}<= 0; Input_Data{26}= 0.68   ; EfficiencyWT = Input_Data{26}; end
 % WTPowertot = [Input_Data{19}];
-Time_Step = Input_Data.Time_Step ;
-    switch(Time_Step)
-        case 'Hourly'
-            Wind_Speed = All_Var.Hourly_Wind_Speed';
-        case 'Half Hourly'
-            Wind_Speed = All_Var.Half_Hourly_Wind_Speed';
-    end    
+
+%     switch(Time_Step)
+%         case 'Hourly'
+%             Wind_Speed = All_Var.Hourly_Wind_Speed';
+%         case 'Half Hourly'
+%             Wind_Speed = All_Var.Half_Hourly_Wind_Speed';
+%     end 
+
+Wind_Speed = All_Var.Hourly_WindSpeed ;
+
 myiter = Time_Sim.myiter;
 %% Climatic data
 % Climatic data are loaded once in the simulation and then is stored in the

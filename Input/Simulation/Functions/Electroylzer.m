@@ -23,19 +23,20 @@
 % _*MaxPowerFC*_, the price of electricity at a given time is given by the
 % variable _*Price*_. The state of the electrolyser such as the hydrogen
 % accumulated _*V_H2_Cumul*_ retrieve a boolean.
-function [ElecPower, FCPower] = Electroylzer(timehour, myiter)
-global Temp_Water V_H2_Cumul Fcn3 Cumul Iteration4 Season Price Timeoffset
-global Housenbr
-global MaxPowerFC ContElec
+function [ElecPower, FCPower, All_Var] = Electroylzer(Time_Sim, All_Var, Input_Data, EnergyOutput)
+
+ContElec = Input_Data.ContElec ;
+MaxPowerFC = Input_Data.MaxPowerFC ;
+timehour    = Time_Sim.timehour ;
+myiter      = Time_Sim.myiter   ;
+Temp_Water  = All_Var.Hourly_Water ;
 %% Data initialization
 % The water dataset is uploaded in the global memory of the workspace, and
 % other data related to the electrolyser are set to 0.
-if Iteration4(Housenbr,1) < 1;
-    data = load ('Smart_House_Data_MatLab.mat');
-    Temp_Water = data.T_water';
-    V_H2_Cumul(Housenbr,1) = 0;
-    Fcn3(Housenbr,1)       = 0;
-    Cumul(Housenbr,1)      = 0;
+if Time_Sim.Iteration4.(Input_Data.Headers) < 1
+    All_Var.V_H2_Cumul.(Input_Data.Headers) = 0;
+    All_Var.Fcn3.(Input_Data.Headers)       = 0;
+    All_Var.Cumul.(Input_Data.Headers)      = 0;
 end
 %%%
 % Some of the variables characterizing the electrolyser are set in this
@@ -49,14 +50,14 @@ A_el = 0.25;T_op = 50;mol_e = 2; N_el = 21;Electro_Power=4000;
 % has not been made. For this reason, the output is set to 0 for not
 % producing any energy. The production of hydrogen occurs when the price of
 % electricity is lower, meaning at night time, from 22 to 7 in the morning.
-if strcmp(ContElec{1}, 'Real time pricing');
-    Contract = 0;
-else
-    if or(timehour < 7, timehour >= 22);
+if strcmp(ContElec,'Varmavirta') || strcmp(ContElec,'Vihrevirta') || strcmp(ContElec,'Tuulivirta')
+    if or(timehour < 7, timehour >= 22)
         Contract = 1;
     else
         Contract = 0;
     end
+else
+    Contract = 0;
 end
 %% Electrolyser
 % The modeling part has been taken from Barthels et al. (1998). The power
@@ -67,7 +68,7 @@ end
 % Where _PEz_ is the power of the electrolyser, _Ez_ is the state of the
 % hydrogen storage and is a boolean (see Equation...), and _Celec_ is the
 % state of the elecotrlyser and is also a boolean, as defined above.
-Powerelectrolyzer = Contract * Electro_Power * V_H2_Cumul(Housenbr,1);
+Powerelectrolyzer = Contract * Electro_Power * All_Var.V_H2_Cumul.(Input_Data.Headers);
 PowerElectrolyzer = Powerelectrolyzer / 1000;
 %%%
 % The hydrogen production is a function of the operating temperature of the
@@ -80,8 +81,8 @@ PowerElectrolyzer = Powerelectrolyzer / 1000;
 % \frac{1}{A_{el}}} \right )+\left ( \frac{1502.7-70.8T_{op}}{\left
 % (\frac{P_{E_{z}}-F_{c2-n-1}}{40}\times \frac{1}{A_{el}}  \right )^{2}}
 % \right )}$$
-Add1 = (Powerelectrolyzer - Fcn3(Housenbr,1)) / 40;
-if max(0,Add1) == 0;
+Add1 = (Powerelectrolyzer - All_Var.Fcn3.(Input_Data.Headers) ) / 40;
+if max(0,Add1) == 0
     Fcn  = 0;
     Fcn2 = 0;
 else
@@ -104,13 +105,17 @@ H2_L = Fcn1 * Add1 * (1 / (96485 * mol_e) * 0.0224 * 3600);
 %%%
 % $$F_{c2-n-1}=18T_{w}e^{-3}\cdot \frac{4187}{3600}\cdot \left (
 % T_{op}-\frac{V_{H_{2}}}{0.0224} \right )$$
-Fcn3(Housenbr,1) = Temp_Water(Timeoffset + myiter+1) * 18 * exp(-3) * 4187 / 3600 * (T_op - H2_L / 0.0224);
+All_Var.Fcn3.(Input_Data.Headers) = Temp_Water(myiter+1) * 18 * exp(-3) * 4187 / 3600 * (T_op - H2_L / 0.0224);
 SwitchH2_L = max(0,H2_L);
 %% High price definition
 % Defines the high price rate for each contract type for both seasons
 % winter and summer.
-if Season(myiter + 1) == 1;
-    switch(ContElec{1})
+% TO BE MODIFIED
+
+[varseason, ~, ~] = Forecaste_Timeslot(Time_Sim, 0, Input_Data) ;
+
+if varseason == 1
+    switch(ContElec)
         case 'Varmavirta'
             Highprice = 7.21;
         case 'Vihrevirta'
@@ -121,7 +126,7 @@ if Season(myiter + 1) == 1;
             Highprice = 7.51;
     end
 else
-    switch(ContElec{1})
+    switch(ContElec)
         case 'Varmavirta'
             Highprice = 6.86;
         case 'Vihrevirta'
@@ -137,8 +142,8 @@ end
 % is producing its energy and the corresponding volume of hydrogen is
 % withdrawn from the hydrogen tank storage. Otherwise, the FC is not
 % activated.
-if Highprice == Price(myiter + 1);
-    switch (MaxPowerFC{1})
+if Highprice <= EnergyOutput.Price
+    switch (MaxPowerFC)
         case '1 kW'
             H2Liters = 14;
             MaxPowerFC2 = 1;
@@ -163,21 +168,21 @@ end
 %%%
 % $$q_{H_{2}}=\dot{q_{v}}_{H_{2}}\cdot \, \frac{60}{stp}\cdot \,
 % \frac{1}{1000}$$
-H2_Stored = H2Liters * 60 * stepreal / 1000;
+H2_Stored = H2Liters * 60 * Time_Sim.stepreal / 1000;
 %%%
 % and the amount left in the hydrogen tank is:
 %%%
 % $$S_{H_{2}-\left (n  \right )}=S_{H_{2}-\left (n-1  \right
 % )}+max(0,V_{H_{2}})-q_{H_{2}}$$
-Cumul(Housenbr,1) = Cumul(Housenbr,1) + SwitchH2_L - H2_Stored;
-H2_Liters = Cumul(Housenbr,1) * 1000;
+All_Var.Cumul.(Input_Data.Headers) = All_Var.Cumul.(Input_Data.Headers) + SwitchH2_L - H2_Stored;
+H2_Liters = All_Var.Cumul.(Input_Data.Headers) * 1000;
 %%%
 % In case the hydrogen storage tank is full, the production of hydrogen is
 % null as there is no space to store the hydrogen.
 if H2_Liters >= 760
-    V_H2_Cumul(Housenbr,1) = 0;
+    All_Var.V_H2_Cumul.(Input_Data.Headers) = 0;
 else
-    V_H2_Cumul(Housenbr,1) = 1;
+    All_Var.V_H2_Cumul.(Input_Data.Headers) = 1;
 end
 
 %[FCPower] = FuelCell(H2Liters, timehour, iter4, myiter); Consider this
