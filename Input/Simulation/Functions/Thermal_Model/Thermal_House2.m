@@ -644,6 +644,14 @@ Thermal_time_constant = (Total_Heat_capacity) / (Total_Loss + Loss_floor + ((1.2
         Thermal_Model.Forecast.PV_production_estimation = [Thermal_Model.Forecast.PV_production_estimation; timetable(Thermal_Model.Forecast.PV_production_estimation.Time(end)+1,0,'VariableNames',{'Var1'})];
         PV_daily_production_estimation                  = retime(Thermal_Model.Forecast.PV_production_estimation,'daily',@sum) ;
         Daily_estimated_production_by_month             = retime(Thermal_Model.Forecast.PV_production_estimation,'monthly',@mean) ;
+        if length(unique(Time_Sim.TimeArray.Month)) == 1
+            % adapt the array id the simulation time is less than a month.
+            % it is to ensure that the whole month is duplicated.
+            tempdate = datetime(Daily_estimated_production_by_month.Time(1)+calmonths(1)) ;
+            Var1 = 0;
+            TT = timetable(tempdate,Var1) ;
+            Daily_estimated_production_by_month = [Daily_estimated_production_by_month;TT];
+        end
 %         Daily_estimated_production_by_month             = retime(Daily_estimated_production_by_month,'hourly','previous')  ;
         Daily_estimated_production_by_month             = retime(Daily_estimated_production_by_month,'regular','previous','TimeStep',seconds(Time_Sim.MinperIter * 60)) ;
         Thermal_Model.Forecast.PV_forecast_TRY          = Daily_estimated_production_by_month;

@@ -939,7 +939,7 @@ if Time_Sim.Series_Sim == 1
         Power_prod1 = zeros(1, Time_Sim.nbrstep.(HouseInfo.Headers) + 1);
         Cons_Tot1   = zeros(1, Time_Sim.nbrstep.(HouseInfo.Headers) + 1);
         Occupancy1  = zeros(1, Time_Sim.nbrstep.(HouseInfo.Headers) + 1);
-        Price1      = zeros(1, Time_Sim.nbrstep.(HouseInfo.Headers) + 1);
+        Price1      = zeros(Time_Sim.nbrstep.(HouseInfo.Headers) + 1, 3);
         
         EnergyOutputLoop = ExtractHouse(EnergyOutput,HouseInfo.Headers) ;
         AppLoop          = ExtractHouse(App,HouseInfo.Headers)          ;
@@ -950,8 +950,9 @@ if Time_Sim.Series_Sim == 1
             Time_SimLoop.myiter = myiter;
             if or(and(min(Starting_Days)+ myiter/timestep >= Start, End >= floor(min(Starting_Days)+ myiter/timestep)),myiter == 0)
                 
-                [Power_prod1(1,myiter+1), Cons_Tot1(1,myiter+1), Occupancy1(1,myiter+1), Price1(1,myiter+1),HouseInfo,All_Var,Time_SimLoop,SimDetails,ContLoop,AppLoop,EnergyOutputLoop,SDI]= ...
+                [Power_prod1(1,myiter+1), Cons_Tot1(1,myiter+1), Occupancy1(1,myiter+1), Priceout,HouseInfo,All_Var,Time_SimLoop,SimDetails,ContLoop,AppLoop,EnergyOutputLoop,SDI]= ...
                 HouseSim(2,1, HouseInfo, All_Var, Time_SimLoop,SimDetails,HouseTitle,ContLoop,AppLoop,EnergyOutputLoop,SDI);
+                Price1(myiter+1,:) = Priceout ;
             end
             
             if getappdata(SimulationTimeWindow,'canceling') || HouseInfo.Terminate == true
@@ -1020,7 +1021,7 @@ if Time_Sim.Series_Sim == 1
         Cons_Tot.(HouseInfo.Headers) = array2timetable(Cons_Tot1','Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'DataOutput'},'StartTime',stime) ; %table(xq,Cons_Tot1','VariableNames',{'Time','DataOutput'}) ;
 %         Emissions_Houses(BuildSim-1,:,:) = SDI.Emissions_Dwel ;
         Occupancy.(HouseInfo.Headers) = array2timetable(Occupancy1','Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'DataOutput'},'StartTime',stime) ; %table(xq,Occupancy1','VariableNames',{'Time','DataOutput'}) ;
-        Price.(HouseInfo.Headers) = array2timetable(Price1','Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'DataOutput'},'StartTime',stime) ; %table(xq,Price1','VariableNames',{'Time','DataOutput'}) ;
+        Price.(HouseInfo.Headers) = array2timetable(Price1,'Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'Electrical_consumption', 'Heating', 'Total'},'StartTime',stime) ; %table(xq,Price1','VariableNames',{'Time','DataOutput'}) ;
         NewVar1 = AppOut.(HouseInfo.Headers).NewVar1 ;
         
         Emissions_Houses.(HouseInfo.Headers)=emiCalc(AppOut, HouseInfo, All_Var, Cons_Tot) ;

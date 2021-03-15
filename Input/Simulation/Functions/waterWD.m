@@ -107,6 +107,12 @@ for iload = 1:length(loads)
         catch
             prob.(flow)(1,1) = prob.(countwithdrawal)(istep) ;
         end
+    else
+        try
+            prob.(flow)(end + 1,1) = 0 ;
+        catch
+            prob.(flow)(1,1) = 0 ;
+        end
     end
         
     water_profile.(countprofile)(istep) = water_profile.(countlength)(istep) * prob.(countwithdrawal)(istep) ;

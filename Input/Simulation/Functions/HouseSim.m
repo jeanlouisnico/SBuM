@@ -162,8 +162,10 @@ Time_Sim.Reduce_Time2(Time_Sim.myiter + 1) = Time_Sim.Reduce_time.(Input_Data.He
 %% Output Variables
 % Declare Cons_Appli_Overall
 Cons_Tot        = EnergyOutput.Cons_Appli_Overall.(Input_Data.Headers)(Time_Sim.myiter + 1)                                                                                             ;
-Occ             = EnergyOutput.Occupancy.(Input_Data.Headers)(Time_Sim.myiter + 1)                                                                                                      ;
-Money           = EnergyOutput.Price * (EnergyOutput.Cons_Appli_Overall.(Input_Data.Headers)(Time_Sim.myiter + 1) + (EnergyOutput.Thermal_Model.(Input_Data.Headers).Total_Electricity_Consumption(Time_Sim.myiter + 1)/1000));
+Occ             = EnergyOutput.Occupancy.(Input_Data.Headers)(Time_Sim.myiter + 1) ;
+Money(1,1)      = EnergyOutput.Price * EnergyOutput.Cons_Appli_Overall.(Input_Data.Headers)(Time_Sim.myiter + 1) ;
+Money(1,2)      = EnergyOutput.Price * (EnergyOutput.Thermal_Model.(Input_Data.Headers).Total_Electricity_Consumption(Time_Sim.myiter + 1)/1000) ;
+Money(1,3)      = EnergyOutput.Price * (EnergyOutput.Cons_Appli_Overall.(Input_Data.Headers)(Time_Sim.myiter + 1) + (EnergyOutput.Thermal_Model.(Input_Data.Headers).Total_Electricity_Consumption(Time_Sim.myiter + 1)/1000));
 SavedMoney      = EnergyOutput.Price * (EnergyOutput.Thermal_Model.(Input_Data.Headers).PhotoVoltaic_Elec_Heat(Time_Sim.myiter+1))/1000;        % Jari's addition for the money saved from the electricity consumption from the PV panels in heating.
 EnergyOutput.Thermal_Model.(Input_Data.Headers).SavedMoney(Time_Sim.myiter+1) = SavedMoney;         % Jari's addition!
 Emissions       = All_Var.Hourly_Emissions((Time_Sim.StartDate.(Input_Data.Headers)-datenum(Time_Sim.YearStartSim2004,1,1))*24+Time_Sim.myiter+1,:) * EnergyOutput.Thermal_Model.(Input_Data.Headers).Total_Electricity_Consumption(Time_Sim.myiter+1)/1000;    % JARI'S ADDITION
