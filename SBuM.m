@@ -6088,6 +6088,9 @@ end  % mouseMovedCallback
                     data.SummaryStructure.(addedHouses{i}) = rmfield(data.SummaryStructure.(addedHouses{i}),'SelfDefinedAppliances');
 
                 end
+                if ~isfield(data,'ProfileUserdistri')
+                    profileupdate('Update Sim') ;
+                end
                 profileupdate('Load') ;
        end
     end %File
@@ -8140,9 +8143,11 @@ end
 
         idx                     = find(strcmp(data.Time_Step,data.SummaryStructure.(Housenumber).Time_Step )) ;
         gui.ListTimeStep.Value  = idx ;
-        
-        gui.Profile.Value       = find(strcmp(gui.Profile.String, data.SummaryStructure.(Housenumber).Profile) == 1);
-        
+        if isempty(find(strcmp(gui.Profile.String, data.SummaryStructure.(Housenumber).Profile) == 1))
+            gui.Profile.Value       = 1 ;
+        else
+            gui.Profile.Value       = find(strcmp(gui.Profile.String, data.SummaryStructure.(Housenumber).Profile) == 1);
+        end
         % Update house details
         
         gui.inhabitants.Value   = find(strcmp(gui.inhabitants.String, data.SummaryStructure.(Housenumber).inhabitants) == 1);
