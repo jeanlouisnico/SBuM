@@ -259,7 +259,7 @@ stpIn = results.A4 / 60 ;
 datevector = (datetime(datenum(2013,1,1),'ConvertFrom','datenum'):seconds(3600*stpIn):datetime(datenum(2013,1,results.A6+1),'ConvertFrom','datenum'))';
 datevector = datevector(1:simulation_size) ;
 % Replicate or not
-rng(1)  
+rng(1,'twister')  
 prob.Rand_Time                   = RandBetween(0,1-results.A4*1.25/100,simulation_size,1) ;
 
 loads = fieldnames(Default) ;
