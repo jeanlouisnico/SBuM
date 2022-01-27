@@ -75,8 +75,8 @@ end
 
 saveFileType = questdlg('Select the file type you want to use to save your variables to',...
                         'Save file type selection',...
-                        '*.mat',... %'*.csv',
-                        '*.xls');%,'*.mat');
+                        '*.mat','*.xls','*.mat') %'*.csv',
+                        %'*.xls');%,'*.mat');
                     
 switch saveFileType
     
