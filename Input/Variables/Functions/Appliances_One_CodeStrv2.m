@@ -582,8 +582,12 @@ varargout{1} = App;
         end
         if isfield(All_Var.GuiInfo.SelfDefinedAppliances,HouseName)
             if isfield(All_Var.GuiInfo.SelfDefinedAppliances.(HouseName),'Lights')
-                LightPlace = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).Lights.Rate ;
-                LightPlace = convert2double(LightPlace) ;    
+                try
+                    LightPlace = All_Var.GuiInfo.SelfDefinedAppliances.(HouseName).Lights.Rate ;
+                    LightPlace = convert2double(LightPlace) ;    
+                catch
+                    LightPlace = 0 ;
+                end
             else
                 LightPlace = 0 ;
             end
