@@ -49,14 +49,20 @@ for i = 1:length(Houses)
     % Check if space heating power or input to underfloor heater is an
     % option
     if any(contains(fieldnames(ThermalModel.(Houses{i}).Heating), 'HeaterPower'))
-    
+        tTime = ThermalVariables.(Houses{i}).TotalThermalDemand.Time ;
         % Collect Space heating power consumption, if it exists
-        ThermalVariables.(Houses{i}).SpaceHeatingPower      = convert2timetable(ThermalModel.(Houses{i}).Heating.HeaterPower) ;
-        
+        if isa(ThermalModel.(Houses{i}).Heating.HeaterPower,'double')
+            ThermalVariables.(Houses{i}).SpaceHeatingPower      = array2timetable(ThermalModel.(Houses{i}).Heating.HeaterPower','RowTimes',tTime(1:length(ThermalModel.(Houses{i}).Heating.Input)));
+        else
+            ThermalVariables.(Houses{i}).SpaceHeatingPower      = convert2timetable(ThermalModel.(Houses{i}).Heating.HeaterPower);
+        end
     elseif any(contains(fieldnames(ThermalModel.(Houses{i}).Heating), 'Input'))
-        
-        ThermalVariables.(Houses{i}).SpaceHeatingPower      = convert2timetable(ThermalModel.(Houses{i}).Heating.Input);
-        
+        tTime = ThermalVariables.(Houses{i}).TotalThermalDemand.Time ;
+        if isa(ThermalModel.(Houses{i}).Heating.HeaterPower,'double')
+           ThermalVariables.(Houses{i}).SpaceHeatingPower      = array2timetable(ThermalModel.(Houses{i}).Heating.Input','RowTimes',tTime(1:length(ThermalModel.(Houses{i}).Heating.Input)));
+        else
+            ThermalVariables.(Houses{i}).SpaceHeatingPower      = convert2timetable(ThermalModel.(Houses{i}).Heating.Input);
+        end
     end
     
     % Collect Ventilation heating power 
