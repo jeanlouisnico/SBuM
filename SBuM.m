@@ -20,16 +20,9 @@ guiwait.Figure = figure( ...
                                 'HandleVisibility', 'on',...
                                 'Visible','off');
 open_Waiting_Window ;
-builtversion =  '2.3.5' ;
+builtversion =  '2.3.4' ;
 x=1;
-
-SBuMPath = mfilename('fullpath') ;
-
-if ~contains(SBuMPath,'SBuMApp')
-    IsExeFile = 0 ;
-else
-    IsExeFile = 1 ;
-end
+IsExeFile = 0 ;
 if ~IsExeFile
     CheckToolBox(builtversion) ;
 end
@@ -39,7 +32,6 @@ if ~isnetavl
 end
 
 data = createData();
-
 % If the process has been aborted, abort also the main function
 if isempty(data)
     msgbox('The model could not be opened', 'Warning','warn');
@@ -348,6 +340,10 @@ displayEndOfDemoMessage('')
                        'awn'
                        'aww'
                        'ad'
+                       'NwS'
+                       'NwW'
+                       'NwN'
+                       'NwE'
                        };
         TP_Variable = {'Select...'
                        'uvs'
@@ -363,12 +359,22 @@ displayEndOfDemoMessage('')
                        'uvr'
                        'n50'
                        'gwindow'
+                       'RwArg'
+                       'alpaOpaque'
                        };
                    
         Ventil_Variable = {'Select...'
                            'N0'
                            'Heat_recovery_ventil_annual'
                            'vent_elec'
+                           'AATD'
+                           'dPATDRef'
+                           'hCowl'
+                           'CCowlOrg'
+                           'Cowlzeta'
+                           'AsPDU'
+                           'AVent'
+                           'dPVentRef'
                            } ;
                        
         Heating_Variable = {'Select...'
@@ -396,6 +402,39 @@ displayEndOfDemoMessage('')
                               'Database'
                               };
                      
+        SClass_variables = {'Open'
+                            'Normal'
+                            'Shielded'
+                            };
+                        
+        CRghFactor_variables = {'Open Terrain'
+                                'Country'
+                                'Urban/City'
+                                };
+                            
+        Thermal_Class_variables = {'ClassI' 
+                                    'ClassE' 
+                                    'ClassIE' 
+                                    'ClassD' 
+                                    'ClassM'
+                                    };
+                                
+        Thermal_Capacity_variables = {'Very light'
+                                      'Light'
+                                      'Medium'
+                                      'Heavy'
+                                      'Very heavy'
+                                      };
+                                
+        CHTC_variables  = {'Default' 
+                           'TARPWinward' 
+                           'MoWiTTWindward' 
+                           'Nusselt-Jurges' 
+                           'McAdams' 
+                           'Mitchell' 
+                           'EmmelVertical'
+                           };
+                          
         Var2Change = {'PV_Variable'         'Spec2DefinePV'
                       'wind_Variable'       'Spec2DefineWind'
                       'FC_Variable'         'Spec2DefineFC'
@@ -421,7 +460,9 @@ displayEndOfDemoMessage('')
     
         WeatherFileList = {'Default weather' 
                            'Load EPW file' 
-                           'Load Individual files'} ;
+                           'Load Individual files'
+                           'Load Multiple EPW files'
+                           'Load Multiple Individual files'} ;
     
         LanguagesAll = Languages ;
         if ismac
@@ -429,22 +470,13 @@ displayEndOfDemoMessage('')
         else
             MachineInfo = whoami;
         end
-        SBuMPath = mfilename('fullpath') ;
-
-        if ~contains(SBuMPath,'SBuMApp')
+        
+        if strcmp(MachineInfo.name,'jlouis')
+            DebugMode = 1 ;
+            DvptMode  = 1 ;
+        else
             DebugMode = 0 ;
             DvptMode  = 0 ;
-            Public    = 1 ;
-        else
-            if strcmp(MachineInfo.name,'jlouis')
-                DebugMode = 1 ;
-                DvptMode  = 1 ;
-                Public    = 0 ;
-            else
-                DebugMode = 0 ;
-                DvptMode  = 0 ;
-                Public    = 1 ;
-            end
         end
         
         App10s = 0 ;
@@ -569,7 +601,6 @@ displayEndOfDemoMessage('')
             'WeatherSelection',WeatherSelection,...
             'DebugMode',DebugMode,...
             'DvptMode',DvptMode,...
-            'Public',Public,...
             'App10s',App10s,...
             'Profile1distri',{Profile1distri},...
             'Profile2distri',{Profile2distri},...
@@ -577,7 +608,13 @@ displayEndOfDemoMessage('')
             'AppProfile',AppProfile,...
             'ApplianceRates',ApplianceRates,...
             'Detail_Appliance',Detail_Appliance,...
-            'ImageFolder',ImageFolder); % JARI'S ADDITION
+            'ImageFolder',ImageFolder,...
+            'SClass_variables', {SClass_variables},...
+            'CRghFactor_variables', {CRghFactor_variables},...
+            'Thermal_Class_variables', {Thermal_Class_variables},...
+            'CHTC_variables', {CHTC_variables},...
+            'Thermal_Capacity_variables', {Thermal_Capacity_variables},...
+            'ExistingProfFile', []); % JARI'S ADDITION
      end % createData
 
 function gui = createInterface()
@@ -615,10 +652,7 @@ function gui = createInterface()
             uimenu( gui.FileMenu, 'Label', 'Copy', 'Callback', @onEdit);
             uimenu( gui.FileMenu, 'Label', 'Delete', 'Callback', @onEdit);
             uimenu( gui.FileMenu, 'Label', 'Import', 'Callback', @onEdit);
-            Randomcrea = uimenu('Parent',gui.FileMenu,'Label','Generate');
-                    uimenu('Parent',Randomcrea, 'Label', 'Random generation for all houses',...
-                        'Callback', {@ContextMenuResponse},...
-                        'Tag','RandAll');
+        
         % + View menu
         gui.ViewMenu = uimenu( gui.Window, 'Label', 'View' );
         displayssubmenu = uimenu( gui.ViewMenu, 'Label', 'Display');
@@ -626,7 +660,6 @@ function gui = createInterface()
         uimenu( gui.ViewMenu, 'Label', 'Filter...','Callback', @onDisplay);
         uimenu( gui.ViewMenu, 'Label', 'Reset Filter','Callback', @onDisplay);
         gui.DisplayVarName = uimenu( gui.ViewMenu, 'Label', 'Use variable long name','Callback', @onDisplay,'Checked','off');
-        uimenu( gui.ViewMenu, 'Label', 'Access Database','Callback', @onDisplay);
         uimenu( gui.ViewMenu, 'Label', 'Report','Callback', @onDisplay);
         uimenu( gui.ViewMenu, 'Label', 'Delete all waiting bars','Callback', @onDisplay,'Separator','on');
         uimenu( gui.ViewMenu, 'Label', 'View map','Callback', @onDisplay,'Separator','on');
@@ -635,12 +668,13 @@ function gui = createInterface()
         % + Simulation menu
         helpMenu = uimenu( gui.Window, 'Label', 'Simulation' );
         uimenu( helpMenu, 'Label', 'Run', 'Callback', @onRun );
-        uimenu( helpMenu, 'Label', 'Run Selected', 'Callback', @onRun )
+        uimenu( helpMenu, 'Label', 'Run Selected', 'Callback', @onRun );
+        uimenu( helpMenu, 'Label', 'Run multiple weather files', 'Callback', @onRun);
         uimenu( helpMenu, 'Label', 'Analyse results...', 'Callback', @RunStatistics )
         
         % + Tools menu
         helpMenu = uimenu( gui.Window, 'Label', 'Tools' );
-        uimenu( helpMenu, 'Label', 'Preferences', 'Callback', @onTools, 'Accelerator','P' );
+        uimenu( helpMenu, 'Label', 'Preferences', 'Callback', @onTools );
         
         % + Help menu
         helpMenu = uimenu( gui.Window, 'Label', 'Help' );
@@ -665,7 +699,7 @@ function gui = createInterface()
         
         % The Javaframe is meant to pre-load the element before it is being
         % built.
-        jFrame = get(gui.Window, 'JavaFrame');
+        jFrame = get(gui.Window,'JavaFrame');
         jMenuBar = jFrame.(gui.Handle_Graphics).getMenuBar;
         pause(.1)
         
@@ -1150,6 +1184,8 @@ function gui = createInterface()
         gui.FileAdditionDefFile = uix.VBox('Parent', gui.FileAdditionPanel);
         gui.FileAdditionEPWFile = uix.VBox('Parent', gui.FileAdditionPanel);
         gui.FileAdditionIndFile = uix.VBox('Parent', gui.FileAdditionPanel); %, 'Title', 'File Addition'); % Maindate); %, 'Title', 'Add your own files');
+        gui.FileAdditionMultipleEPWFiles = uix.VBox('Parent', gui.FileAdditionPanel);
+        gui.FileAdditionMultipleIndFiles = uix.VBox('Parent', gui.FileAdditionPanel);
         %%%%% Panel EPW load
         
         gui.EPWBrowseBox = uix.VBox('Parent', gui.FileAdditionEPWFile);
@@ -1169,6 +1205,33 @@ function gui = createInterface()
             uix.Empty('Parent', gui.EPWBrowseBox);
             gui.EPWLoadText = uicontrol('Parent', gui.EPWBrowseBox,...
                                       'style','text') ;
+                                  
+        %%%%% MultiEPW file panel
+        
+        gui.MultiEPWBrowseBox = uix.VBox('Parent', gui.FileAdditionMultipleEPWFiles);
+            gui.MultiEPWBrowse = uicontrol('Parent', gui.MultiEPWBrowseBox,...
+                                      'style','pushbutton',...
+                                      'string','Browse...',...
+                                      'callback',@BrowseMultipleEPW) ;
+        str = {'File' 'Address'} ;                     
+        gui.ColumListMultipleEPWfiles = uimulticollist('Parent',gui.MultiEPWBrowseBox,...
+                                                      'string', str,...
+                                                      'columnColour', {'BLACK' 'BLACK' });
+            uix.Empty('Parent', gui.MultiEPWBrowseBox);                                      
+            gui.MultiEPWLoad = uicontrol('Parent', gui.MultiEPWBrowseBox,...
+                                      'style','pushbutton',...
+                                      'string','Load...',...
+                                      'Tag', 'LoadSingle',...
+                                      'callback',@LoadMultipleEWP) ;
+            uix.Empty('Parent', gui.MultiEPWBrowseBox);
+            gui.MultiEPWLoadAll = uicontrol('Parent', gui.MultiEPWBrowseBox,...
+                                      'style','pushbutton',...
+                                      'string','Load All',...
+                                      'Tag','LoadAll',...
+                                      'callback',@LoadMultipleEWP) ;
+            uix.Empty('Parent', gui.MultiEPWBrowseBox);
+            gui.MultipleEPWLoadText = uicontrol('Parent', gui.MultiEPWBrowseBox,...
+                                      'style','text') ;
                                                   
         %%%%% Panel defined file
         gui.TemperatureBox = uix.VBox('Parent', gui.FileAdditionIndFile);
@@ -1178,7 +1241,7 @@ function gui = createInterface()
                                             'String', 'Load weather file(s)...', ...
                                             'Tag', 'ChangeTemperature');
         
-        File2Load = {'Temperature' 'Radiation' 'Price' 'Emissions'};
+        File2Load = {'Temperature' 'Radiation' 'WindSpeed' 'Price' 'Emissions'};
                                         
         gui.ListFileInd = uicontrol('Parent', gui.TemperatureBox,...
                                  'style','popup',...
@@ -1250,6 +1313,88 @@ function gui = createInterface()
                                                         'enable', 'on', ...
                                                         'callback', @SimulationTimeFrameSetting, ...
                                                         data.ToolTipString, Tip);
+                                                    
+        %%%%% Multiple individual files selection
+        
+        gui.MultiTemperatureBox = uix.VBox('Parent', gui.FileAdditionMultipleIndFiles);
+        gui.MultiChangeTemperature = uicontrol('Parent', gui.MultiTemperatureBox, ...
+                                            'Style', 'text', ...
+                                            'HorizontalAlignment','Left',...
+                                            'String', 'Load weather file(s)...', ...
+                                            'Tag', 'ChangeTemperature');
+        
+        File2Load = {'Temperature' 'Radiation' 'WindSpeed' 'Price' 'Emissions'};
+                                        
+        gui.MultipleListFileInd = uicontrol('Parent', gui.MultiTemperatureBox,...
+                                 'style','popup',...
+                                 'string',File2Load) ;
+                                        
+            gui.MultiTemperatureButtons      = uix.HBox('Parent', gui.MultiTemperatureBox);
+                gui.MultiWeatherAddition = uicontrol('Parent', gui.MultiTemperatureButtons, ...
+                                            'Style', 'pushbutton', ...
+                                            'String', 'Add', ...
+                                            'callback', @ImportMultipleExternalFiles, ...
+                                            'Tag', 'WeatherAddition');
+                gui.MultiWeatherRemoval = uicontrol('Parent', gui.MultiTemperatureButtons, ...
+                                            'Style', 'pushbutton', ...
+                                            'String', 'Remove', ...
+                                            'callback', @ImportMultipleExternalFiles, ...
+                                            'Tag', 'WeatherRemoval');
+            str = {'File' 'Address'} ;                     
+            gui.ColumnsMultipleWeatherfiles = uimulticollist('Parent',gui.MultiTemperatureBox,...
+                                                      'string', str,...
+                                                      'columnColour', {'BLACK' 'BLACK' },...
+                                                      'tag','multicolumnApp', ...
+                                                      'callback', @WeatherSelection, ...
+                                                      'ButtonDownFcn', @ModificationWeatherSel);                              
+                                        
+        gui.MultiDataSetStartsMain = uix.VBox('Parent', gui.FileAdditionMultipleIndFiles, 'Spacing', 3);
+                                        
+        gui.MultiDataSetStartsPanel = uix.Panel('Parent', gui.MultiDataSetStartsMain, 'Title', 'Database Start Years'); %, 'Spacing', 5);
+                                        
+        gui.MultiDataSetStarts = uix.VBox('Parent', gui.MultiDataSetStartsPanel, 'Spacing', 5); % Maindate, 'Spacing', 2);  
+            gui.MultiDataSetStartsTemp = uix.VBox('Parent', gui.MultiDataSetStarts);
+                gui.MultiStartOfDataSetTempText = uicontrol('Parent', gui.MultiDataSetStartsTemp, ...
+                                                    'Style', 'text',...
+                                                    'String', 'Temperature and Radiation');                              
+            gui.MultiStartOfDataSetTemp = uix.HBox('Parent', gui.MultiDataSetStarts);
+                gui.MultiStartYearTempRad = uicontrol('Parent', gui.MultiStartOfDataSetTemp, ...
+                                            'Style', 'edit', ...
+                                            'String', '2000', ...
+                                            'Tag', 'Temperature&Radiation');               
+                gui.MultiStartYearDataSetButtonTemp = uicontrol('Parent', gui.MultiStartOfDataSetTemp, ...
+                                                    'Style', 'pushbutton', ...
+                                                    'String', 'Add', ...
+                                                    'callback', @DataSetStart, ...
+                                                    'Tag', 'AdditionTemp&Rad');                                 
+            gui.MultiDataSetStartsPrice = uix.VBox('Parent', gui.MultiDataSetStarts);
+                gui.MultiStartOfDataSetPriceText = uicontrol('Parent', gui.MultiDataSetStartsPrice, ...
+                                                    'Style', 'text',...
+                                                    'String', 'Electricity Price and Emissions:');
+                                                
+            gui.MultiStartOfDataSetPrice = uix.HBox('Parent', gui.MultiDataSetStarts);
+                gui.MultiStartYearPriceEmissions = uicontrol('Parent', gui.MultiStartOfDataSetPrice, ...
+                                            'Style', 'edit', ...
+                                            'String', '2004', ...
+                                            'Tag', 'Price&Emission');              
+                gui.MultiStartYearDataSetButtonPrice = uicontrol('Parent', gui.MultiStartOfDataSetPrice, ...
+                                                    'Style', 'pushbutton', ...
+                                                    'String', 'Add', ...
+                                                    'callback', @DataSetStart, ...
+                                                    'Tag', 'AdditionPrice&Emission');                                  
+            gui.MultiSimulationTimeFrame = uix.VBox('Parent', gui.MultiDataSetStarts);
+                gui.MultiSimulationTimeFrameBox = uix.VBox('Parent', gui.MultiSimulationTimeFrame);
+                    gui.MultiSimulationTimeFrameText = uicontrol('Parent', gui.MultiSimulationTimeFrameBox, ...
+                                                            'Style', 'text',...
+                                                            'String', 'Forecasting method'); % for forecasting global irradiance                                     
+                gui.MultiSimulationTimeFramePopUp = uix.VBox('Parent', gui.MultiSimulationTimeFrame);                          
+                    gui.MultiSimulationTimeFrameSelection = uicontrol('Parent', gui.MultiSimulationTimeFramePopUp, ...
+                                                        'Style', 'popup', ...
+                                                        'String', data.SimulationTimeFrame_Var, ...
+                                                        'Tag', 'SimulationTimeFrame', ...
+                                                        'enable', 'on', ...
+                                                        'callback', @SimulationTimeFrameSetting, ...
+                                                        data.ToolTipString, Tip);
 %                                                     
 %                                         
 %         % END OF JARI'S ADDITION
@@ -1257,10 +1402,12 @@ function gui = createInterface()
 %         
 %   
         
-        set(Maindate, 'Heights', [50 45 460]);  % JArI % 50 300 122
+        set(Maindate, 'Heights', [50 45 510]);  % JArI % 50 300 122
         set(TimeDefBox, 'Heights', [20 25]) ;
         set(gui.TemperatureBox, 'Heights', [20 25 25 -1]);    % J
+        set(gui.MultiTemperatureBox, 'Heights', [20 25 25 -1]);
         set(gui.EPWBrowseBox, 'Heights', [25 75 25 25 25 25]);
+        set(gui.MultiEPWBrowseBox, 'Heights', [25 75 25 25 25 25 25 25]);
 %         set(gui.TemperatureMain, 'Height', [25 25]);    % J
 %         set(gui.RadiationBox, 'Heights', [15 50]);      % J
 %         set(gui.RadiationMain, 'Height', [25 25]);      % J
@@ -1269,12 +1416,17 @@ function gui = createInterface()
 %         set(gui.EmissionBox, 'Heights', [15 50]);       % J
 %         set(gui.EmissionMain, 'Height', [25 25]);       % J
         set(gui.DataSetStarts, 'Height', [15 25 15 25 50]); %[15 15 25 15 25 45]); % J % 30 25 30 25
+        set(gui.MultiDataSetStarts, 'Height', [15 25 15 25 50]);
         set(gui.SimulationTimeFrame, 'Height', [15 30]); % J
+        set(gui.MultiSimulationTimeFrame, 'Height', [15 30]);
 %         set(gui.SimulationTimeFrame, 'Height', [-1 -1]);    % J
         set(gui.StartOfDataSetTemp, 'Widths', [-4 -1]);     % J
         set(gui.StartOfDataSetPrice, 'Widths', [-4 -1]);    % J
+        set(gui.MultiStartOfDataSetTemp, 'Widths', [-4 -1]);     % J
+        set(gui.MultiStartOfDataSetPrice, 'Widths', [-4 -1]); 
 %         set(Maindate, 'Widths', [-1 -1]); %set(Maindate, 'Widths', -1);
         set(gui.FileSelectionBox,'Heights',[25 -1]);
+        %set(gui.MultiFileSelectionBox,'Heights',[25 -1]);
         set(selectionbox,'Heights',[25 25]) ;
         set(Startdatebox,'Widths',[-1 73 73]);
         set(EndDatebox,'Widths',[-1 73 73]);
@@ -1603,6 +1755,32 @@ function gui = createInterface()
                        
                  str={'Appl.' 'Rate' 'Qty' 'Database'}   ;   
                  
+                 gui.UseExistingAppProfileParent = uix.VBox('Parent',gui.SplitApp);
+                 
+                 gui.UseExistingAppProfile = uicontrol('Parent',gui.UseExistingAppProfileParent,'Style','checkbox',...
+                            'String', 'Use existing appliance consumption profile',...
+                            'Tag', 'ExistingApp',...
+                            'enable', 'on',...
+                            'Callback',@AddApplianceProfile);
+                        
+                 gui.ExistingProfFileText = uicontrol('Parent',gui.UseExistingAppProfileParent,'Style','text',...
+                            'String','Add existing appliance file location',...
+                            'Tag','ExistingProfFileText');
+                        
+                 gui.ExistingProfileHBox = uix.HBox('Parent',gui.UseExistingAppProfileParent);
+                        
+                 gui.ExistingProfFile = uicontrol('Parent',gui.ExistingProfileHBox,'Style','edit',...
+                            'String',data.ExistingProfFile,...
+                            'Tag','ExistingProfFile',...
+                            'enable','off',...
+                            'Callback',@ExistingProfFileFunction);
+                        
+                 gui.ExistingProfFileAdd = uicontrol('Parent',gui.ExistingProfileHBox,'style','pushbutton',...
+                            'String','Add',...
+                            'Tag','ExistingProfFileAdd',...
+                            'enable','off',...
+                            'Callback',@ExistingProfFileAddion);
+                 
                  gui.multicolumnApp = uimulticollist('Parent',gui.SplitApp,...
                                   'string', str,...
                                   'columnColour', {'BLACK' 'BLACK' 'BLACK' 'BLACK' },...
@@ -1624,8 +1802,10 @@ function gui = createInterface()
         set(SplitPG,'Heights',[pos1(4) pos1(4)]) ; 
         set(SplitPL,'Heights',[pos2(4) pos2(4) pos2(4)]) ; 
         
-        set(AppAdd,'Widths',[-1 25 25 25]);
-        set(gui.SplitApp,'Heights',[25 -1]) ;
+        set(AppAdd,'Widths', [-1 25 25 25]); %[-1 25 25 25]);
+        set(gui.SplitApp,'Heights',[25 75 -1]) ;
+        set(gui.UseExistingAppProfileParent,'Heights',[25 25 25]);
+        set(gui.ExistingProfileHBox,'Widths', [-1 45]);
         
         [PanelSize1] = PanelinnerSize(gui.panel{1}) ;
         [PanelSize2] = PanelinnerSize(gui.panel{2}) ;
@@ -1774,6 +1954,35 @@ function gui = createInterface()
                           'HorizontalAlignment','left',...
                           'Style','text',...
                           'String','Building Dimension');
+                      
+                      
+                      
+                uicontrol('Parent',gui.SplitBD,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Shielding Class');
+                gui.DefineSClass = uicontrol('Parent',gui.SplitBD,...
+                                                    'Style','popup',...
+                                                    'Tag','SClass',...
+                                                    'string',data.SClass_variables(:),...
+                                                    'callback',@SetClassValue);
+                                                
+                uicontrol('Parent',gui.SplitBD,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Roughness factor');
+                                                
+                gui.DefineCRghFactor = uicontrol('Parent',gui.SplitBD,...
+                                                    'Style','popup',...
+                                                    'Tag','CRghFactor',...
+                                                    'string',data.CRghFactor_variables(:),...
+                                                    'callback',@SetClassValue);
+                                                
+                uicontrol('Parent', gui.SplitBD,...
+                            'HorizontalAlignment', 'left',...
+                            'Style', 'text',...
+                            'String','Default/Define');
+                                                
                 gui.DefineBDVar = uicontrol('Parent',gui.SplitBD,...
                                                     'Style','popup',...
                                                     'Tag','DefineBDVar',...
@@ -1822,6 +2031,97 @@ function gui = createInterface()
                           'HorizontalAlignment','left',...
                           'Style','text',...
                           'String','Thermal performance');
+                      
+                uicontrol('Parent',gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Distribution of thermal mass, Walls');
+                      
+                gui.DefineWallThermalClass = uicontrol('Parent', gui.SplitTP,...
+                                                       'Style', 'popup',...
+                                                       'Tag', 'WallThermalClass',...
+                                                       'String',data.Thermal_Class_variables(:),...
+                                                       'Value',4,...
+                                                       'callback',@SetClassValue);
+                                                   
+                uicontrol('Parent', gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Select thermal capacity class, Walls');
+                      
+                gui.WallThermalCapacityClass = uicontrol('Parent',gui.SplitTP,...
+                                                         'Style','popup',...
+                                                         'Tag','WallThermalCapacity',...
+                                                         'String',data.Thermal_Capacity_variables(:),...
+                                                         'Value',3,...
+                                                         'callback',@SetClassValue);
+                                                   
+
+                uicontrol('Parent',gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Distribution of thermal mass, Roof');
+                                                   
+                gui.DefineRoofThermalClass = uicontrol('Parent', gui.SplitTP,...
+                                                       'Style', 'popup',...
+                                                       'Tag', 'RoofThermalClass',...
+                                                       'String',data.Thermal_Class_variables(:),...
+                                                       'Value',4,...
+                                                       'callback',@SetClassValue);
+                                                   
+                uicontrol('Parent', gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Select thermal capacity class, Roof');
+                      
+                gui.RoofThermalCapacityClass = uicontrol('Parent',gui.SplitTP,...
+                                                         'Style','popup',...
+                                                         'Tag','RoofThermalCapacity',...
+                                                         'String',data.Thermal_Capacity_variables(:),...
+                                                         'Value',3,...
+                                                         'callback',@SetClassValue);
+                                                   
+
+                uicontrol('Parent',gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Distribution of thermal mass, Floor');
+                                                   
+                gui.DefineFloorThermalClass = uicontrol('Parent', gui.SplitTP,...
+                                                       'Style', 'popup',...
+                                                       'Tag', 'FloorThermalClass',...
+                                                       'String',data.Thermal_Class_variables(:),...
+                                                       'Value',4,...
+                                                       'callback',@SetClassValue);
+                                                   
+                uicontrol('Parent', gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Select thermal capacity class, Floor');
+                      
+                gui.FloorThermalCapacityClass = uicontrol('Parent',gui.SplitTP,...
+                                                         'Style','popup',...
+                                                         'Tag','FloorThermalCapacity',...
+                                                         'String',data.Thermal_Capacity_variables(:),...
+                                                         'Value',5,...
+                                                         'callback',@SetClassValue);
+                                                   
+                uicontrol('Parent',gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Select CHTC method');
+                                                   
+                gui.DefineCHTCvalue = uicontrol('Parent', gui.SplitTP,...
+                                                'Style','popup',...
+                                                'Tag','CHTCmethod',...
+                                                'String',data.CHTC_variables(:),...
+                                                'callback',@SetClassValue);
+                                                   
+                uicontrol('Parent',gui.SplitTP,...
+                          'HorizontalAlignment','left',...
+                          'Style','text',...
+                          'String','Default/Define/Database');
+                      
                 gui.DefineTPVar = uicontrol('Parent',gui.SplitTP,...
                                                     'Style','popup',...
                                                     'Tag','DefineTPVar',...
@@ -1884,6 +2184,46 @@ function gui = createInterface()
                                                       'String','Demand Controlled Ventilation',...
                                                       'Tag','DemandVentilation',...
                                                       'enable','off',...
+                                                      'Value',0,...
+                                                      'Callback',@HeatingTechnologySetting);
+                                                  
+                    gui.AirTerminal = uicontrol('Parent', gui.SplitVent, ...
+                                                      'Style', 'checkbox',...
+                                                      'String','Air Terminal device',...
+                                                      'Tag','AirTerminal',...
+                                                      'enable','on',...
+                                                      'Value',0,...
+                                                      'Callback',@HeatingTechnologySetting);
+                                                  
+                    gui.Duct = uicontrol('Parent', gui.SplitVent, ...
+                                                      'Style', 'checkbox',...
+                                                      'String','Duct',...
+                                                      'Tag','Duct',...
+                                                      'enable','on',...
+                                                      'Value',0,...
+                                                      'Callback',@HeatingTechnologySetting);
+                                                  
+                    gui.Cowl = uicontrol('Parent', gui.SplitVent, ...
+                                                      'Style', 'checkbox',...
+                                                      'String','Cowl',...
+                                                      'Tag','Cowl',...
+                                                      'enable','on',...
+                                                      'Value',0,...
+                                                      'Callback',@HeatingTechnologySetting);
+                                                  
+                    gui.OpenableWindows = uicontrol('Parent', gui.SplitVent, ...
+                                                      'Style', 'checkbox',...
+                                                      'String','Openable Windows',...
+                                                      'Tag','OpenableWindows',...
+                                                      'enable','on',...
+                                                      'Value',0,...
+                                                      'Callback',@HeatingTechnologySetting);
+                                                  
+                    gui.Vents   = uicontrol('Parent', gui.SplitVent, ...
+                                                      'Style', 'checkbox',...
+                                                      'String','External Vents',...
+                                                      'Tag','Vents',...
+                                                      'enable','on',...
                                                       'Value',0,...
                                                       'Callback',@HeatingTechnologySetting);
                                                                     
@@ -2034,9 +2374,9 @@ function gui = createInterface()
                                                                 'callback',@ListSPPSelection,...
                                                                 'enable','off');
                                         
-       set(gui.SplitBD,'Heights',[15 23 15 23 23 -1] );  
-       set(gui.SplitTP,'Heights',[15 23 15 23 23 -1] );  
-       set(gui.SplitVent,'Heights',[23 15 23 15 23 23 -1] );  
+       set(gui.SplitBD,'Heights',[15 15 23 15 23 15 23 15 23 23 -1] );  
+       set(gui.SplitTP,'Heights',[15 15 23 15 23 15 23 15 23 15 23 15 23 15 23 15 23 15 23 23 -1] );  
+       set(gui.SplitVent,'Heights',[23 15 23 15 15 15 15 15 15 23 23 -1] );  
        set(gui.SplitHeating,'Heights',[23 23 23 23 23 15 23 23 -1] );
        
        set(gui.AddBDVarSpec,'Widths',[-4 -1 -1]);
@@ -2994,11 +3334,6 @@ end
                         gui.(HouseSelected).Enable = 'on' ;
                     end
                 end
-            case 'Access Database'
-                opendata = data ;
-                opendata = orderfields(opendata) ;
-                assignin('base','opendata',opendata) ;
-                open opendata;
             case 'Rename'
                 % Rename the selected house
                 
@@ -3756,13 +4091,6 @@ end  % mouseMovedCallback
                     arg = str.(fields{i}) ;
                     if iscell(arg) && (size(arg,2) > 1 || size(arg,1) > 1)
                         arg = 'multiple value possible' ;
-                    elseif isa(arg,'struct')
-                        if isempty(fieldnames(arg))
-                            arg = 'No field to display';
-                        else
-                            argfield = fieldnames(arg) ;
-                            arg      = arg.(argfield{1}) ;
-                        end
                     elseif isa(arg,'double')
                         arg = num2str(arg) ;
                     end
@@ -4091,17 +4419,12 @@ end  % mouseMovedCallback
                 ApplianceCode       = data.AppliancesList{ij,3} ;
                 AppliancerateCode   = data.AppliancesList{ij,4} ;
                 
-                try
-                    AppLG = data.varname.(ApplianceCode).LongName ;
+                % MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
+                MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
 
-                    % MaxQty = data.ApplianceMax{find(strcmp(ApplianceCode,data.ApplianceMax(:,1))==1),Inh+1} ;
-                    MaxQty = data.ApplianceMax{find(strcmp(AppLG,data.ApplianceMax(:,1))==1),Inh+1} ;
-
-                    MinQty = 0;
-                    AppQty = round(RandBetween(MinQty,MaxQty)) ; %fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
-                catch
-                    AppQty = 1 ; % Applied to the lighting system
-                end
+                MinQty = 0;
+                AppQty = round(RandBetween(MinQty,MaxQty)) ; %fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
+                
                 if AppQty > 0
                     for appqty = 1:AppQty
                         AppQtyReport(appqty) = {'1'}; 
@@ -4131,14 +4454,12 @@ end  % mouseMovedCallback
                                 end
                             else
                                 MinQty = 2;
-                                LastApp = [] ;
                                 MaxQty = numel(data.Lightopt);
                                 for apprate = 1:AppQty
                                     AppRatetmp = fix(((MaxQty - MinQty + 1) * rand()) + MinQty) ;
                                     AppRatetmp = data.Lightopt{AppRatetmp} ;
                                     AppRate(apprate) = {AppRatetmp}; 
                                 end
-                                SaveData('clLight', HouseList{i}, AppRatetmp) ;
                             end
                                 
                         case 'None'
@@ -4924,7 +5245,7 @@ end  % mouseMovedCallback
                     end
                     arg = arg{1} ;
                 elseif isa(str.(fields{i}),'struct')
-                    continue ;
+                    
                 else
                     arg = str.(fields{i}) ;
                 end
@@ -5123,19 +5444,14 @@ end  % mouseMovedCallback
                             if get(popupRateobj,'value') > 2 && popupRateobj.Value ~= 5 % Second on JARI
                                     set(popupRateobj,'value',1);    % ORIGINAL!!
                             end
-                            if strcmp(SelectedValue,'Lighting System') % create an exception for the lighting system
-                                set(gui.popupDB,'Enable', 'off') ;
-                            else
-                                DbList = fieldnames(data.AppProfile.(data.AppliancesList{PositionApp,3})) ;
-                                    ToInsert = 'Select database...';
-                                    DbList(2:end+1,:) = DbList(1:end,:);
-                                    DbList(1,:) = {ToInsert};
-                                    DbList = orderalphacellarray(DbList,2,numel(DbList));
-                                set(gui.popupDB,'Enable', 'on') ;
-                                set(gui.popupDB,'String', DbList) ;
-                                if get(gui.popupDB,'Value') > length(DbList)
-                                    set(gui.popupDB,'Value',1)
-                                end
+                            DbList = fieldnames(data.AppProfile.(data.AppliancesList{PositionApp,3})) ;
+                                ToInsert = 'Select database...';
+                                DbList(2:end+1,:) = DbList(1:end,:);
+                                DbList(1,:) = {ToInsert};
+                                DbList = orderalphacellarray(DbList,2,numel(DbList));
+                            set(gui.popupDB,'String', DbList) ;
+                            if get(gui.popupDB,'Value') > length(DbList)
+                                set(gui.popupDB,'Value',1)
                             end
                             if gui.ownSelection == 1            % JARI
                                 if strcmp(SelectedValue, 'Rate') % JARI
@@ -5270,14 +5586,11 @@ end  % mouseMovedCallback
                             uiwait(msgbox('Please select an appliance','Error','modal'));
                             return;
                         end
-                        if strcmp(Inputstr1,'Lighting System')
-                            AppName = 'Lights' ;
-                        else
-                            AppName = data.AppliancesList{find(strcmp(Inputstr1{1},data.AppliancesList(:,1)) == 1),3} ;
-                        end
+                        AppName = data.AppliancesList{find(strcmp(Inputstr1{1},data.AppliancesList(:,1)) == 1),3} ;
+                        
                     Check4 = gui.popupDB ;
                         Inputstr4 = Check4.String(Check4.Value) ;    
-                        if strcmp(Inputstr4,'Select database...') && ~strcmp(Inputstr1,'Lighting System') 
+                        if strcmp(Inputstr4,'Select database...') 
                             uiwait(msgbox('Please select a database','Error','modal'));
                             return;
                         end
@@ -5289,9 +5602,11 @@ end  % mouseMovedCallback
                             return;
                         elseif strcmp(Inputstr2,'-')
                         elseif strcmp(Inputstr2,'Self-defined')
-                            [data, gui] = saveSelfDefined(data, HouseSelected,'ApplianceStandBy', gui, AppName, Inputstr1, Inputstr4{1}) ;
-                            [data, gui] = saveSelfDefined(data, HouseSelected,'ApplianceRate', gui, AppName, Inputstr1, Inputstr4{1}) ;
-                            [data, gui] = saveSelfDefined(data, HouseSelected,'ApplianceSleep', gui, AppName, Inputstr1, Inputstr4{1}) ;
+                            for hh = 1:size(HouseSelected,1)
+                               data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(Inputstr4{1}).Rate = str2double(gui.ApplianceRate.String)    ;
+                               data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(Inputstr4{1}).Sleep = str2double(gui.ApplianceSleep.String)   ;
+                               data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(Inputstr4{1}).StandBy = str2double(gui.ApplianceStandBy.String) ;
+                            end
                         end
                     Check3 = gui.popupQty ;
                         Inputstr3 = Check3.String(Check3.Value) ;
@@ -5341,11 +5656,7 @@ end  % mouseMovedCallback
                                 if ~isempty(codedatabase)
                                     SaveData(codedatabase,HouseTag,NewDataDB)
                                 end
-                                if strcmp(Inputstr1, 'Lighting System')
-                                    SaveData('clLight', HouseTag, NewDataRate) ;
-                                else
-                                    SaveData('Appliances', HouseTag, codeAppliance) ;
-                                end
+                                SaveData('Appliances', HouseTag, codeAppliance) ;
                                 MaxApp = maxAppcount(HouseTag) ;
                                 SaveData('Appliance_Max',HouseTag,MaxApp)
                             end
@@ -5435,7 +5746,8 @@ end  % mouseMovedCallback
                         setratingapp(ApplianceRates) ;                                    
                     end
                 case {'ApplianceStandBy', 'ApplianceRate', 'ApplianceSleep' } 
-                    HouseSelected   = gui.ListBox.String(gui.ListBox.Value) ;
+                    Housenumber     = gui.ListBox.String(gui.ListBox.Value);
+                    AppName         = data.AppliancesList{find(strcmp(data.AppliancesList(:,1), gui.popupApp.String{gui.popupApp.Value})),3} ;
                     DBsel           = gui.popupDB.String{gui.popupDB.Value} ;
                     
                     %%% Check for errors before proceeding
@@ -5445,24 +5757,35 @@ end  % mouseMovedCallback
                         return;
                     end
                     
-                    if strcmp(DBsel,'Select database...')  && ~strcmp(Inputstr1,'Lighting System') 
+                    if strcmp(DBsel,'Select database...') 
                         uiwait(msgbox('Please select a database','Error','modal'));
                         return;
                     end
                     
-                    if strcmp(Inputstr1,'Lighting System')
-                        AppName = 'Lights' ;
-                    else
-                        AppName = data.AppliancesList{find(strcmp(Inputstr1{1},data.AppliancesList(:,1)) == 1),3} ;
-                    end
                     %%% Retrieve the value and store it in the self defined
                     %%% variable
-                    try
-                        [data, gui] = saveSelfDefined(data, HouseSelected,Source, gui, AppName, Inputstr1) ;
-                    catch
-                        % do not do anything, it is most likely already
-                        % saved
-                    end
+                    
+                    for hh = 1:size(Housenumber,1)
+                        switch Source
+                            case 'ApplianceStandBy'
+                                data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).StandBy    = str2double(gui.(Source).String)   ;
+                            case 'ApplianceRate' 
+                                data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Rate       = str2double(gui.(Source).String)   ;
+                            case 'ApplianceSleep'
+                                data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Sleep      = str2double(gui.(Source).String)   ;
+                        end
+                        % Fill in the missing fields if they have never
+                        % been declared before
+                        if ~isfield(data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel),'Rate')
+                            data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Rate   = 0 ;
+                        end
+                        if ~isfield(data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel),'StandBy')
+                            data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).StandBy   = 0 ;
+                        end
+                        if ~isfield(data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel),'Sleep')
+                            data.SelfDefinedAppliances.(HouseSelected{hh}).(AppName).(DBsel).Sleep   = 0 ;
+                        end
+                    end  
                 otherwise
             end
         end
@@ -5668,7 +5991,6 @@ end  % mouseMovedCallback
                   data.Exit = 'Saved' ; 
                   return; 
                end
-               
                %See if it has already been saved
                if isempty(data.savedname)
                    % It has not been save yet
@@ -5701,16 +6023,6 @@ end  % mouseMovedCallback
                    else
                        data.SummaryStructure.(Housenumber{i}).SelfDefinedAppliances = 0;
                    end
-
-                   try 
-                       data.SummaryStructure.(Housenumber{i}).clLight ;
-                   catch
-                       
-                       data.SummaryStructure.(Housenumber{i}).clLight = 'Low consumption bulbs' ;
-                       AddText = 'Light class was not set. It is now set to Low consumption bulbs' ;
-                       warning(AddText)
-                   end
-                   
                end                                      % JARI'S ADDITION ENDS
                AllData = data.SummaryStructure ;
                
@@ -5811,31 +6123,24 @@ end  % mouseMovedCallback
                    msgbox('No house to be saved','Information','help');
                    return;
                end
-               
-               for ii = 1:numel(Housenumber)
-                   Eachfield = fieldnames(AllData.(Housenumber{ii}));
-                   for i = 1:numel(Eachfield)
-                       MaxValue = 1;
-                       try
-                           if ~isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')
-                               if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'cell')
-                                    MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;
-                               end
-                           else                 % Jari's addition
-                               if any(strcmp(Eachfield{i},data.AppliancesList(:,3)) == 1) || any(strcmp((Eachfield{i}),data.AppliancesList(:,4))==1)    % J
-                                   if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')                                                              % J 
-                                       % If value for appliance is a char
-                                       % change it to a cell! J
-                                       AllData.(Housenumber{ii}).(Eachfield{i}) = {AllData.(Housenumber{ii}).(Eachfield{i})};                           % J
-                                       % Assign same char value in to the cell.
-                                       MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;                                      % J
-                                   end                                                                                                                  % J
-                               end                                                                                                                      % J
+               Eachfield = fieldnames(AllData.(Housenumber{1}));
+               for i = 1:numel(Eachfield)
+                   MaxValue = 1;
+                   for ii = 1:numel(Housenumber)
+                       if ~isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')
+                           if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'cell')
+                                MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;
                            end
-                       catch
-                           % If there is an error then skip the field and
-                           % go to the next field
-                           continue;
+                       else                 % Jari's addition
+                           if any(strcmp(Eachfield{i},data.AppliancesList(:,3)) == 1) || any(strcmp((Eachfield{i}),data.AppliancesList(:,4))==1)    % J
+                               if isa(AllData.(Housenumber{ii}).(Eachfield{i}),'char')                                                              % J 
+                                   % If value for appliance is a char
+                                   % change it to a cell! J
+                                   AllData.(Housenumber{ii}).(Eachfield{i}) = {AllData.(Housenumber{ii}).(Eachfield{i})};                           % J
+                                   % Assign same char value in to the cell.
+                                   MaxValue = max(MaxValue,size(AllData.(Housenumber{ii}).(Eachfield{i}),2)) ;                                      % J
+                               end                                                                                                                  % J
+                           end                                                                                                                      % J
                        end
                    end
                    % Restructure the variable for saving it
@@ -5846,30 +6151,24 @@ end  % mouseMovedCallback
                    data.Simulationdata.(Housenumber{i}) = AllData.(Housenumber{i}) ;
                    % Restructure the variable for saving it
                    for ii = 1:numel(Eachfield)
-                       try
-                           % Restructure the variable for saving it
-                           if strcmp(Eachfield{ii},'Charger')
-                               x = 1;
+                       % Restructure the variable for saving it
+                       if strcmp(Eachfield{ii},'Charger')
+                           x = 1;
+                       end
+                       if isa(AllData.(Housenumber{i}).(Eachfield{ii}),'cell')
+                           MaxApp = 0 ;
+                           for jjHouse = 1:numel(Housenumber)
+                               MaxApp = max(MaxApp,size(AllData.(Housenumber{jjHouse}).(Eachfield{ii}),2)) ;
                            end
-                           if isa(AllData.(Housenumber{i}).(Eachfield{ii}),'cell')
-                               MaxApp = 0 ;
-                               for jjHouse = 1:numel(Housenumber)
-                                   MaxApp = max(MaxApp,size(AllData.(Housenumber{jjHouse}).(Eachfield{ii}),2)) ;
+                           for ij = 1:MaxApp
+                               if ij <= size(AllData.(Housenumber{i}).(Eachfield{ii}),2)
+                                    s.(Eachfield{ii}){i,ij} = AllData.(Housenumber{i}).(Eachfield{ii}){1,ij};
+                               else
+                                    s.(Eachfield{ii}){i,ij} = '0' ;
                                end
-                               for ij = 1:MaxApp
-                                   if ij <= size(AllData.(Housenumber{i}).(Eachfield{ii}),2)
-                                        s.(Eachfield{ii}){i,ij} = AllData.(Housenumber{i}).(Eachfield{ii}){1,ij};
-                                   else
-                                        s.(Eachfield{ii}){i,ij} = '0' ;
-                                   end
-                               end
-                           else
-                               s.(Eachfield{ii}){i,1} = AllData.(Housenumber{i}).(Eachfield{ii});
                            end
-                       catch
-                           % If there is an error then skip the field and
-                           % go to the next field
-                           continue;
+                       else
+                           s.(Eachfield{ii}){i,1} = AllData.(Housenumber{i}).(Eachfield{ii});
                        end
                    end
                end
@@ -6070,26 +6369,17 @@ end  % mouseMovedCallback
                 for i = 1:size(addedHouses,2) %fieldnames(data.SummaryStructure))
                     data.SelfDefinedAppliances.(addedHouses{i}) = data.SummaryStructure.(addedHouses{i}).SelfDefinedAppliances;
 %                     if isnumeric(data.SelfDefinedAppliances.(addedHouses{i})(1))
-                    if isempty(data.SelfDefinedAppliances.(addedHouses{i}))
-                        data.SelfDefinedAppliances = rmfield(data.SelfDefinedAppliances,addedHouses{i});
-                    elseif strcmp(data.SelfDefinedAppliances.(addedHouses{i})(1),'0')
+                    if strcmp(data.SelfDefinedAppliances.(addedHouses{i})(1),'0')
                         data.SelfDefinedAppliances = rmfield(data.SelfDefinedAppliances,addedHouses{i});
                     else
                         for m = 1:size(data.SelfDefinedAppliances.(addedHouses{i}),1)
                             for n = 2:4
-                                try 
-                                    data.SelfDefinedAppliances.(addedHouses{i}){m,n} = str2double(data.SelfDefinedAppliances.(addedHouses{i})(m,n));
-                                catch
-                                    continue ;
-                                end
+                                data.SelfDefinedAppliances.(addedHouses{i}){m,n} = str2double(data.SelfDefinedAppliances.(addedHouses{i})(m,n));
                             end
                         end
                     end
                     data.SummaryStructure.(addedHouses{i}) = rmfield(data.SummaryStructure.(addedHouses{i}),'SelfDefinedAppliances');
 
-                end
-                if ~isfield(data,'ProfileUserdistri')
-                    profileupdate('Update Sim') ;
                 end
                 profileupdate('Load') ;
        end
@@ -6174,6 +6464,8 @@ end  % mouseMovedCallback
                 OkSimString = 'Run';
             case 'Run Selected'
                 OkSimString = 'Run Selected';
+            case 'Run multiple weather files'
+                OkSimString = 'Run multiple weather';
             otherwise
                 OkSimString = 'Run';
         end
@@ -6184,7 +6476,7 @@ end  % mouseMovedCallback
         NotOpened = [] ;
         i = 1          ;
         while isempty(NotOpened)
-                if find(strcmp(figHandles(i).Name,{'Run' 'Run Selected'})) > 0
+                if find(strcmp(figHandles(i).Name,{'Run' 'Run Selected' 'Run multiple weather'})) > 0
                     if strcmp(OkSimString,figHandles(i).Name)
                         % This means that a window is already opened
                         figure(figHandles(i)) ;
@@ -6211,6 +6503,18 @@ end  % mouseMovedCallback
     end %onrun
 %-------------------------------------------------------------------------%
     function CreaterunWindow(OkSimString)
+        
+        if strcmp(OkSimString,'Run multiple weather')
+            
+            try
+                loopFields = fieldnames(data.Loop);
+            catch
+                warningdlg('Multiple weather files are not selected! Please check your selections. Opening the run window for selection \"Run all\".')
+                OkSimString = 'Run';
+            end
+                
+        end
+        
         Mfigpos = get(gui.Window,'OuterPosition') ;
         buttonwidth = 500 ;
         buttonheight = 500 ;
@@ -6255,18 +6559,61 @@ end  % mouseMovedCallback
                                           'Style', 'checkbox',...
                                           'Tag','Comparehouses',...
                                           'String','Compare houses');
-            Outputsimutext = uix.HBox('Parent',Optionbox,'spacing', 2 );                          
+            if strcmp(OkSimString,'Run multiple weather')
+                Outputsimutext = uix.HBox('Parent',Optionbox,'spacing',2);
+                
+                textsimoutput = uicontrol('Parent',Outputsimutext,...
+                        'Style','text',...
+                        'String','Set simulation names for all the weather file in order');
+                    uix.Empty('Parent',Outputsimutext);
+
+                
+                for ii = 1:length(loopFields)
+                    
+                    gui.NameSimEdit(ii) = uicontrol('Parent',Optionbox,...
+                        'style','edit',...
+                        'HorizontalAlignment','left',...
+                        'string',append('Simulation',string(ii)),...
+                        'tag',append('NameSimEdit',string(ii)));
+                    
+                end
+                
+%                 for hh = 1:length(textsimoutput)
+%                     nbrOfTextsimoutputs = length(textsimoutput);
+%                     orgWidths_array = [textsimoutput{1}.Extent(3) -1];
+%                     widths_array = repmat(orgWidths_array, [1 nbrOfTextsimoutputs]);
+%                     set(Outputsimutext,'Widths',widths_array)
+%                 end
+                
+                nbrChildren = length(Optionbox.Children);
+                
+                ExtraChildren = nbrChildren - 2;    % Normal number is 4 excluding the original textsimoutput
+                
+                ExtraChildren_array = ones(1,ExtraChildren)*23;
+                
+                OptionboxHeights_array = [23 15 ExtraChildren_array 15 23];
+
+                    
+            else
+                Outputsimutext = uix.HBox('Parent',Optionbox,'spacing', 2 );
                 textsimoutput = uicontrol('Parent', Outputsimutext,...
-                          'Style', 'text',... 
-                          'String','Set simulation name');   
+                    'Style', 'text',...
+                    'String','Set simulation name');
                 uix.Empty('Parent',Outputsimutext);
-            gui.NameSimEdit = uicontrol('Parent',Optionbox,...
-                                         'style','edit',...
-                                         'HorizontalAlignment','left',...
-                                         'string','Simulation',...
-                                         'tag','NameSimEdit');
+                gui.NameSimEdit = uicontrol('Parent',Optionbox,...
+                    'style','edit',...
+                    'HorizontalAlignment','left',...
+                    'string','Simulation',...
+                    'tag','NameSimEdit');
                 
+%                 set(Outputsimutext,'Widths',[textsimoutput.Extent(3) -1]) 
                 
+                OptionboxHeights_array = [23 15 23 15 23];
+%                 set(Optionbox,'Heights',[23 15 23 15 23])
+
+                
+            end
+            
             Outputfoldertext = uix.HBox('Parent',Optionbox,'spacing', 2 );                          
                 textoutput = uicontrol('Parent', Outputfoldertext,...
                           'Style', 'text',... 
@@ -6287,11 +6634,22 @@ end  % mouseMovedCallback
                                         
         set(Outputsimutext,'Widths',[textsimoutput.Extent(3) -1])                               
         set(Outputfoldertext,'Widths',[textoutput.Extent(3) -1])
-        set(Optionbox,'Heights',[23 15 23 15 23])
+        set(Optionbox,'Heights',OptionboxHeights_array)
+%         set(Optionbox,'Heights',[23 15 23 15 23])
         set(Outputfolder,'Widths',[-1 50]); 
         pheightmin = 23;
-        [pheightmax] = PanelinnerSize(gui.OptionSimulation) ;
-        pheightmax = max(pheightmax + 40,pheightmin) ;
+        
+        if strcmp(OkSimString,'Run multiple weather')
+            
+            [pheightmax] = sum(OptionboxHeights_array);
+            
+        else
+        
+            [pheightmax] = PanelinnerSize(gui.OptionSimulation) ;
+            
+        end
+        
+        pheightmax = max(pheightmax + 120,pheightmin) ;
         
         set(MainPanel,'Heights',[23 pheightmax -1]);     
     end
@@ -6321,7 +6679,6 @@ end  % mouseMovedCallback
                     Simulationdata = data.Simulationdata ;
                     % Check completeness of the information
                     ValidInput = Checkintegrity(Simulationdata, data.datastructure) ;
-                    [data] = CheckAppliances(Simulationdata, data.datastructure, data) ;
                     if ~isempty(ValidInput)
                           % display a new figure with an UIMultiList, 3 columns
                           displayerror(ValidInput)
@@ -6357,31 +6714,47 @@ end  % mouseMovedCallback
                     i = i + 1; 
                 end
                 ValidInput = Checkintegrity(Simulationdata, data.datastructure) ;
-                [data] = CheckAppliances(Simulationdata, data.datastructure, data) ;
                 if ~isempty(ValidInput)
                       % display a new figure with an UIMultiList, 3 columns
                       displayerror(ValidInput)
                       uiwait();
                       return;
                 end
-                
-                nbrhsel = 0 ;
-                i = 1;
-                while nbrhsel < SelectedHousesnbr
-                    if sum(strcmp(Housenumber{i},SelectedHouses))
-                        % JARI's change and commented line was original
-%                         Simulationdata.(Housenumber{i}) = data.SummaryStructure.(Housenumber{i}) ;
-                        Simulationdata.(Housenumber{i}) = data.Simulationdata.(Housenumber{i});         % J
-                        nbrhsel = nbrhsel + 1 ;
-                    end
-                    i = i + 1; 
-                end
-
                 data.Simulationdata = Simulationdata ;
-                if ~isfield(data,'ProfileUserdistri')
-                    profileupdate('Update Sim') ;
-                end
                 Launch_Sim(gui.OutputFolEdit.String,gui.NameSimEdit.String,data,gui.SimLogWindow)
+            case 'Run multiple weather'
+                loopFields = fieldnames(data.Loop);
+                data.loopFields = string(loopFields);
+                for jj = 1:length(loopFields)
+                    data.nbrOfLoop = jj;
+                    figHandles = findall(0, 'Tag', 'TMWWaitbar') ;
+                delete(figHandles) ;
+                if ~isempty(gui.ListBox.String) && ~isempty(gui.ListBox.Value)
+                    if isempty(data.savedname)
+                        File('Save all')
+                    else
+                        % Option to save the simulation ile somewhere else
+                        File('Save all')
+                    end
+                    % JARI'S ADDITION
+%                     AccessDevelopmentMode()
+                    % END OF JARI'S ADDITION
+                    Simulationdata = data.Simulationdata ;
+                    % Check completeness of the information
+                    ValidInput = Checkintegrity(Simulationdata, data.datastructure) ;
+                    if ~isempty(ValidInput)
+                          % display a new figure with an UIMultiList, 3 columns
+                          displayerror(ValidInput)
+                          uiwait();
+                          return;
+                    end
+                    if ~isfield(data,'ProfileUserdistri')
+                        profileupdate('Update Sim') ;
+                    end
+                    Launch_Sim(gui.OutputFolEdit.String,gui.NameSimEdit(jj).String,data,gui.SimLogWindow)
+                end
+                    
+                end
             case 'Cancel'
                 delete(gui.runWindow)
                 return;
@@ -6758,11 +7131,6 @@ end  % mouseMovedCallback
                                                     'String', 'Access Development mode', ...
                                                     'Tag', 'DevelopmentMode', ...
                                                     'callback', @AccessDevelopmentMode);
-                    gui.Public = uicontrol('Parent', gui.DevelopmentBox,...
-                                                    'Style', 'pushbutton', ...
-                                                    'Value',1,...
-                                                    'Tag', 'Public', ...
-                                                    'callback', @AccessDevelopmentMode);
                     gui.App10s = uicontrol('Parent', gui.DevelopmentBox,...
                                                     'Style', 'checkbox', ...
                                                     'String', 'Record detailed appliance signature - 10s', ...
@@ -6772,7 +7140,7 @@ end  % mouseMovedCallback
                    uix.Empty('Parent', gui.DevelopmentBox);                             
                    set(gui.DevelopmentTick, 'Value', data.DebugMode)
                     
-                    set(gui.DevelopmentBox,'Heights',[23 23 23 -1]);
+                    set(gui.DevelopmentBox,'Heights',[23 23 -1]);
         gui.Peferences.Visible = 'on' ;
     end %onTools
 %--------------------------------------------------------------------------%
@@ -6985,7 +7353,7 @@ end  % mouseMovedCallback
             AllFields = fieldnames(data.datastructure) ;
             while n == 0
                 i = i + 1;
-                LN2Check = data.datastructure.(AllFields{i}).LongName ;
+                    LN2Check = data.datastructure.(AllFields{i}).LongName ;
                 if strcmp(LN2Check,Var2Input)
                     n = 1;
                     Var2Input = data.datastructure.(AllFields{i}).ShortName ;
@@ -7382,8 +7750,14 @@ switch GetSource
         VentilationSelected = src.String(src.Value);
         if strcmp(VentilationSelected, 'Natural ventilation')
             gui.DemandVentilation.Enable = 'off';
+            gui.AirTerminal.Enable          = 'on';
+            gui.Duct.Enable                 = 'on';
+            gui.Cowl.Enable                 = 'on';
         else
             gui.DemandVentilation.Enable = 'on';
+            gui.AirTerminal.Enable          = 'off';
+            gui.Duct.Enable                 = 'off';
+            gui.Cowl.Enable                 = 'off';
         end
         for i = 1:numel(HousingSelected)
             HouseTag = HousingSelected{i};
@@ -7394,6 +7768,36 @@ switch GetSource
         for i = 1:numel(HousingSelected)
             HouseTag = HousingSelected{i};
             SaveData(GetSource,HouseTag,DemandVentilationSelected)
+        end
+    case 'AirTerminal'
+        AirTerminalSelected = src.Value;
+        for i = 1:numel(HousingSelected)
+            HouseTag = HousingSelected{i};
+            SaveData(GetSource,HouseTag,AirTerminalSelected)
+        end
+    case 'Duct'
+        DuctSelected = src.Value;
+        for i = 1:numel(HousingSelected)
+            HouseTag = HousingSelected{i};
+            SaveData(GetSource,HouseTag,DuctSelected)
+        end
+    case 'Cowl'
+        CowlSelected = src.Value;
+        for i = 1:numel(HousingSelected)
+            HouseTag = HousingSelected{i};
+            SaveData(GetSource,HouseTag,CowlSelected)
+        end
+    case 'OpenableWindows'
+        OpenableWindowsSelected = src.Value;
+        for i = 1:numel(HousingSelected)
+            HouseTag = HousingSelected{i};
+            SaveData(GetSource,HouseTag,OpenableWindowsSelected)
+        end
+    case 'Vents'
+        VentsSelected = src.Value;
+        for i = 1:numel(HousingSelected)
+            HouseTag = HousingSelected{i};
+            SaveData(GetSource,HouseTag,VentsSelected)
         end
 end
         
@@ -7813,6 +8217,47 @@ end
         %%% Load the EPW into variables
         
     end
+
+%% Browse multiple EPW files
+
+function BrowseMultipleEPW(src,~)
+        [file, path] = uigetfile('*.epw', 'MultiSelect', 'on');
+
+        if path == 0 
+            return;
+        else
+%             FullFile        = zeros(1,length(file));
+%             dataLoop        = zeros(1,length(file));
+            
+            for m = 1:length(file)
+            
+                FullFile{m} = append(path,file{m});
+                
+                dataLoop(m) = string(m);
+            
+            end
+        end
+        
+        str = uimulticollist( gui.ColumListMultipleEPWfiles, 'string' );
+        
+        if size(str,1) > 1
+            uimulticollist(gui.ColumListMultipleEPWfiles, 'changeItem', file, 2, 1 )
+            uimulticollist(gui.ColumListMultipleEPWfiles, 'changeItem', path, 2, 2 )
+        else
+            rowItems = {file path} ;
+            if length(file) > 1
+                for i = 1:length(file)
+                    uimulticollist( gui.ColumListMultipleEPWfiles, 'addRow', {file{i} path} )
+                end
+            else
+            uimulticollist( gui.ColumListMultipleEPWfiles, 'addRow', rowItems )
+            end
+        end
+        
+        %%% Load the EPW into variables
+        
+    end
+
 %% Load EPW file
     function LoadEWP(src,~)
         gui.EPWLoadText.String = 'Loading...' ;
@@ -7824,6 +8269,193 @@ end
         
         [data.EPW] = EPWreader(FullPath) ;
         gui.EPWLoadText.String = 'Successfully loaded!!' ;
+    end
+%--------------------------------------------------------------------------%
+%% Load multiple EPW file
+    function LoadMultipleEWP(src,~)
+        gui.MultiEPWLoadText.String = 'Loading...' ;
+        
+        DefaultName     = 'Loop1';
+        
+        AllFields = fieldnames(data);
+        
+        if ~any(strcmp(AllFields,'Loop'))
+            
+            data.Loop.(DefaultName) = [];
+            
+        end
+            
+        
+        switch(src.String)
+            
+            case 'Load...'
+        
+                Value = uimulticollist(gui.ColumListMultipleEPWfiles, 'value');
+                str = uimulticollist(gui.ColumListMultipleEPWfiles, 'string') ;
+                path = str{Value,2} ;
+                file = str{Value,1} ;
+
+                if isstruct(data.Loop)
+
+                    Names = fieldnames(data.Loop);
+
+                    answer = questdlg('Existing files found, do you want to overwrite them or add new files?', 'Existing files found', 'Overwrite', 'Add', 'Cancel');
+
+                    switch answer
+
+                        case 'Overwrite'
+                            
+%                             DataLoopFields = fieldnames(data.Loop);
+%                             
+%                             for h = 1:length(DataLoopFields)
+% 
+%                                 data.Loop.(DataLoopFields(h)) = [];
+%                                 
+%                             end
+
+                            data.Loop = [];
+                            
+                            for g = 1:length(Value)
+
+                                dataLoop(g) = append('Loop',string(g));
+                            
+                            end
+
+                            for j = 1:length(Value)
+
+                                FullPath = append(path,file) ;
+
+                                [data.Loop.(dataLoop(j)).EPW] = EPWreader(FullPath) ;
+
+                            end
+
+                        case 'Add'
+                            
+                            for g = 1:length(Value)
+
+                                dataLoop(g) = append('Loop', string(length(Names)+g));
+                                
+                            end
+
+                            for j = 1:length(Value)
+
+                                FullPath = append(path,file);
+
+                                [data.Loop.(dataLoop(j)).EPW] = EPWreader(FullPath);
+
+                            end
+
+                        case 'Cancel'
+
+                            msgbox('Action canceled!')
+
+                            return
+
+                    end
+
+                else
+                    
+                    for g = 1:length(Value)
+
+                        dataLoop(g) = append('Loop',string(g));
+                        
+                    end
+
+                            for j = 1:length(Value)
+
+                                FullPath = append(path,file) ;
+
+                                [data.Loop.(dataLoop(j)).EPW] = EPWreader(FullPath) ;
+
+                            end
+
+                end
+                
+            case 'Load All'
+                
+                str = uimulticollist(gui.ColumListMultipleEPWfiles, 'string') ;
+                
+                if isstruct(data.Loop)
+
+                    Names = fieldnames(data.Loop);
+
+                    answer = questdlg('Existing files found, do you want to overwrite them or add new files?', 'Existing files found', 'Overwrite', 'Add', 'Cancel');
+
+                    switch answer
+
+                        case 'Overwrite'
+
+%                             DataLoopFields = fieldnames(data.Loop);
+%                             
+%                             for h = 1:length(DataLoopFields)
+% 
+%                                 data.Loop.(DataLoopFields{h}) = [];
+%                                 
+%                             end
+
+                            data.Loop = [];
+                            
+                            for g = 1:length(str)-1
+
+                                dataLoop(g) = append('Loop',string(g));
+                                
+                            end
+
+                            for j = 2:length(str)
+
+                                FullPath = append(str{j,2},str{j,1}) ;
+
+                                [data.Loop.(dataLoop(j-1)).EPW] = EPWreader(FullPath) ;
+
+                            end
+
+                        case 'Add'
+
+                            for g = 1:length(str)-1
+
+                                dataLoop(g) = append('Loop',string(length(Names)+g));
+                                
+                            end
+                            
+                            for j = 2:length(str)
+
+                                FullPath = append(str{j,2},str{j,1}) ;
+
+                                [data.Loop.(dataLoop(j-1)).EPW] = EPWreader(FullPath) ;
+
+                            end
+
+                        case 'Cancel'
+
+                            msgbox('Action canceled!')
+
+                            return
+
+                    end
+                    
+                else
+
+                    for g = 1:length(str)-1
+
+                        dataLoop(g) = append('Loop',string(g));
+                                
+                    end
+
+                            for j = 2:length(str)
+
+                                FullPath = append(str{j,2},str{j,1}) ;
+
+                                [data.Loop.(dataLoop(j-1)).EPW] = EPWreader(FullPath) ;
+
+                            end
+                    
+                end
+                
+        end
+        
+        
+        gui.MultiEPWLoadText.String = 'Successfully loaded!!' ;
+        
     end
 %--------------------------------------------------------------------------%
 %% This function is used in importing external file to the model to be used as source for the code
@@ -7857,6 +8489,10 @@ switch(Input_Var)
         data.FileSelection.RadiationFile        = FullFile;
         data.FileSelection.RadiationChanged     = 1;
 %         gui.RadiationFile.String                = FullFile;
+        % Code
+    case 'WindSpeed'
+        data.FileSelection.WindSpeedFile        = FullFile;
+        data.FileSelection.WindSpeedChanged     = 1;
         % Code
     case 'Price'
         data.FileSelection.PriceFile            = FullFile;
@@ -7898,6 +8534,10 @@ elseif strcmp(src.String,'Remove')
                     data.FileSelection.RadiationChanged = 0;
         %             gui.RadiationFile.String            = 'Select Radiation file...';
                     % Code
+                case 'WindSpeed'
+                    data.FileSelection.WindSpeedFile = [];
+                    data.FileSelection.WindSpeedChanged = 0;
+                    % Code
                 case 'Price'
                     data.FileSelection.PriceFile = [];
                     data.FileSelection.PriceChanged = 0;
@@ -7910,6 +8550,129 @@ elseif strcmp(src.String,'Remove')
                     % Code
             end
         set(gui.multiweatherfiles, 'Value',1 ) ;
+    end
+else
+        return;     % Then neither adding or removing is selected and this should not do anything!
+    
+
+end
+
+end
+
+%--------------------------------------------------------------------------%
+%% This function is used in importing external file to the model to be used as source for the code
+% You can import a suitable file for yourself to be used in the simulation
+
+function ImportMultipleExternalFiles(src, ~)
+
+% Start with defining whether a file is added or removed.
+Input_Var = gui.ListFileInd.String{gui.ListFileInd.Value} ;    
+if strcmp(src.String,'Add')
+
+        [file, path] = uigetfile('*.mat', 'MultiSelect', 'on');
+
+        if file == 0
+            return;
+        else
+            
+            FullFile    = zeros(1,length(file));
+            dataLoop        = zeros(1,length(file));
+            
+            for m = 1:length(file)
+            
+                FullFile(m) = strcat(path(m),file(m));
+                
+                dataLoop(m) = string(m);
+            
+            end
+        end
+
+% Assign a notice of which file has been changed!
+% This is needed in Launch_Sim file to assign the created file into the
+% correct slot! Consider also extra selection for the start of the
+% databases
+
+for n = 1:length(file)
+
+switch(Input_Var)
+    case 'Temperature'
+        data.Loop.(dataLoop(n)).FileSelection.TemperatureFile      = FullFile(n);
+        data.Loop.(dataLoop(n)).FileSelection.TemperatureChanged   = 1;
+%         gui.TemperatureFile.String              = FullFile;
+        % Code
+    case 'Radiation'
+        data.Loop.(dataLoop(n)).FileSelection.RadiationFile        = FullFile(n);
+        data.Loop.(dataLoop(n)).FileSelection.RadiationChanged     = 1;
+%         gui.RadiationFile.String                = FullFile;
+        % Code
+    case 'WindSpeed'
+        data.Loop.(dataLoop(n)).FileSelection.WindSpeedFile        = FullFile(n);
+        data.Loop.(dataLoop(n)).FileSelection.WindSpeedChanged     = 1;
+        % Code
+    case 'Price'
+        data.Loop.(dataLoop(n)).FileSelection.PriceFile            = FullFile(n);
+        data.Loop.(dataLoop(n)).FileSelection.PriceChanged         = 1;
+%         gui.PriceFile.String                    = FullFile;
+        % Code
+    case 'Emission'
+        data.Loop.(dataLoop(n)).FileSelection.EmissionsFile        = FullFile(n);
+        data.Loop.(dataLoop(n)).FileSelection.EmissionsChanged     = 1;
+%         gui.EmissionFile.String                 = FullFile;
+        % Code
+        
+end
+str = uimulticollist( gui.multiweatherfiles, 'string' );
+if any(strcmp(str(:,1),Input_Var))
+    Row2Change = find(strcmp(str(:,1),src.Tag)==1) ;
+    uimulticollist(gui.multiweatherfiles, 'changeItem', FullFile, Row2Change, 2 )
+else
+    rowItems = {Input_Var FullFile} ;
+    uimulticollist( gui.multiweatherfiles, 'addRow', rowItems )
+end
+
+end
+
+elseif strcmp(src.String,'Remove')
+    % The part where the preselected file is removed and the default file
+    % is used!
+    selectedrow = get( gui.multiweatherfiles, 'Value' ) ;
+    if selectedrow > 1
+        Input_Var = uimulticollist( gui.multiweatherfiles, 'selectedStrCol',1);
+            uimulticollist( gui.multiweatherfiles, 'delRow', selectedrow )
+            
+            dataLoop = 1:length(Input_Var);
+            
+            for n = 1:length(Input_Var)
+
+            switch(Input_Var{n})
+                case 'Temperature'
+                    data.Loop.(dataLoop(n)).FileSelection.TemperatureFile = [];
+                    data.Loop.(dataLoop(n)).FileSelection.TemperatureChanged = 0;
+        %             gui.TemperatureFile.String            = 'Select Temperature file...';
+                    % Code
+                case 'Radiation'
+                    data.Loop.(dataLoop(n)).FileSelection.RadiationFile = [];
+                    data.Loop.(dataLoop(n)).FileSelection.RadiationChanged = 0;
+        %             gui.RadiationFile.String            = 'Select Radiation file...';
+                    % Code
+                case 'WindSpeed'
+                    data.Loop.(dataLoop(n)).FileSelection.WindSpeedFile = [];
+                    data.Loop.(dataLoop(n)).FileSelection.WindSpeedChanged = 0;
+                    % Code
+                case 'Price'
+                    data.Loop.(dataLoop(n)).FileSelection.PriceFile = [];
+                    data.Loop.(dataLoop(n)).FileSelection.PriceChanged = 0;
+        %             gui.PriceFile.String            = 'Select Price file...';
+                    % Code
+                case 'Emission'
+                    data.Loop.(dataLoop(n)).FileSelection.EmissionsFile = [];
+                    data.Loop.(dataLoop(n)).FileSelection.EmissionsChanged = 0;
+        %             gui.EmissionFile.String            = 'Select Emission file...';
+                    % Code
+            end
+        set(gui.multiweatherfiles, 'Value',1 ) ;
+            end
+    
     end
 else
         return;     % Then neither adding or removing is selected and this should not do anything!
@@ -8143,11 +8906,9 @@ end
 
         idx                     = find(strcmp(data.Time_Step,data.SummaryStructure.(Housenumber).Time_Step )) ;
         gui.ListTimeStep.Value  = idx ;
-        if isempty(find(strcmp(gui.Profile.String, data.SummaryStructure.(Housenumber).Profile) == 1))
-            gui.Profile.Value       = 1 ;
-        else
-            gui.Profile.Value       = find(strcmp(gui.Profile.String, data.SummaryStructure.(Housenumber).Profile) == 1);
-        end
+        
+        gui.Profile.Value       = find(strcmp(gui.Profile.String, data.SummaryStructure.(Housenumber).Profile) == 1);
+        
         % Update house details
         
         gui.inhabitants.Value   = find(strcmp(gui.inhabitants.String, data.SummaryStructure.(Housenumber).inhabitants) == 1);
@@ -8375,7 +9136,6 @@ end
 % the running mode
 
     function AccessDevelopmentMode(src,~)
-        persistent chk
         switch src.Tag
             case 'App10s'
                 data.App10s  = abs(data.App10s-1) ;
@@ -8389,27 +9149,8 @@ end
                         DefineDates(Housenumber);
                     end
                 else
-                    if ~isempty(gui.ListBox.String)
-                        DefineDates(gui.ListBox.String{gui.ListBox.Value});
-                    end
+                    DefineDates(gui.ListBox.String{gui.ListBox.Value});
                 end
-            case 'Public'
-                
-                if isempty(chk)
-                      chk = 1;
-                      pause(0.2); %Add a delay to distinguish single click from a double click
-                      if chk == 1
-                          % Execute a single click action  
-                          fprintf(1,'\nI am doing a single-click.\n\n');
-                          chk = [];
-                      end
-                else
-                      % Execute a double click action   
-                      fprintf(1,'\nI am doing a double-click.\n\n');
-                      chk = [];
-                      data.Public = abs(data.Public-1) 
-                end
-                
         end
     end
 %--------------------------------------------------------------------------%
@@ -8555,6 +9296,12 @@ end
             case 'Load Individual files'
                 gui.FileAdditionPanel.Selection = 3 ;
                 data.WeatherSelection = 'Individual' ;
+            case 'Load Multiple EPW files'
+                gui.FileAdditionPanel.Selection = 4;
+                data.WeatherSelection = 'Multiple EPW';
+            case 'Load Multiple Individual files'
+                gui.FileAdditionPanel.Selection = 5;
+                data.WeatherSelection = 'Multiple Ind';
         end
         
     end %WeatherSel
@@ -9358,11 +10105,7 @@ end
             selectedQuantity    = varargin{3};
             selectedDB          = varargin{4};
             AppCodeLine = find(strcmp(data.AppliancesList(:,1),selectedAppliance) == 1) ;
-            if strcmp(selectedAppliance, 'Lighting System')
-                AppCodeVal  = 'Lights' ;
-            else
-                AppCodeVal  = data.AppliancesList{AppCodeLine,3} ;
-            end
+            AppCodeVal  = data.AppliancesList{AppCodeLine,3} ;
         end
         
         Mfigpos = get(gui.Window,'OuterPosition') ;
@@ -9486,22 +10229,7 @@ end
         if nargin > 0
             HouseTag = gui.ListBox.String{gui.ListBox.Value(1)} ;
             if strcmp(selectedRank,'Self-defined')
-                if strcmp(AppCodeVal,'Lights')
-                    Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal)       ;
-                else
-                    try
-                        Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})       ;
-                    catch
-                        % This means that the self appliance was not
-                        % properly set. Therefore set some default for
-                        % correcting the values that can be corrected by
-                        % the user later
-                        data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1}).StandBy = 0  ;
-                        data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1}).Rate = 0     ;
-                        data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1}).Sleep = 0    ;
-                        Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})      ;
-                    end
-                end
+                Power = data.SelfDefinedAppliances.(HouseTag).(AppCodeVal).(selectedDB{1})       ;
                 NominalPower    = Power.Rate ;
                 Stdby           = Power.StandBy ;
                 Offpower        = Power.Sleep ;
@@ -9570,65 +10298,25 @@ end
         %%% UPDATE THE UIMULTICOLLIST     
         % Get the data from the multi column list to compare them
         % with thenew input data
-        if strcmp(AppName, 'Lighting System') % Exception for the lighting system as we cannot have 2 at the same time
-            str = uimulticollist( gui.multicolumnApp, 'string' ) ;
-            ArrayApp = strcmp(str(:,1), AppName) ;
-            if sum(ArrayApp) > 1
-                % if there are multiple lighting system defined, this is a
-                % mistake and should be corrected witht he latest
-                % information
-                row2modify  = find(ArrayApp == 1) ;
-                for irowdel = 2:length(row2modify)
-                    % Delete all but the first one
-                    selectedrow = row2modify(irowdel) ;
-                    uimulticollist( gui.multicolumnApp, 'delRow', selectedrow )
-                end
-                % Modify the remaining one with the latest information
-                updateuimulticollist(AppName, Rate, Qty, DB) ;
-            elseif sum(ArrayApp) == 1
-                % If the lighting system was already defined then we
-                % replace its value by the newest value
-                row2modify  = find(ArrayApp == 1) ;
-                uimulticollist(gui.multicolumnApp, 'changeItem', Rate{1}, row2modify, 2 )
-            else
-                % If no lighting system was defined prevously, we define a
-                % new one
-                rowItems = [AppName, Rate, Qty, DB] ;
-                uimulticollist(gui.multicolumnApp, 'addRow', rowItems , 2 )
-            end
-        else
-            str = uimulticollist( gui.multicolumnApp, 'string' ) ;
-            ArrayApp = strcmp(str(:,2), Rate) .* strcmp(str(:,1), AppName) .* strcmp(str(:,4), DB) ;
-            if sum(ArrayApp) >= 1
-                % The appliance is already listed, check if the rating
-                % is also rated. Create a temporary new array to search
-                row2modify  = find(ArrayApp == 1) ;
-                if isfield(gui, 'popupApp') && isvalid(gui.popupApp)
-                    if strcmp(get(gui.popupApp,'enable'),'off')
-                        % This means we do not add up but we
-                        % modifiy the quantity of appliances as well as
-                        % the rate if necessary
-                        if isa(Qty,'cell')
-                            Newqty = str2double(Qty) ;
-                        elseif isa(Qty,'double')
-                            Newqty = Qty ;
-                        end
-                        Newqty = num2str(Newqty) ;
-                        uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )
-                    else                            
-                        % this particular appliance already exist --> add
-                        % the quantity selected to this row
-                        Originalqty = str(row2modify,3) ;
-                        if isa(Qty,'cell')
-                            Newqty = str2double(Originalqty) + str2double(Qty) ;    
-                        elseif isa(Qty,'double')
-                            Newqty = str2double(Originalqty) + Qty ;    
-                        end
-
-                        Newqty = num2str(Newqty) ;
-                        uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )                            
-                    end  
-                else
+        str = uimulticollist( gui.multicolumnApp, 'string' ) ;
+        ArrayApp = strcmp(str(:,2), Rate) .* strcmp(str(:,1), AppName) .* strcmp(str(:,4), DB) ;
+        if sum(ArrayApp) >= 1
+            % The appliance is already listed, check if the rating
+            % is also rated. Create a temporary new array to search
+            row2modify  = find(ArrayApp == 1) ;
+            if isfield(gui, 'popupApp')
+                if strcmp(get(gui.popupApp,'enable'),'off')
+                    % This means we do not add up but we
+                    % modifiy the quantity of appliances as well as
+                    % the rate if necessary
+                    if isa(Qty,'cell')
+                        Newqty = str2double(Qty) ;
+                    elseif isa(Qty,'double')
+                        Newqty = Qty ;
+                    end
+                    Newqty = num2str(Newqty) ;
+                    uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )
+                else                            
                     % this particular appliance already exist --> add
                     % the quantity selected to this row
                     Originalqty = str(row2modify,3) ;
@@ -9636,14 +10324,26 @@ end
                         Newqty = str2double(Originalqty) + str2double(Qty) ;    
                     elseif isa(Qty,'double')
                         Newqty = str2double(Originalqty) + Qty ;    
-                    end  
+                    end
+                    
                     Newqty = num2str(Newqty) ;
-                    uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )  
-                end
+                    uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )                            
+                end  
             else
-                rowItems = [AppName, Rate, Qty, DB] ;
-                uimulticollist(gui.multicolumnApp, 'addRow', rowItems , 2 )
+                % this particular appliance already exist --> add
+                % the quantity selected to this row
+                Originalqty = str(row2modify,3) ;
+                if isa(Qty,'cell')
+                    Newqty = str2double(Originalqty) + str2double(Qty) ;    
+                elseif isa(Qty,'double')
+                    Newqty = str2double(Originalqty) + Qty ;    
+                end  
+                Newqty = num2str(Newqty) ;
+                uimulticollist(gui.multicolumnApp, 'changeItem', Newqty, row2modify, 3 )  
             end
+        else
+            rowItems = [AppName, Rate, Qty, DB] ;
+            uimulticollist(gui.multicolumnApp, 'addRow', rowItems , 2 )
         end
     end
 %% Get the appliance Ref from the summarystructure
@@ -9740,4 +10440,177 @@ end
         dataout.SummaryStructure.(housenbr).Appliances.(AppFields).Qty      = AppQty    ;
         dataout.SummaryStructure.(housenbr).Appliances.(AppFields).Class    = AppClass  ;
     end
+
+%% Function to control availability of existing appliance profile
+    function AddApplianceProfile(src,~)
+        Value = src.Value;
+       
+        if Value == 1
+            gui.ExistingProfFile.Enable = 'on';
+            gui.ExistingProfFileAdd.Enable = 'on';
+            
+        else
+            gui.ExistingProfFile.Enable = 'off';
+            gui.ExistingProfFileAdd.Enable = 'off';
+            data.ExistingProfFile = [];
+            gui.ExistingProfFile.String = [];
+            
+        end
+        
+    end
+
+%% Function to save in memory the added appliance profile file
+    function ExistingProfFileFunction(src,~)
+        
+        Variable = src.String;
+        newVariable = strcmp(Variable,data.ExistingProfFile);
+        
+        if ~newVariable
+            
+            
+            files = dir(fullfile(Variable, '*.mat'));
+            
+            if length(files) ~= 1
+            
+                extraFile = dir(append(files(end).folder,'\',files(end).name));
+            
+                files(end+1) = extraFile;
+            
+            end
+            
+            singleFile = length(files) == 1;
+            
+            FileVariables = {'Appliances_One_CodeStrv2'; 'App'; 'Cont'; 'Occupancy_Global'; 'Cons_Tot_Global'};
+            
+            if singleFile 
+                
+                VariableInfo = who('-file', append(Variable,'\',files.name));
+                
+                FileVariables{1} = 'NewVar';
+                FileVariables{4} = 'Occupancy';
+                FileVariables{5} = 'Cons_Tot';
+                FileVariables{6} = 'AppStatus';
+                
+                for hh = 1:length(FileVariables)
+                    
+                    VariableName    = FileVariables{hh};
+                    Check           = ismember(VariableName, VariableInfo);
+                    
+                    if ~Check
+                        
+                        msgbox(append(VariableName,' not found, please check your file'))
+                        
+                    end
+                    
+                end
+                
+            else
+                
+                Check = zeros(17,1);
+                
+                for gg = 1:length(FileVariables)
+                    
+                    for kk = 1:length(files)
+                    
+                        Check(kk)       = strcmp(append(FileVariables{gg},'.mat'),files(kk).name);
+                    
+                    end
+                    
+                    if ~any(Check)
+                        
+                        msgbox(append(append(FileVariables{gg},'.mat'),' not found please check your directory'))
+
+                        return
+                        
+                    end
+                    
+                end
+                
+            end
+            
+            data.ExistingProfFile = src.String;
+            
+        else
+            
+            msgbox('Same file added! Please check your files or be ensured you have selected correct one!')
+            
+        end
+                
+        
+    end
+
+%% Function to add the path for the appliance profile
+
+    function ExistingProfFileAddion(src,~)
+        
+        FileLocation = uigetdir ;
+        
+        gui.ExistingProfFile.String = FileLocation;
+        
+        ExistingProfFileFunction(gui.ExistingProfFile);
+        
+    end
+
+%% Set class callback function
+    function SetClassValue(src,~)
+       
+        Variable = src.Tag;
+        NewValue = src.String(src.Value);
+        
+        HouseSelected = gui.ListBox.String(gui.ListBox.Value);
+        
+        if length(HouseSelected) > 1
+            
+            for i = 1:length(HouseSelected)
+        
+                switch Variable
+                    case 'SClass'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'CRghFactor'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'WallThermalClass'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'RoofThermalClass'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'FloorThermalClass'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'CHTCmethod'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'WallThermalCapacity'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'RoofThermalCapacity'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                    case 'FloorThermalCapacity'
+                        SaveData(Variable,HouseSelected{i},NewValue);
+                end
+                
+            end
+            
+        else
+            
+            switch Variable
+                case 'SClass'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'CRghFactor'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'WallThermalClass'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'RoofThermalClass'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'FloorThermalClass'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'CHTCmethod'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'WallThermalCapacity'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'RoofThermalCapacity'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+                case 'FloorThermalCapacity'
+                    SaveData(Variable,HouseSelected{1},NewValue);
+            end
+            
+        
+        end
+    end
+
 end

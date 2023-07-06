@@ -1,0 +1,62 @@
+function [varargout] = AirLeakage(varargin)
+% Function for calculating the air-leakage value from building (W/K)
+%% Inputs 
+
+qVRef       = ;
+ALeak       = ;
+Af          = ;
+Aroof       = ;
+u10         = ;
+hPath       = ;
+Te          =  ;
+Tz          =  ;
+
+SClass      = ;
+CRghFactor  = ;
+
+slope       = ;
+
+fcross      = ;
+
+nLeak       = 0.667;        % Default value for usage in design conditions calculation. Dimensionless
+PLeakRef    = 50;           % Default pressure difference for design conditions calculation. Pa
+TeRef       = 293.15;       % Reference external temperature in K, (20 C)
+rooARef     = 1.204;        % Reference density of air at reference temperature (kg/m3)
+g           = 9.81;         % Acceleration of gravity (m2/s)
+
+syms PzRef
+
+%% Design conditions
+
+CLeak       = qVRef * (ALeak/(PLeakRef^nLeak));     % Leakage coefficient on the zone
+
+CLeakF      = CLeak * (Af/(Af+Aroof));              % Leakage coefficient no the facade
+CLeakR      = CLeak * (Aroof/(Aroof+Af));           % Leakage coefficient on the roof
+
+% Divide the leakage to 5 leaks, 2 on windward and leeward sides and 1 on
+% the 
+
+%% Air leakage flow
+
+qVLeaFW     = CLeakF * dP(1) * abs(dP(1))^nLeak;
+
+qVLeaFL     = CLeakF * dP(2) * abs(dP(2))^nLeak;
+
+qVLeaR      = CLeakR * dP(3) * abs(dP(3))^nLeak;
+
+qVLea       = qVLeaFW + qVLeaFL + qVLeaR;
+
+%% Mass balance
+
+qmLeakIn    = qVLeaFW * rooARef * (TeRef/Te);
+
+qmLeakOut   = (qVleaFL + qVLeaR) * rooARef * (TeRef/Tz);
+
+%% Outputs
+
+varargout{1} = qVLea;
+varargout{2} = qmLeakIn;
+varargout{3} = qmLeakOut;
+
+end
+

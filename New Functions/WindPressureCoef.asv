@@ -1,0 +1,196 @@
+function [Cp] = WindPressureCoef(varargin)
+% Function used for determining wind pressure coefficient for air leakage
+
+%% Input
+
+slope   = varargin{1};
+SClass  = varargin{2};  
+
+% Wind direction
+
+% WD      = varargin{3};
+% alfa    = 0:90:360;
+
+fcross  = varargin{3};
+
+% Pre-allocate
+
+Cp = zeros(1,3);
+
+% Determination of windward
+% 
+% WindWard    = alfa - WD <= 60 && alfa - WD >= -60;
+% LeeWard     = alfa - WD >= 120 && alfa - WD <= 240;
+% Along       = alfa - WD == 90;
+
+%% Determining the coefficient
+
+if fcross == true
+
+if h < 15
+    
+    switch SClass
+        
+        case 'Open'
+            
+            Cp(1)    = 0.5;
+            Cp(2)     = -0.7;
+            Cp(3)       = 0;
+
+            if slope < 10
+                
+                Cp(5)       = -0.7;
+                
+            elseif slope >= 10 && slope <= 30
+                
+                Cp(5)       = -0.6;
+                
+            else
+                
+                Cp(5)       = -0.2;
+                
+            end
+            
+        case 'Normal'
+            
+            Cp(WindWard)    = 0.25;
+            Cp(LeeWard)     = -0.5;
+            Cp(Along)       = 0;
+
+            if slope < 10
+                
+                Cp(5)       = -0.6;
+                
+            elseif slope >= 10 && slope <= 30
+                
+                Cp(5)       = -0.5;
+                
+            else
+                
+                Cp(5)       = -0.2;
+                
+            end
+            
+        case 'Shielded'
+            
+            Cp(WindWard)    = 0.05;
+            Cp(LeeWard)     = -0.3;
+            Cp(Along)       = 0;
+
+            if slope < 10
+                
+                Cp(5)       = -0.5;
+                
+            elseif slope >= 10 && slope <= 30
+                
+                Cp(5)       = -0.4;
+                
+            else
+                
+                Cp(5)       = -0.2;
+                
+            end
+            
+    end
+    
+elseif h >= 15 && h < 50
+    
+    switch SClass
+        
+        case 'Open'
+            
+            Cp(WindWard)    = 0.65;
+            Cp(LeeWard)     = -0.7;
+            Cp(Along)       = 0;
+
+            if slope < 10
+                
+                Cp(5)       = -0.7;
+                
+            elseif slope >= 10 && slope <= 30
+                
+                Cp(5)       = -0.6;
+                
+            else
+                
+                Cp(5)       = -0.2;
+                
+            end
+            
+        case 'Normal'
+            
+            Cp(WindWard)    = 0.45;
+            Cp(LeeWard)     = -0.5;
+            Cp(Along)       = 0;
+
+            if slope < 10
+                
+                Cp(5)       = -0.6;
+                
+            elseif slope >= 10 && slope <= 30
+                
+                Cp(5)       = -0.5;
+                
+            else
+                
+                Cp(5)       = -0.2;
+                
+            end
+            
+        case 'Shielded'
+            
+            Cp(WindWard)    = 0.25;
+            Cp(LeeWard)     = -0.3;
+            Cp(Along)       = 0;
+
+            if slope < 10
+                
+                Cp(5)       = -0.5;
+                
+            elseif slope >= 10 && slope <= 30
+                
+                Cp(5)       = -0.4;
+                
+            else
+                
+                Cp(5)       = -0.2;
+                
+            end
+            
+    end
+    
+else
+   
+    Cp(WindWard)    = 0.8;
+    Cp(LeeWard)     = -0.7;
+    Cp(Along)       = 0;
+
+    if slope < 10
+                
+        Cp(5)       = -0.7;
+                
+    elseif slope >= 10 && slope <= 30
+                
+        Cp(5)       = -0.6;
+                
+    else
+                
+        Cp(5)       = -0.2;
+                
+    end
+    
+    
+end
+
+else
+    
+    Cp(WindWard)    = 0.05;
+    Cp(LeeWard)     = -0.05;
+    Cp(Along)       = 0;
+    Cp(5)           = 0;
+    
+end
+        
+
+end
+
