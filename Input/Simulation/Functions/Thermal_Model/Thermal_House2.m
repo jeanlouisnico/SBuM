@@ -1133,7 +1133,13 @@ UpperTempLimit2 = UpperTempLimit;
 Time_ahead           = 24 / Time_Sim.stepreal;        % This is the time the model considers and calculates the heat demand beforehand
 
 % Temp_inside_forecast = ones(1,Time_ahead) * LowerTempLimit(1); %* Temp_Set(1); %LowerTempLimit(1); 
-Temp_inside_forecast = ones(1,Time_ahead) * Temp_Set;
+if strcmp(Heating_Tech,'Time Set Temp')
+    Temp_Set_forecast = Temp_Set(1);
+else
+    Temp_Set_forecast = Temp_Set;
+end
+
+Temp_inside_forecast = ones(1,Time_ahead) * Temp_Set_forecast;
 Temp_inside_forecast_corrected = ones(1,Time_ahead) * Temp_inside;
 
 if myiter == 8600
@@ -1455,7 +1461,15 @@ end
                             PhotoVoltaic_Elec_Heat = 0;     % Assume the PV generation is not used in heating
 
                             % Temperature indoor
-                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+                            % [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt, lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor, House_Volume, Building_Envelope, Building_Storage_constant, Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain, Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly, T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation);
+
+                            [T_inside, T_radiative, T_operative, Temperatures1] = InsideTemperature(uvs, uve, uvw, uvn, uvsw, uvew, uvnw, uvww, uvd, uvf, uvr, hgt,...
+                                                                                                    lgts, lgte, pitch, aws, awe, awn, aww, ad, A_Roof, A_floor,...
+                                                                                                    House_Volume, Building_Envelope, Building_Storage_constant,...
+                                                                                                    Air_leak, Ventilation_Type, Flow_rate, Internal_Heat_Gain,...
+                                                                                                    Solar_Heat_Gain, Heater_Power, Temperature, T_ground_hourly,...
+                                                                                                    T_inlet, Temperatures_nodal, Solar_Radiation_vertical, Solar_radiation, Time_Sim.MinperIter);
+
 
                             Temp_inside         = T_inside;
                             Temp_radiative      = T_radiative;
@@ -1490,7 +1504,7 @@ end
                         if Thermal_Model.Heating.Set_Up > 0
                             a = 1;
                         end
-                            [Heater_Power, ~, Total_Heating, Set_Up] = Manually_controlled_heating(Max_heating_capacity, Dwelling_env_heat, tenancy, Heat_Demand, UpperTempLimit, Space_Heating_Efficiency, Heating_Ventil, Temp_inside, myiter, Thermal_Model.Heating.Set_Up, LowerTempLimit, Heat_Demand_Temp_Set, Temperature, Heat_Demand_Manual);
+                            [Heater_Power, ~, Total_Heating, Set_Up] = Manually_controlled_heating(Max_heating_capacity, Dwelling_env_heat, tenancy, Heat_Demand, UpperTempLimit, Space_Heating_Efficiency, Heating_Ventil, Temp_inside, myiter, Thermal_Model.Heating.Set_Up, LowerTempLimit, Heat_Demand_Temp_Set, Temperature, Heat_Demand_Manual, Temp_Set);
                             PhotoVoltaic_Elec_Heat = 0;     % Assumed no PV is used in heating
 
                             % Save the set-up for future use, if building is unoccupied.

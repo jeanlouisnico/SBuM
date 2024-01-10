@@ -32,11 +32,11 @@ Temperature                 = varargin{10};
 
 % First check the time and adjust the Temperature setting accordingly.
 
-if timehour < 6 || timehour >= 23 || (timehour > 9 && timehour < 17)
-    Temp_Set1 = Temp_Set(2);
-else
-    Temp_Set1 = Temp_Set(1);
-end
+% if timehour < 6 || timehour >= 23 || (timehour > 9 && timehour < 17)
+%     Temp_Set1 = Temp_Set(2);
+% else
+%     Temp_Set1 = Temp_Set(1);
+% end
 
 % Next calculate the heater power from the direct electric space heater.
 % Here the heat demand and the change in the energy content in the system
@@ -45,7 +45,7 @@ end
 % drop to temperature setting yet), there won't be any heat supplied to the
 % system. 
 
-Heater_Power = (1.2 * House_Volume * 1.007 + Building_Storage)/3.6 * (Temp_Set1 - Temp_inside) + Heat_Demand;
+Heater_Power = (1.2 * House_Volume * 1.007 + Building_Storage)/3.6 * (Temp_Set - Temp_inside) + Heat_Demand;
 Heater_Power = max(0, Heater_Power);
 
 % Check the capacity limits and outdoor temperature effect.
@@ -54,7 +54,7 @@ if Heater_Power > Dwelling_env_heat
     
     Heater_Power = Dwelling_env_heat;
     
-elseif Temperature > Temp_Set1
+elseif Temperature > Temp_Set
     
     Heater_Power = 0;
     

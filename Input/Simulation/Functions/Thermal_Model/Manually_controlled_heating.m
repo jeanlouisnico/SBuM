@@ -18,9 +18,10 @@ LowerTempLimit              = varargin{11};
 Heat_Demand_Temp_Set        = varargin{12};
 Temperature                 = varargin{13};
 Heat_Demand_Manual          = varargin{14};
+Temp_Set                    = varargin{15};
 
-LowerTempLimit = 21;    % For this simulation time
-UpperTempLimit = 25;    % For this simulation time
+LowerTempLimit = Temp_Set - 1;    % For this simulation time
+UpperTempLimit = Temp_Set + 1;    % For this simulation time
 
 %% Define the manual heater & Electric space heating function
 % The used manual heater is defined here. The possible heating power
