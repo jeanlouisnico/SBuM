@@ -1090,7 +1090,7 @@ if Time_Sim.Series_Sim == 1
         Price.(HouseInfo.Headers) = array2timetable(Price1,'Timestep',seconds(Time_Sim.MinperIter * 60),'VariableNames',{'Electrical_consumption', 'Heating', 'Total'},'StartTime',stime) ; %table(xq,Price1','VariableNames',{'Time','DataOutput'}) ;
         NewVar1 = AppOut.(HouseInfo.Headers).NewVar1 ;
         
-        Emissions_Houses.(HouseInfo.Headers)=emiCalc(AppOut, HouseInfo, All_Var, Cons_Tot) ;
+        Emissions_Houses.(HouseInfo.Headers)=emiCalc(AppOut, HouseInfo, All_Var, Cons_Tot, EnergyOutput.Thermal_Model.(HouseInfo.Headers).Emissions) ;
         
         s = {'Building Number',' ', num2str(BuildSim),' out of ',' ',num2str(Nbr_Building),' Completed'};
         AddText = [s{:}];
