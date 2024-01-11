@@ -1,4 +1,6 @@
-function EmissionsArray=emiCalc(AppOut, HouseInfo, All_Var, Cons_Tot)
+function EmissionsArray=emiCalc(AppOut, HouseInfo, All_Var, Cons_Tot,varargin)
+
+HeatingEmissionsTimeTable = varargin{1};
 
 Emissions = All_Var.Hourly_EmissionsTimed ;
 Emissions = table2timetable(Emissions) ;
@@ -40,4 +42,13 @@ for iEmi = 1:length(EmissionsIndic)
     EmissionsCalc = ElecApp .* EmissionsArrayfact ;
     tableout = table(xq,EmissionsCalc,'VariableNames',{'Time','DataOutput'}) ;
     EmissionsArray.Cons_Tot.(EmissionsIndic{iEmi}) = table2timetable(tableout) ;
+
+    EmissionsThermal = HeatingEmissionsTimeTable.DataOutput(:,iEmi);
+    EmissionsThermaltable = table(xq(1:end-1),EmissionsThermal,'VariableNames',{'Time','DataOutput'});
+    EmissionsArray.Thermal.(EmissionsIndic{iEmi}) = table2timetable(EmissionsThermaltable);
+    
+    EmissionsTotal = EmissionsArray.Cons_Tot.(EmissionsIndic{iEmi}).DataOutput(1:end-1) + HeatingEmissionsTimeTable.DataOutput(:,iEmi);
+    EmissionsTotaltable = table(xq(1:end-1),EmissionsTotal,'VariableNames',{'Time','DataOutput'});
+    EmissionsArray.Total.(EmissionsIndic{iEmi}) = table2timetable(EmissionsTotaltable);
+    
 end
