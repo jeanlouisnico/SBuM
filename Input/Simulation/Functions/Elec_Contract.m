@@ -126,15 +126,15 @@ if strcmp(ContElec,'Varmavirta') || strcmp(ContElec,'Vihrevirta') || strcmp(Cont
         end
     elseif FixedTariff == 1
         switch(ContElec)
-            case 'Varmavirta'
+            case 'Varmavirta' % Continous
                 MonthlyFee = 355 * 12 / (yeardays(timeyear,0) * 24) ; 
-                price2 = 6.74;
-            case 'Vihrevirta'
+                price2 = 12.46; % Update by 1.1.2022 price from Energiavirasto L2 %6.74;
+            case 'Vihrevirta' % 1-year Fixed
                 MonthlyFee = 355 * 12 / (yeardays(timeyear,0) * 24) ; 
-                price2 = 6.89;    
-            case 'Tuulivirta'
+                price2 = 10.64;    
+            case 'Tuulivirta' % 2-year Fixed
                 MonthlyFee = 355 * 12 / (yeardays(timeyear,0) * 24) ; 
-                price2 = 7.04;
+                price2 = 10.38;
             otherwise
                 error('Problem with the pricing system!!')
         end
